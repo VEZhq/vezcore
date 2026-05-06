@@ -1,0 +1,5 @@
+export const inputCls = 'w-full px-3.5 py-2.5 bg-[#0d0d0d] light:bg-[#fafafa] border border-white/[0.06] light:border-black/[0.08] text-white light:text-black text-sm placeholder:text-[#4c4c4c] light:placeholder:text-[#9a9a9a] focus:outline-none focus:border-emerald-500/40 transition-colors'
+export const textareaCls = `${inputCls} min-h-[110px] resize-y`
+export const buttonCls = 'inline-flex items-center gap-2 border border-emerald-400/20 bg-emerald-500/[0.08] px-4 py-2.5 text-[10px] font-medium uppercase tracking-[0.16em] text-emerald-300 transition-colors hover:bg-emerald-500/[0.12] hover:border-emerald-400/30 disabled:opacity-50 disabled:cursor-not-allowed light:text-emerald-700'
+export const iconButtonCls = 'inline-flex items-center justify-center border border-white/[0.08] light:border-black/[0.08] p-2 text-[#777777] transition-colors hover:bg-white/[0.04] hover:text-white light:hover:bg-black/[0.04] light:hover:text-black'
+export const cardCls = 'border border-white/[0.06] bg-[#111111] p-4 light:border-black/[0.08] light:bg-white'

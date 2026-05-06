@@ -1,0 +1,45 @@
+export const VEZVISION_PERMISSIONS = {
+  ACCESS: 'vezvision.access',
+  BLOG_VIEW: 'vezvision.blog.view',
+  BLOG_MANAGE: 'vezvision.blog.manage',
+  BLOG_PUBLISH: 'vezvision.blog.publish',
+  PORTFOLIO_VIEW: 'vezvision.portfolio.view',
+  PORTFOLIO_MANAGE: 'vezvision.portfolio.manage',
+  SERVICES_VIEW: 'vezvision.services.view',
+  SERVICES_MANAGE: 'vezvision.services.manage',
+  FAQ_VIEW: 'vezvision.faq.view',
+  FAQ_MANAGE: 'vezvision.faq.manage',
+  NEWSLETTER_VIEW: 'vezvision.newsletter.view',
+  NEWSLETTER_MANAGE: 'vezvision.newsletter.manage',
+  FILES_VIEW: 'vezvision.files.view',
+  FILES_MANAGE: 'vezvision.files.manage',
+  FILES_PERMISSIONS_MANAGE: 'vezvision.files.permissions.manage',
+  SETTINGS_VIEW: 'vezvision.settings.view',
+  SETTINGS_MANAGE: 'vezvision.settings.manage',
+  CALENDAR_VIEW: 'vezvision.calendar.view',
+  CALENDAR_MANAGE: 'vezvision.calendar.manage',
+} as const
+
+export type VezVisionPermissionKey =
+  (typeof VEZVISION_PERMISSIONS)[keyof typeof VEZVISION_PERMISSIONS]
+
+export const VEZVISION_ACCESS_FALLBACK_KEYS: VezVisionPermissionKey[] = [
+  VEZVISION_PERMISSIONS.BLOG_VIEW,
+  VEZVISION_PERMISSIONS.BLOG_MANAGE,
+  VEZVISION_PERMISSIONS.BLOG_PUBLISH,
+  VEZVISION_PERMISSIONS.PORTFOLIO_VIEW,
+  VEZVISION_PERMISSIONS.PORTFOLIO_MANAGE,
+  VEZVISION_PERMISSIONS.SERVICES_VIEW,
+  VEZVISION_PERMISSIONS.SERVICES_MANAGE,
+  VEZVISION_PERMISSIONS.FAQ_VIEW,
+  VEZVISION_PERMISSIONS.FAQ_MANAGE,
+  VEZVISION_PERMISSIONS.NEWSLETTER_VIEW,
+  VEZVISION_PERMISSIONS.NEWSLETTER_MANAGE,
+  VEZVISION_PERMISSIONS.FILES_VIEW,
+  VEZVISION_PERMISSIONS.FILES_MANAGE,
+  VEZVISION_PERMISSIONS.FILES_PERMISSIONS_MANAGE,
+  VEZVISION_PERMISSIONS.SETTINGS_VIEW,
+  VEZVISION_PERMISSIONS.SETTINGS_MANAGE,
+  VEZVISION_PERMISSIONS.CALENDAR_VIEW,
+  VEZVISION_PERMISSIONS.CALENDAR_MANAGE,
+]
