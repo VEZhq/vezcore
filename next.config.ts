@@ -2,6 +2,13 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === 'development'
 
+// Set FORCE_HTTPS=true when serving the app over HTTPS (e.g. via Coolify with TLS).
+// When unset/false on a plain HTTP deployment (local homelab, no TLS cert),
+// the CSP omits `upgrade-insecure-requests` and HSTS — otherwise the browser
+// upgrades every HTTP asset request to HTTPS, which has no listener locally,
+// and the page renders as a blank white screen.
+const forceHttps = process.env.FORCE_HTTPS === 'true'
+
 const securityHeaders = [
   {
     key: 'X-Frame-Options',
@@ -24,30 +31,36 @@ const securityHeaders = [
 function buildCspHeader(): { key: string; value: string } {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://glgldtfuvahmrlkywdoy.supabase.co'
 
+  const directives = [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self'",
+    "img-src 'self' data: https: blob:",
+    "font-src 'self' data:",
+    `connect-src 'self' ${supabaseUrl} https://api.ipify.org`,
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+  ]
+  if (forceHttps) {
+    directives.push('upgrade-insecure-requests')
+  }
+
   return {
     key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      "script-src 'self'",
-      "style-src 'self'",
-      "img-src 'self' data: https: blob:",
-      "font-src 'self' data:",
-      `connect-src 'self' ${supabaseUrl} https://api.ipify.org`,
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "object-src 'none'",
-      "upgrade-insecure-requests",
-    ].join('; '),
+    value: directives.join('; '),
   }
 }
 
-const productionOnlyHeaders = [
-  {
-    key: 'Strict-Transport-Security',
-    value: 'max-age=31536000; includeSubDomains',
-  },
-]
+const productionOnlyHeaders = forceHttps
+  ? [
+      {
+        key: 'Strict-Transport-Security',
+        value: 'max-age=31536000; includeSubDomains',
+      },
+    ]
+  : []
 
 const nextConfig: NextConfig = {
   experimental: {
