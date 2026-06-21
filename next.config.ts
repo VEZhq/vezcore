@@ -30,6 +30,7 @@ const securityHeaders = [
 
 function buildCspHeader(): { key: string; value: string } {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://glgldtfuvahmrlkywdoy.supabase.co'
+  const supabaseWsUrl = `wss://${new URL(supabaseUrl).host}`
 
   const directives = [
     "default-src 'self'",
@@ -37,10 +38,17 @@ function buildCspHeader(): { key: string; value: string } {
     // (self.__next_f.push(...) bootstrap emitted inline by the SSR stream).
     // Switch to per-request nonces if you add middleware that injects them.
     "script-src 'self' 'unsafe-inline'",
-    "style-src 'self'",
+    // 'unsafe-inline' required for Next.js-emitted inline styles (styled-jsx,
+    // dynamic Tailwind, and RSC payload style tags). Without it the browser
+    // refuses every injected <style> and the dashboard falls over with
+    // "coś poszło nie tak".
+    "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
-    `connect-src 'self' ${supabaseUrl} https://api.ipify.org`,
+    // wss:// must be listed explicitly — CSP treats https:// and wss:// as
+    // distinct sources, so a connect-src containing only the https:// Supabase
+    // URL blocks Supabase Realtime websockets ("The operation is insecure").
+    `connect-src 'self' ${supabaseUrl} ${supabaseWsUrl} https://api.ipify.org`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
