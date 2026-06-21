@@ -33,7 +33,10 @@ function buildCspHeader(): { key: string; value: string } {
 
   const directives = [
     "default-src 'self'",
-    "script-src 'self'",
+    // 'unsafe-inline' required for Next.js RSC hydration scripts
+    // (self.__next_f.push(...) bootstrap emitted inline by the SSR stream).
+    // Switch to per-request nonces if you add middleware that injects them.
+    "script-src 'self' 'unsafe-inline'",
     "style-src 'self'",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
