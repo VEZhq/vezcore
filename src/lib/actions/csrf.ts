@@ -7,7 +7,11 @@ import { ONE_HOUR, ONE_HOUR_SECONDS } from '@/lib/constants/time'
 
 const CSRF_TOKEN_NAME = '__vez_csrf'
 const CSRF_TOKEN_EXPIRY = ONE_HOUR
-const IS_PRODUCTION = process.env.NODE_ENV === 'production'
+// Mirror next.config.ts: cookies require `secure: true` only when the app is
+// actually served over HTTPS. On a plain HTTP deployment (local homelab via
+// Coolify without TLS) a secure cookie is silently rejected by the browser,
+// which breaks CSRF validation end-to-end ("Nieprawidłowy token bezpieczeństwa").
+const IS_HTTPS = process.env.FORCE_HTTPS === 'true'
 
 interface CSRFToken {
 	token: string
@@ -21,7 +25,7 @@ export async function generateCSRFToken(): Promise<string> {
 	const cookieStore = await cookies()
 	cookieStore.set(CSRF_TOKEN_NAME, JSON.stringify({ token, expires }), {
 		httpOnly: true,
-		secure: IS_PRODUCTION,
+		secure: IS_HTTPS,
 		sameSite: 'strict',
 		maxAge: ONE_HOUR_SECONDS,
 		path: '/',
