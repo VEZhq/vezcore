@@ -28,9 +28,17 @@ const securityHeaders = [
   },
 ]
 
+function buildSupabaseWsUrl(supabaseUrl: string): string {
+  try {
+    return `wss://${new URL(supabaseUrl).host}`
+  } catch {
+    return 'wss://glgldtfuvahmrlkywdoy.supabase.co'
+  }
+}
+
 function buildCspHeader(): { key: string; value: string } {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://glgldtfuvahmrlkywdoy.supabase.co'
-  const supabaseWsUrl = `wss://${new URL(supabaseUrl).host}`
+  const supabaseWsUrl = buildSupabaseWsUrl(supabaseUrl)
 
   const directives = [
     "default-src 'self'",
@@ -53,6 +61,7 @@ function buildCspHeader(): { key: string; value: string } {
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",
+    "report-uri /api/csp-report",
   ]
   if (forceHttps) {
     directives.push('upgrade-insecure-requests')
