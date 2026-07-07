@@ -17,6 +17,8 @@ import { rateLimitByIP } from '@/lib/rate-limit'
 
 type UploadBucket = 'vv-blog-images' | 'vv-portfolio-images' | 'vv-service-images' | 'vv-files-private' | 'vv-newsletter-images'
 
+const PUBLIC_IMAGE_CACHE_CONTROL_SECONDS = '31536000'
+
 interface UploadResponse {
   success: boolean
   data?: string
@@ -162,7 +164,11 @@ export const POST = withCors(async (request: Request): Promise<NextResponse<Uplo
   const vv = getVezVisionPrivilegedClient()
   const { error } = await vv.storage
     .from(bucketRaw)
-    .upload(sanitizedPath, fileBuffer, { contentType: fileRaw.type || 'application/octet-stream', upsert: false })
+    .upload(sanitizedPath, fileBuffer, {
+      contentType: fileRaw.type || 'application/octet-stream',
+      cacheControl: PUBLIC_IMAGE_CACHE_CONTROL_SECONDS,
+      upsert: false,
+    })
 
   if (error) {
     await reportApiFailure('Upload storage write failed', {
