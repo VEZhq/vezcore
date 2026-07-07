@@ -34,7 +34,7 @@ export default function NewsletterNav() {
           <Link
             key={tab.href}
             href={tab.href}
-            prefetch
+            prefetch={false}
             className={`flex items-center gap-2 rounded-[4px] px-3 py-2 text-[12px] transition-colors ${
               isActive
                 ? 'bg-[#ececf1] text-[#111111] font-medium'

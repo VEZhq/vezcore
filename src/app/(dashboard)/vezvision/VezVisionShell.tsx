@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import {
   LayoutDashboard,
@@ -52,21 +52,17 @@ function NavItem({
   icon: Icon,
   active,
   onClick,
-  onPrefetch,
 }: {
   href: string
   label: string
   icon: React.ElementType
   active: boolean
   onClick?: () => void
-  onPrefetch?: (href: string) => void
 }) {
   return (
     <Link
       href={href}
-      prefetch
-      onMouseEnter={() => onPrefetch?.(href)}
-      onFocus={() => onPrefetch?.(href)}
+      prefetch={false}
       onClick={onClick}
       className={`group flex items-center justify-between rounded-[5px] px-2.5 py-2 text-[12px] font-normal transition-all duration-150 ${
         active
@@ -86,7 +82,7 @@ function NavItem({
   )
 }
 
-function Sidebar({ onClose, navItems, onPrefetch }: { onClose?: () => void; navItems: NavItemConfig[]; onPrefetch: (href: string) => void }) {
+function Sidebar({ onClose, navItems }: { onClose?: () => void; navItems: NavItemConfig[] }) {
   const pathname = usePathname()
   const sidebarSectionTitleCls = 'px-2.5 pb-1.5 text-[10px] font-normal tracking-[-0.01em] text-[#8b9098]'
 
@@ -125,7 +121,6 @@ function Sidebar({ onClose, navItems, onPrefetch }: { onClose?: () => void; navI
               label={item.label}
               icon={item.icon}
               active={active}
-              onPrefetch={onPrefetch}
               onClick={onClose}
             />
           )
@@ -158,6 +153,7 @@ function Sidebar({ onClose, navItems, onPrefetch }: { onClose?: () => void; navI
       <div className="space-y-2 px-2.5 py-3">
         <Link
           href="/dashboard"
+          prefetch={false}
           onClick={onClose}
           className="flex items-center gap-2.5 rounded-[5px] px-2.5 py-2 text-[12px] font-normal text-[#555b66] transition-colors hover:bg-[#f0f0f4] hover:text-[#111111]"
         >
@@ -199,7 +195,6 @@ export default function VezVisionShell({
   canViewSettings,
   canViewCalendar,
 }: VezVisionShellProps) {
-  const router = useRouter()
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -219,15 +214,11 @@ export default function VezVisionShell({
   const visibleNavItems = useMemo(() => navItems.filter((item) => item.visible), [navItems])
   const currentItem = visibleNavItems.find((item) => item.href === '/vezvision' ? pathname === item.href : pathname.startsWith(item.href)) ?? visibleNavItems[0]
 
-  const prefetchRoute = (href: string) => {
-    router.prefetch(href)
-  }
-
   return (
     <div className="h-screen overflow-hidden bg-[#dedee4] p-3 text-[#111111] sm:p-5">
       <div className="flex h-full overflow-hidden rounded-[14px] border border-white/80 bg-[#fbfbfc] shadow-[0_26px_80px_rgba(27,31,42,0.16)]">
         <aside className="hidden w-[216px] flex-shrink-0 flex-col border-r border-[#e7e7ec] bg-[#f5f5f8] lg:flex">
-          <Sidebar navItems={navItems} onPrefetch={prefetchRoute} />
+          <Sidebar navItems={navItems} />
         </aside>
 
         {mobileOpen && (
@@ -239,7 +230,7 @@ export default function VezVisionShell({
               aria-label="Zamknij menu VezVision"
             />
             <aside className="absolute bottom-0 left-0 top-0 z-10 flex w-[216px] flex-col border-r border-[#e7e7ec] bg-[#f5f5f8]">
-              <Sidebar navItems={navItems} onClose={() => setMobileOpen(false)} onPrefetch={prefetchRoute} />
+              <Sidebar navItems={navItems} onClose={() => setMobileOpen(false)} />
             </aside>
           </div>
         )}
@@ -274,7 +265,7 @@ export default function VezVisionShell({
               </button>
               <Link
                 href="/vezvision/files"
-                prefetch
+                prefetch={false}
                 className="hidden h-9 items-center gap-2 rounded-[5px] border border-[#ececf1] bg-white px-3 text-[12px] text-[#555b66] transition-colors hover:text-[#111111] sm:inline-flex"
               >
                 <Files className="h-3.5 w-3.5" />
@@ -282,6 +273,7 @@ export default function VezVisionShell({
               </Link>
               <Link
                 href="/dashboard"
+                prefetch={false}
                 className="inline-flex h-9 items-center justify-center rounded-[5px] bg-[#111111] px-3 text-[12px] font-medium text-white shadow-sm transition-colors hover:bg-[#262626]"
               >
                 Vezcore
