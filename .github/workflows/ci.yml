@@ -29,5 +29,8 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Security hardening checks
+        run: npm run test:security
+
       - name: Build
         run: npm run build
