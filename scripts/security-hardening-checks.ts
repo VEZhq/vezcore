@@ -57,7 +57,7 @@ function testFilesUploadRouteHardening(): void {
 
 function testFilesAclGuardPresence(): void {
   const root = process.cwd()
-  const content = readFileSync(join(root, 'src/lib/actions/vezvision/files.ts'), 'utf-8')
+  const content = readFileSync(join(root, 'src/lib/actions/vezvision/files-acl.ts'), 'utf-8')
 
   assert(content.includes("action: 'files.folder.acl.upsert'"), 'ACL hardening missing: upsert guard action not found')
   assert(content.includes("action: 'files.folder.acl.remove'"), 'ACL hardening missing: remove guard action not found')
