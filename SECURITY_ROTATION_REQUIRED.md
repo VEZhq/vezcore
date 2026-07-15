@@ -33,7 +33,8 @@ Add to `.gitignore`:
 
 ---
 
-**Created:** 2025-03-26  
-**Updated:** 2026-07-15  
+**Created:** 2025-03-26
+
+**Updated:** 2026-07-15
 **Status:** VEZcore migration completed; legacy-provider revocation remains an
 operator task.
