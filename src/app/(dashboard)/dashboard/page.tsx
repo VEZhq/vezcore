@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { redirect } from 'next/navigation'
 import { User, ClipboardList, Settings, UserCog } from 'lucide-react'
 import { NeuralBackground } from '@/components/NeuralBackground'
 import { ActivityFeed } from '@/components/ActivityFeed'
@@ -7,8 +8,15 @@ import { SystemHealth } from '@/components/SystemHealth'
 import { DashboardModules } from './DashboardModules'
 import { getUserPermissions } from '@/lib/permissions'
 import { getDashboardStats, getRecentDashboardActivity } from '@/lib/queries/dashboard'
+import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 
 export default async function DashboardPage() {
+  // Next.js can render a page in parallel with its parent layout. Guard the
+  // page itself before querying stats so a layout redirect cannot serialize
+  // sensitive dashboard data into an unauthenticated RSC response.
+  const authState = await getAuthenticatedUserPermissionState()
+  if (!authState) redirect('/login')
+
   const permissions = await getUserPermissions()
 
   const yesterdayDate = new Date()

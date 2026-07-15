@@ -63,12 +63,24 @@ function testFilesAclGuardPresence(): void {
   assert(content.includes("action: 'files.folder.acl.remove'"), 'ACL hardening missing: remove guard action not found')
 }
 
+function testDashboardPageGuardsBeforeStats(): void {
+  const root = process.cwd()
+  const content = readFileSync(join(root, 'src/app/(dashboard)/dashboard/page.tsx'), 'utf-8')
+  const guardPosition = content.indexOf('getAuthenticatedUserPermissionState()')
+  const statsPosition = content.indexOf('getDashboardStats(')
+
+  assert(guardPosition >= 0, 'Dashboard hardening missing: page-level auth guard not found')
+  assert(statsPosition >= 0, 'Dashboard hardening check invalid: stats query not found')
+  assert(guardPosition < statsPosition, 'Dashboard auth guard must run before querying stats')
+}
+
 function run(): void {
   testHtmlSanitizer()
   testSearchSanitizer()
   testGuardPresence()
   testFilesUploadRouteHardening()
   testFilesAclGuardPresence()
+  testDashboardPageGuardsBeforeStats()
   console.log('security-hardening-checks: OK')
 }
 
