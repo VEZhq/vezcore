@@ -5,11 +5,15 @@ import { nextCookies } from 'better-auth/next-js'
 import { admin, twoFactor } from 'better-auth/plugins'
 import { databasePool } from '@/lib/database/pool'
 
+const isProductionBuild = process.env.NEXT_PHASE === 'phase-production-build'
+  || process.env.npm_lifecycle_event === 'build'
+
 export const auth = betterAuth({
   appName: 'VEZcore',
   database: databasePool,
   baseURL: process.env.BETTER_AUTH_URL,
-  secret: process.env.BETTER_AUTH_SECRET,
+  secret: process.env.BETTER_AUTH_SECRET
+    || (isProductionBuild ? 'vezcore-build-only-placeholder-secret-32-chars' : undefined),
   trustedOrigins: (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? '')
     .split(',')
     .map((origin) => origin.trim())

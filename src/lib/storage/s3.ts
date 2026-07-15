@@ -32,6 +32,13 @@ interface ListOptions {
 
 function required(name: string): string {
   const value = process.env[name]
+  const isProductionBuild = process.env.NEXT_PHASE === 'phase-production-build'
+    || process.env.npm_lifecycle_event === 'build'
+  if (!value && isProductionBuild) {
+    if (name.endsWith('_ENDPOINT') || name.endsWith('_PUBLIC_URL')) return 'http://127.0.0.1:9000'
+    if (name.endsWith('_BUCKET')) return 'build-placeholder'
+    return 'build-placeholder-credential'
+  }
   if (!value) throw new Error(`${name} is not configured`)
   return value
 }

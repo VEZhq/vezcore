@@ -6,6 +6,9 @@ import type { Database as VezVisionDatabase } from '@/types/vezvision-db'
 
 function required(name: string): string {
   const value = process.env[name]
+  const isProductionBuild = process.env.NEXT_PHASE === 'phase-production-build'
+    || process.env.npm_lifecycle_event === 'build'
+  if (!value && isProductionBuild) return 'http://127.0.0.1:3001'
   if (!value) throw new Error(`${name} is not configured`)
   return value.replace(/\/$/, '')
 }
