@@ -35,7 +35,7 @@ export const auth = betterAuth({
   advanced: {
     cookiePrefix: 'vezcore',
     useSecureCookies: process.env.NODE_ENV === 'production',
-    database: { generateId: 'uuid' },
+    database: { generateId: () => crypto.randomUUID() },
   },
   plugins: [
     admin({

@@ -12,7 +12,7 @@ export const auth = betterAuth({
     disableSignUp: process.env.BETTER_AUTH_ALLOW_SIGNUP !== 'true',
     minPasswordLength: 12,
   },
-  advanced: { database: { generateId: 'uuid' } },
+  advanced: { database: { generateId: () => crypto.randomUUID() } },
   plugins: [
     admin({ defaultRole: 'user', adminRoles: ['admin'] }),
     twoFactor({ issuer: 'VEZcore' }),
