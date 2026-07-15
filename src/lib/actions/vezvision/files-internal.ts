@@ -9,10 +9,12 @@ import {
 } from '@/lib/constants/file-limits'
 import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
 import { createActionClient } from '@/lib/supabase/server'
+import { getAdminClient } from '@/lib/supabase/admin'
 import { getVezVisionPermissionState, hasVezVisionPermission } from '@/lib/auth/vezvision-permissions'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import type { VezVisionPermissionKey } from '@/lib/vezvision-permissions'
 import { getClientIP, validateUUID } from '@/lib/server-utils'
+import { isAdminRole } from '@/lib/roles'
 import type {
   VVFile,
   VVFileAssignableUser,
@@ -68,10 +70,6 @@ export interface ListFilesOptions {
 export interface CleanupRetentionResult {
   deletedCount: number
   failedCount: number
-}
-
-export function isAdminRole(role: string | null): boolean {
-  return role === 'admin' || role === 'super_admin'
 }
 
 export async function getFolderChain(folderId: string): Promise<VVFolder[] | null> {
@@ -313,8 +311,8 @@ export function parseRetentionDays(rawValue: string | undefined): number {
 }
 
 export async function getUserRole(userId: string): Promise<string | null> {
-  const vv = getVezVisionPrivilegedClient()
-  const { data, error } = await vv.from('profiles').select('role').eq('id', userId).single()
+  const core = await createActionClient()
+  const { data, error } = await core.from('profiles').select('role').eq('id', userId).single()
   if (error) {
     logError('files-internal.getUserRole', error)
     return null
@@ -469,11 +467,10 @@ export async function getResolvedFolderAclEntries(folderId: string): Promise<VVF
   const { data: profilesRaw } = await actionClient.from('profiles').select('id').in('id', userIds)
   const profileRows = (profilesRaw ?? []) as Array<{ id: string }>
   const profileIdSet = new Set(profileRows.map((row) => row.id))
-  const { data: userEmails, error: emailsError } = await vv.rpc('get_user_emails_by_ids', { user_ids: userIds })
-  if (emailsError) {
-    logError('files-internal.getResolvedFolderAclEntries.get_user_emails_by_ids', emailsError)
-  }
-  const emailMap = new Map((userEmails ?? []).map((row: { id: string; email: string | null }) => [row.id, row.email]))
+  const adminClient = getAdminClient()
+  const { data: authUsers, error: usersError } = await adminClient.auth.admin.listUsers()
+  if (usersError) logError('files-internal.getResolvedFolderAclEntries.listUsers', usersError)
+  const emailMap = new Map((authUsers?.users ?? []).map((row) => [row.id, row.email ?? null]))
 
   const resolvedMap = new Map<string, VVFolderAclEntry>()
   for (const row of aclRows) {

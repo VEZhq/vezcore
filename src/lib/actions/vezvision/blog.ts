@@ -7,7 +7,7 @@ import { requireVezVisionPermission } from '@/lib/auth/vezvision'
 import { revalidatePath } from 'next/cache'
 import type { TablesInsert, TablesUpdate } from '@/types/vezvision-db'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
-import { sanitizeSearchTerm, sanitizeVezVisionHtml } from '@/lib/vezvision-security-utils'
+import { sanitizeSearchTerm, sanitizeVezVisionHtml, sanitizeSlug, calcReadingTime } from '@/lib/vezvision-security-utils'
 import { guardVezVisionMutation } from '@/lib/actions/vezvision/security'
 import { logError } from '@/lib/logger'
 import type {
@@ -16,10 +16,6 @@ import type {
   VVBlogPostInput,
   ActionResult,
 } from './types'
-
-function calcReadingTime(content: string): number {
-  return Math.max(1, Math.round(content.trim().split(/\s+/).length / 200))
-}
 
 function normalizeReadingTime(value: number | undefined): number | null {
   if (value === undefined) return null
@@ -57,16 +53,6 @@ function validateBlogInput(input: { title_pl?: string; title_en?: string | null;
     if (new Date(input.scheduled_for) <= new Date()) return 'Data publikacji musi być w przyszłości'
   }
   return null
-}
-
-function sanitizeSlug(slug: string): string {
-  return slug
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
 }
 
 function hasTextContent(html: string | null | undefined): boolean {

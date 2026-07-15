@@ -1,26 +1,10 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/vezvision-db'
+import 'server-only'
 
-type VezVisionClient = ReturnType<typeof createSupabaseClient<Database>>
+import { getVezVisionDatabaseClient } from '@/lib/database/postgrest'
+import { getVezVisionStorage } from '@/lib/storage/s3'
 
-let _client: VezVisionClient | null = null
-
-export function getVezVisionPrivilegedClient(): VezVisionClient {
-  if (_client) return _client
-
-  const url = process.env.VEZVISION_SUPABASE_URL
-  const key = process.env.VEZVISION_SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !key) {
-    throw new Error('Missing VEZVISION_SUPABASE_URL or VEZVISION_SUPABASE_SERVICE_ROLE_KEY')
-  }
-
-  _client = createSupabaseClient<Database>(url, key, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+export function getVezVisionPrivilegedClient() {
+  return Object.assign(getVezVisionDatabaseClient(), {
+    storage: getVezVisionStorage(),
   })
-
-  return _client
 }

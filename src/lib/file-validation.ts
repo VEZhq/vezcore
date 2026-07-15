@@ -54,3 +54,17 @@ export function validateMagicBytes(
 
   return false
 }
+
+export function sanitizeUploadPath(path: string): string | null {
+  const trimmed = path.trim()
+  if (!trimmed) return null
+  if (trimmed.startsWith('/')) return null
+  if (trimmed.includes('..')) return null
+
+  const segments = trimmed.split('/').filter(Boolean)
+  if (segments.some((segment) => segment === '.' || segment === '..')) return null
+
+  if (!/^[a-zA-Z0-9/_\-.]+$/.test(trimmed)) return null
+
+  return trimmed.replace(/\/+/g, '/').replace(/\/$/g, '')
+}

@@ -11,6 +11,8 @@ import { sanitizeVezVisionHtml } from '@/lib/vezvision-security-utils'
 import { logError } from '@/lib/logger'
 import type { Json, TablesInsert, TablesUpdate } from '@/types/vezvision-db'
 import type { ActionResult, VVNewsletterCampaign } from '../types'
+import { generateEmailHtml } from '@/lib/newsletter/email-template'
+import { getNewsletterSettings } from './settings'
 
 type NewsletterCampaignInsert = TablesInsert<'vv_newsletter_campaigns'> & {
   subject_en?: string | null
@@ -320,47 +322,91 @@ export async function sendNewsletterCampaign(
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.NEWSLETTER_MANAGE)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const baseUrl = process.env.VEZVISION_SUPABASE_URL
-  const serviceRoleKey = process.env.VEZVISION_SUPABASE_SERVICE_ROLE_KEY
-  const dispatchToken = process.env.NEWSLETTER_DISPATCH_TOKEN
-  if (!baseUrl || !serviceRoleKey || !dispatchToken) {
-    return { success: false, error: 'Brak konfiguracji serwisowej (NEWSLETTER_DISPATCH_TOKEN)' }
-  }
+  const resendApiKey = process.env.RESEND_API_KEY
+  if (!resendApiKey) return { success: false, error: 'Brak konfiguracji RESEND_API_KEY' }
 
-  try {
-    const response = await fetch(`${baseUrl}/functions/v1/send-newsletter`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
-        'x-newsletter-dispatch-token': dispatchToken,
-      },
-      body: JSON.stringify({ campaignId }),
-      cache: 'no-store',
+  const vv = getVezVisionPrivilegedClient()
+  const { data: campaign, error: campaignError } = await vv
+    .from('vv_newsletter_campaigns')
+    .select('id,subject,subject_en,content_html,content_html_en,status,segment_language,segment_tags')
+    .eq('id', campaignId)
+    .single()
+  if (campaignError || !campaign) return { success: false, error: 'Kampania nie istnieje' }
+  if (!['draft', 'scheduled', 'failed'].includes(campaign.status)) return { success: false, error: 'Kampania nie może zostać wysłana w tym stanie' }
+
+  let subscribersQuery = vv
+    .from('vv_newsletter_subscribers')
+    .select('id,email,language,tags,token')
+    .eq('is_active', true)
+    .limit(1000)
+  if (campaign.segment_language) subscribersQuery = subscribersQuery.eq('language', campaign.segment_language)
+  if (campaign.segment_tags?.length) subscribersQuery = subscribersQuery.overlaps('tags', campaign.segment_tags)
+  const { data: subscribers, error: subscribersError } = await subscribersQuery
+  if (subscribersError) return { success: false, error: 'Nie udało się pobrać odbiorców' }
+
+  const settingsResult = await getNewsletterSettings()
+  if (!settingsResult.success) return { success: false, error: settingsResult.error }
+  const settings = settingsResult.data
+  const publicUrl = (process.env.VEZVISION_PUBLIC_URL ?? 'https://vezvision.vezlabs.dev').replace(/\/$/, '')
+
+  await vv.from('vv_newsletter_campaigns').update({
+    status: 'sending',
+    recipient_count: subscribers?.length ?? 0,
+    sent_count: 0,
+  }).eq('id', campaignId)
+
+  let sentCount = 0
+  let errorCount = 0
+  for (const subscriber of subscribers ?? []) {
+    const language = subscriber.language === 'en' ? 'en' : 'pl'
+    const subject = language === 'en' && campaign.subject_en ? campaign.subject_en : campaign.subject
+    const content = language === 'en' && campaign.content_html_en ? campaign.content_html_en : campaign.content_html
+    const unsubscribeUrl = `${publicUrl}/unsubscribe?token=${encodeURIComponent(subscriber.token)}`
+    const html = generateEmailHtml(subject, content.replaceAll('{{UNSUBSCRIBE_URL}}', unsubscribeUrl), settings, unsubscribeUrl, language)
+
+    let status = 'sent'
+    let providerMessageId: string | null = null
+    let errorMessage: string | null = null
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: `${settings.from_name} <${settings.from_email}>`,
+          to: [subscriber.email],
+          reply_to: settings.reply_to || undefined,
+          subject,
+          html,
+        }),
+        cache: 'no-store',
+      })
+      const responseBody = await response.json().catch(() => null) as { id?: string; message?: string } | null
+      if (!response.ok) throw new Error(responseBody?.message || `Resend HTTP ${response.status}`)
+      providerMessageId = responseBody?.id ?? null
+      sentCount += 1
+    } catch (error) {
+      status = 'failed'
+      errorMessage = error instanceof Error ? error.message.slice(0, 500) : 'Unknown send error'
+      errorCount += 1
+    }
+
+    await vv.from('vv_newsletter_send_logs').insert({
+      campaign_id: campaignId,
+      subscriber_id: subscriber.id,
+      subscriber_email: subscriber.email,
+      status,
+      provider: 'resend',
+      provider_message_id: providerMessageId,
+      error_message: errorMessage,
     })
-
-    const payload = (await response.json().catch(() => null)) as {
-      success?: boolean
-      sentCount?: number
-      errorCount?: number
-      error?: string
-      message?: string
-    } | null
-
-    if (!response.ok || !payload?.success) {
-      return { success: false, error: payload?.error || payload?.message || 'Nie udało się wysłać kampanii' }
-    }
-
-    revalidatePath('/vezvision/newsletter/campaigns')
-    return {
-      success: true,
-      data: {
-        sentCount: payload.sentCount ?? 0,
-        errorCount: payload.errorCount ?? 0,
-      },
-    }
-  } catch {
-    return { success: false, error: 'Nie udało się połączyć z usługą wysyłki' }
   }
+
+  await vv.from('vv_newsletter_campaigns').update({
+    status: errorCount > 0 && sentCount === 0 ? 'failed' : 'sent',
+    sent_count: sentCount,
+    sent_at: new Date().toISOString(),
+  }).eq('id', campaignId)
+
+  revalidatePath('/vezvision/newsletter/campaigns')
+  return { success: true, data: { sentCount, errorCount } }
 }

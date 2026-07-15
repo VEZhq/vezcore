@@ -12,6 +12,7 @@ import type { VVBucket, ActionResult } from './types'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import { guardVezVisionMutation } from '@/lib/actions/vezvision/security'
 import { logError } from '@/lib/logger'
+import { sanitizeUploadPath } from '@/lib/file-validation'
 
 const BUCKET_RULES: Record<VVBucket, { maxSizeBytes: number; allowedMimeTypes: readonly string[]; pathPrefix: string }> = {
   'vv-blog-images': {
@@ -50,15 +51,6 @@ const BUCKET_RULES: Record<VVBucket, { maxSizeBytes: number; allowedMimeTypes: r
 
 function isVezVisionBucket(value: string): value is VVBucket {
   return value === 'vv-blog-images' || value === 'vv-portfolio-images' || value === 'vv-service-images' || value === 'vv-files-private'
-}
-
-function sanitizeUploadPath(path: string): string | null {
-  const trimmed = path.trim()
-  if (!trimmed || trimmed.startsWith('/') || trimmed.includes('..')) return null
-  if (!/^[a-zA-Z0-9/_\-.]+$/.test(trimmed)) return null
-  const normalized = trimmed.replace(/\/+/g, '/').replace(/\/$/g, '')
-  if (!normalized || normalized.split('/').some((segment) => segment === '.' || segment === '..')) return null
-  return normalized
 }
 
 function hasAllowedExtension(path: string, allowedMimeTypes: readonly string[]): boolean {

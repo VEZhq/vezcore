@@ -3,10 +3,11 @@ import type { NewsletterSettings } from '@/lib/actions/vezvision/newsletter/sett
 export type CampaignLanguage = 'pl' | 'en'
 
 export const DEFAULT_UNSUBSCRIBE_URL = 'https://vezvision.com/unsubscribe?token={{TOKEN}}'
+const VEZVISION_ASSET_URL = process.env.VEZVISION_PUBLIC_URL ?? 'https://vezvision.vezlabs.dev'
 
 const defaultSettings: NewsletterSettings = {
   brand_name: 'VezVision',
-  logo_url: 'https://pcxcqbpygyidkusetghk.supabase.co/storage/v1/object/public/vezvision-assets/logo-navbar.svg',
+  logo_url: `${VEZVISION_ASSET_URL}/logo-navbar.svg`,
   primary_color: '#04070d',
   background_color: '#f3f4f6',
   surface_color: '#ffffff',
@@ -92,13 +93,13 @@ export function generateEmailHtml(
           <tr>
             <td align="center" style="padding:0 0 16px 0;">
               <a href="https://x.com/vezvision" style="display:inline-block;margin:0 6px;padding:8px;border:1px solid #e5e7eb;border-radius:6px;text-decoration:none;" target="_blank">
-                <img src="https://pcxcqbpygyidkusetghk.supabase.co/storage/v1/object/public/vezvision-assets/icons/x.svg" alt="X" width="16" height="16" style="display:block;" />
+                <span style="font:600 12px/16px Arial,sans-serif;color:#111827;">X</span>
               </a>
               <a href="https://instagram.com/vezvision" style="display:inline-block;margin:0 6px;padding:8px;border:1px solid #e5e7eb;border-radius:6px;text-decoration:none;" target="_blank">
-                <img src="https://pcxcqbpygyidkusetghk.supabase.co/storage/v1/object/public/vezvision-assets/icons/instagram.svg" alt="Instagram" width="16" height="16" style="display:block;" />
+                <span style="font:600 11px/16px Arial,sans-serif;color:#111827;">IG</span>
               </a>
               <a href="https://linkedin.com/company/vezvision" style="display:inline-block;margin:0 6px;padding:8px;border:1px solid #e5e7eb;border-radius:6px;text-decoration:none;" target="_blank">
-                <img src="https://pcxcqbpygyidkusetghk.supabase.co/storage/v1/object/public/vezvision-assets/icons/linkedin.svg" alt="LinkedIn" width="16" height="16" style="display:block;" />
+                <span style="font:600 11px/16px Arial,sans-serif;color:#111827;">in</span>
               </a>
             </td>
           </tr>

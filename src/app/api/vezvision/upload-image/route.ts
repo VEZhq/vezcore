@@ -11,7 +11,7 @@ import {
   UPLOAD_PRIVATE_MAX_SIZE,
 } from '@/lib/constants/file-limits'
 import { withCors } from '@/app/api/withCors'
-import { validateMagicBytes } from '@/lib/file-validation'
+import { validateMagicBytes, sanitizeUploadPath } from '@/lib/file-validation'
 import { reportApiFailure } from '@/lib/monitoring'
 import { rateLimitByIP } from '@/lib/rate-limit'
 
@@ -70,19 +70,6 @@ function getPermissionForBucket(bucket: UploadBucket): VezVisionPermissionKey {
   if (bucket === 'vv-files-private') return VEZVISION_PERMISSIONS.FILES_MANAGE
   if (bucket === 'vv-newsletter-images') return VEZVISION_PERMISSIONS.NEWSLETTER_MANAGE
   return VEZVISION_PERMISSIONS.SERVICES_MANAGE
-}
-
-function sanitizeUploadPath(path: string): string | null {
-  const trimmed = path.trim()
-  if (!trimmed) return null
-  if (trimmed.startsWith('/')) return null
-  if (trimmed.includes('..')) return null
-
-  const segments = trimmed.split('/').filter(Boolean)
-  if (segments.some((s) => s === '.' || s === '..')) return null
-
-  if (!/^[a-zA-Z0-9/_\-.]+$/.test(trimmed)) return null
-  return trimmed.replace(/\/+/g, '/').replace(/\/$/g, '')
 }
 
 export const POST = withCors(async (request: Request): Promise<NextResponse<UploadResponse>> => {

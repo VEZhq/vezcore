@@ -1,24 +1,12 @@
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim()
-}
+import { sanitizeSlug, calcReadingTime, sanitizeVezVisionHtml } from '@/lib/vezvision-security-utils'
 
-export function calcReadingTime(content: string): number {
-  const plain = content.replace(/<[^>]+>/g, ' ')
-  return Math.max(1, Math.round(plain.trim().split(/\s+/).length / 200))
-}
+export const slugify = sanitizeSlug
+
+export { calcReadingTime }
 
 function hasHtmlMarkup(content: string): boolean {
   return /<\/?[a-z][\s\S]*>/i.test(content)
 }
-
-import { sanitizeVezVisionHtml } from '@/lib/vezvision-security-utils'
 
 export function normalizeEditorHtml(content: string): string {
   return sanitizeVezVisionHtml(content).replace(/\s+/g, ' ').trim()

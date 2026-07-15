@@ -3,36 +3,22 @@ import { redirect } from 'next/navigation'
 import { resolveClientIpFromHeaders } from '@/lib/server-utils'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
+import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
 
-function getNewsletterSupabaseConfig(): { url: string; anonKey: string } | null {
-  const url = process.env.VEZVISION_SUPABASE_URL
-  const anonKey = process.env.VEZVISION_SUPABASE_ANON_KEY
+async function unsubscribeByToken(token: string): Promise<boolean> {
+  const { data, error } = await getVezVisionPrivilegedClient()
+    .from('vv_newsletter_subscribers')
+    .update({
+      is_active: false,
+      unsubscribed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('token', token)
+    .eq('is_active', true)
+    .select('id')
+    .maybeSingle()
 
-  if (!url || !anonKey) {
-    return null
-  }
-
-  return { url, anonKey }
-}
-
-async function unsubscribeByToken(url: string, anonKey: string, token: string, ip: string): Promise<boolean> {
-  const response = await fetch(`${url}/functions/v1/unsubscribe-newsletter`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${anonKey}`,
-      apikey: anonKey,
-      'Content-Type': 'application/json',
-      'x-forwarded-for': ip,
-    },
-    body: JSON.stringify({ token }),
-  })
-
-  if (!response.ok) {
-    return false
-  }
-
-  const data = await response.json().catch(() => null)
-  return data?.success === true
+  return !error && Boolean(data)
 }
 
 export async function GET(request: Request, { params }: { params: Promise<Record<string, string>> }) {
@@ -52,12 +38,7 @@ export async function GET(request: Request, { params }: { params: Promise<Record
     return new NextResponse('Too many requests', { status: 429 })
   }
 
-  const config = getNewsletterSupabaseConfig()
-  if (!config) {
-    redirect('/unsubscribed?status=invalid')
-  }
-
-  const success = await unsubscribeByToken(config.url, config.anonKey, token, ip)
+  const success = await unsubscribeByToken(token)
 
   if (!success) {
     redirect('/unsubscribed?status=invalid')
@@ -93,12 +74,7 @@ export async function POST(request: Request, { params }: { params: Promise<Recor
     return new NextResponse('Too many requests', { status: 429 })
   }
 
-  const config = getNewsletterSupabaseConfig()
-  if (!config) {
-    return new Response('Newsletter backend is not configured', { status: 500 })
-  }
-
-  const success = await unsubscribeByToken(config.url, config.anonKey, token, ip)
+  const success = await unsubscribeByToken(token)
 
   if (!success) {
     return new Response('Invalid token or already unsubscribed', { status: 400 })

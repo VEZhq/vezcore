@@ -117,8 +117,7 @@ export async function removeAvatar(csrfToken: string) {
 		.single()
 
 	if (profile?.avatar_url) {
-		// avatar_url format: https://.../storage/v1/object/public/avatars/USER_ID/avatar.ext
-		const bucketPrefix = '/object/public/avatars/'
+		const bucketPrefix = '/avatars/'
 		const idx = profile.avatar_url.indexOf(bucketPrefix)
 		if (idx !== -1) {
 			const storagePath = profile.avatar_url.slice(idx + bucketPrefix.length)

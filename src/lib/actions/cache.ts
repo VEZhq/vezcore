@@ -5,7 +5,7 @@ import { createActionClient } from '@/lib/supabase/server'
 import { ERRORS } from '@/lib/constants'
 import { validateCSRFToken } from '@/lib/actions/csrf'
 
-function isSuperAdminRole(role: string | null): boolean {
+function isSuperAdminRole(role: string | null | undefined): boolean {
   return role === 'super_admin'
 }
 

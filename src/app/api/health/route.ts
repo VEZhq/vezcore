@@ -20,8 +20,8 @@ export const GET = withCors(async (request: Request): Promise<NextResponse<Healt
   }
 
   const token = getBearerToken(request)
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!token || !serviceRoleKey || token !== serviceRoleKey) {
+  const healthCheckToken = process.env.HEALTH_CHECK_TOKEN
+  if (!token || !healthCheckToken || token !== healthCheckToken) {
     return NextResponse.json(
       { status: 'unhealthy', timestamp: new Date().toISOString() } as HealthRouteStatus,
       { status: 401 }

@@ -108,6 +108,8 @@ export async function createUser(data: { email: string; password: string; full_n
     email: sanitizeString(data.email),
     password: data.password,
     email_confirm: true,
+    user_metadata: { full_name: data.full_name ? sanitizeString(data.full_name) : undefined },
+    role: normalizedRole,
   })
 
   if (error) {
@@ -209,6 +211,13 @@ export async function updateUser(userId: string, data: { full_name?: string; rol
     return { error: ERRORS.USER_UPDATE_FAILED }
   }
 
+  if (typeof data.role !== 'undefined') {
+    const { error: authRoleError } = await adminClient.auth.admin.updateUserById(userId, {
+      role: updatePayload.role,
+    })
+    if (authRoleError) return { error: ERRORS.USER_UPDATE_FAILED }
+  }
+
   const ip = await getClientIP()
 
   await supabase
@@ -268,7 +277,7 @@ export async function deleteUser(userId: string, csrfToken: string): Promise<Act
     .maybeSingle()
   const targetProfile = targetProfileRaw as { discord_thread_id: string | null } | null
 
-  const { error: authDeleteError } = await adminClient.auth.admin.deleteUser(userId, false)
+  const { error: authDeleteError } = await adminClient.auth.admin.deleteUser(userId)
 
   if (authDeleteError) {
     return { error: ERRORS.USER_DELETE_FAILED }

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
 import { useToast } from '@/components/ToastProvider'
 
 interface SecurityAlertsProviderProps {
@@ -11,60 +10,34 @@ interface SecurityAlertsProviderProps {
 
 export function SecurityAlertsProvider({ children, isAdmin }: SecurityAlertsProviderProps) {
 	const { addToast } = useToast()
-	const channelRef = useRef<ReturnType<ReturnType<typeof createBrowserClient>['channel']> | null>(null)
+	const lastSeenRef = useRef(new Date().toISOString())
 
 	useEffect(() => {
 		if (!isAdmin) {
 			return
 		}
 
-		const supabase = createBrowserClient(
-			process.env.NEXT_PUBLIC_SUPABASE_URL!,
-			process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-		)
-
-		const channel = supabase
-			.channel('security-alerts')
-			.on(
-				'postgres_changes',
-				{
-					event: 'INSERT',
-					schema: 'public',
-					table: 'audit_log',
-					filter: 'action=in.(failed_login,ip_blocked,2fa_failed)',
-				},
-				(payload) => {
-					const event = payload.new as {
-						action: string
-						details: Record<string, unknown> | null
-					}
-
-					let message: string
-
-					switch (event.action) {
-						case 'failed_login':
-							message = `Nieudane logowanie z IP: ${event.details?.ip || 'unknown'}`
-							break
-						case 'ip_blocked':
-							message = `IP zablokowane: ${event.details?.ip || 'unknown'}`
-							break
-						case '2fa_failed':
-							message = 'Nieudane 2FA'
-							break
-						default:
-							return
-					}
-
-					addToast(message, 'error')
+		let cancelled = false
+		const poll = async () => {
+			try {
+				const response = await fetch(`/api/security/alerts?since=${encodeURIComponent(lastSeenRef.current)}`, { cache: 'no-store' })
+				if (!response.ok || cancelled) return
+				const payload = await response.json() as { alerts?: Array<{ action: string; details: Record<string, unknown> | null; created_at: string }> }
+				for (const event of payload.alerts ?? []) {
+					lastSeenRef.current = event.created_at
+					if (event.action === 'failed_login') addToast(`Nieudane logowanie z IP: ${event.details?.ip || 'unknown'}`, 'error')
+					if (event.action === 'ip_blocked') addToast(`IP zablokowane: ${event.details?.ip || 'unknown'}`, 'error')
+					if (event.action === '2fa_failed') addToast('Nieudane 2FA', 'error')
 				}
-			)
-			.subscribe()
-
-		channelRef.current = channel
+			} catch {
+				// A transient monitoring failure must not interrupt the dashboard.
+			}
+		}
+		const timer = window.setInterval(poll, 15_000)
 
 		return () => {
-			supabase.removeChannel(channel)
-			channelRef.current = null
+			cancelled = true
+			window.clearInterval(timer)
 		}
 	}, [isAdmin, addToast])
 

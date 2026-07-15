@@ -15,7 +15,7 @@ export type Database = {
       audit_log: {
         Row: {
           action: string
-          created_at: string | null
+          created_at: string
           details: Json | null
           entity_id: string | null
           entity_type: string | null
@@ -47,13 +47,13 @@ export type Database = {
       }
       ip_lists: {
         Row: {
-          created_at: string | null
+          created_at: string
           created_by: string | null
           expires_at: string | null
           id: string
           ip: string
           reason: string | null
-          type: string
+          type: "whitelist" | "blacklist"
         }
         Insert: {
           created_at?: string | null
@@ -62,7 +62,7 @@ export type Database = {
           id?: string
           ip: string
           reason?: string | null
-          type: string
+          type: "whitelist" | "blacklist"
         }
         Update: {
           created_at?: string | null
@@ -71,7 +71,7 @@ export type Database = {
           id?: string
           ip?: string
           reason?: string | null
-          type?: string
+          type?: "whitelist" | "blacklist"
         }
         Relationships: [
           {
@@ -87,7 +87,7 @@ export type Database = {
         Row: {
           blocked_until: string | null
           count: number
-          created_at: string | null
+          created_at: string
           ip: string
           last_attempt: string
         }
@@ -110,14 +110,14 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          created_at: string | null
+          created_at: string
           deleted_at: string | null
           discord_thread_id: string | null
           full_name: string | null
           id: string
           role: string
           tenant_id: string | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           avatar_url?: string | null
@@ -143,10 +143,34 @@ export type Database = {
         }
         Relationships: []
       }
+      tenants: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           count: number
-          created_at: string | null
+          created_at: string
           key: string
           reset_time: string
           updated_at: string
@@ -169,11 +193,11 @@ export type Database = {
       }
       user_permissions: {
         Row: {
-          created_at: string | null
+          created_at: string
           granted_by: string | null
           id: string
           permission_key: string
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {

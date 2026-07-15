@@ -1,5 +1,5 @@
-import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
+import type { AuthUser } from '@/lib/auth/compat'
 
 export interface DashboardAuthUser {
   id: string
@@ -19,17 +19,11 @@ export async function getDashboardAuthUser(): Promise<DashboardAuthUser | null> 
 
 export async function enforceRequiredMfaLevel(): Promise<{ allowed: true } | { allowed: false }> {
   const supabase = await createClient()
-  const { data: authLevel } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-
-  if (authLevel?.nextLevel === 'aal2' && authLevel.currentLevel === 'aal1') {
-    await supabase.auth.signOut()
-    return { allowed: false }
-  }
-
-  return { allowed: true }
+  const { data: { user } } = await supabase.auth.getUser()
+  return user ? { allowed: true } : { allowed: false }
 }
 
-function mapAuthUser(user: User): DashboardAuthUser {
+function mapAuthUser(user: AuthUser): DashboardAuthUser {
   return {
     id: user.id,
     email: user.email,
