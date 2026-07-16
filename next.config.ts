@@ -69,6 +69,7 @@ const productionOnlyHeaders = forceHttps
   : []
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   experimental: {
     serverActions: {
       bodySizeLimit: '4mb',
