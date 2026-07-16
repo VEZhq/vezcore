@@ -40,7 +40,7 @@ const BUCKET_RULES: Record<UploadBucket, { maxSizeBytes: number; allowedMimeType
   },
   'vv-newsletter-images': {
     maxSizeBytes: UPLOAD_IMAGE_MAX_SIZE,
-    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
   },
   'vv-files-private': {
     maxSizeBytes: UPLOAD_PRIVATE_MAX_SIZE,
