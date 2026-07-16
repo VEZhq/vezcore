@@ -348,6 +348,7 @@ export async function sendNewsletterCampaign(
   if (!settingsResult.success) return { success: false, error: settingsResult.error }
   const settings = settingsResult.data
   const publicUrl = (process.env.VEZVISION_PUBLIC_URL ?? 'https://vezvision.vezlabs.dev').replace(/\/$/, '')
+  const functionsApiUrl = (process.env.VEZVISION_FUNCTIONS_API_URL ?? 'https://api.vezlabs.dev/functions/v1').replace(/\/$/, '')
 
   await vv.from('vv_newsletter_campaigns').update({
     status: 'sending',
@@ -361,7 +362,8 @@ export async function sendNewsletterCampaign(
     const language = subscriber.language === 'en' ? 'en' : 'pl'
     const subject = language === 'en' && campaign.subject_en ? campaign.subject_en : campaign.subject
     const content = language === 'en' && campaign.content_html_en ? campaign.content_html_en : campaign.content_html
-    const unsubscribeUrl = `${publicUrl}/unsubscribe?token=${encodeURIComponent(subscriber.token)}`
+    const unsubscribeUrl = `${publicUrl}/${language}/unsubscribe?token=${encodeURIComponent(subscriber.token)}`
+    const oneClickUnsubscribeUrl = `${functionsApiUrl}/unsubscribe-newsletter?token=${encodeURIComponent(subscriber.token)}`
     const html = generateEmailHtml(subject, content.replaceAll('{{UNSUBSCRIBE_URL}}', unsubscribeUrl), settings, unsubscribeUrl, language)
 
     let status = 'sent'
@@ -371,12 +373,17 @@ export async function sendNewsletterCampaign(
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(15_000),
         body: JSON.stringify({
           from: `${settings.from_name} <${settings.from_email}>`,
           to: [subscriber.email],
           reply_to: settings.reply_to || undefined,
           subject,
           html,
+          headers: {
+            'List-Unsubscribe': `<${oneClickUnsubscribeUrl}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
         }),
         cache: 'no-store',
       })
