@@ -20,7 +20,8 @@ ENV NODE_ENV=production \
     HOSTNAME=0.0.0.0 \
     PORT=3000
 
-RUN addgroup --system --gid 10001 nextjs \
+RUN apk add --no-cache curl \
+    && addgroup --system --gid 10001 nextjs \
     && adduser --system --uid 10001 --ingroup nextjs nextjs \
     && mkdir -p /app/.next/cache \
     && chown -R nextjs:nextjs /app
