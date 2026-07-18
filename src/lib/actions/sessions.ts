@@ -245,13 +245,9 @@ export async function adminRevokeSession(
 		return { error: ERRORS.NO_PERMISSIONS }
 	}
 
-	const { data: targetProfile } = await supabase
-		.from('profiles')
-		.select('email')
-		.eq('id', targetUserId)
-		.single()
-
-	const targetEmail = targetProfile?.email || 'unknown'
+	const adminClient = getAdminClient()
+	const { data: targetUser } = await adminClient.auth.admin.getUserById(targetUserId)
+	const targetEmail = targetUser.user?.email || 'unknown'
 
 	const { data: deleted, error } = await supabase.rpc('delete_user_session', {
 		session_id: sessionId,

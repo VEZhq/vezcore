@@ -41,5 +41,5 @@ export function useAutoLogout() {
         window.removeEventListener(event, resetTimer)
       })
     }
-  }, [preferences.sessionTimeout])
+  }, [preferences.sessionTimeout, csrfToken])
 }

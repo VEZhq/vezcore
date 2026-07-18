@@ -10,6 +10,7 @@ import { reportAuthFailure, maskEmail } from '@/lib/monitoring'
 import { validateCSRFToken } from '@/lib/actions/csrf'
 import { FIVE_MINUTES, FIFTEEN_MINUTES } from '@/lib/constants/time'
 import { logError } from '@/lib/logger'
+import { auth as betterAuth } from '@/lib/auth'
 
 type LoginResult =
   | { error: string; success?: never; requires2FA?: never; factorId?: never; challengeId?: never }
@@ -40,23 +41,25 @@ export async function login(formData: FormData): Promise<LoginResult> {
 	const headersList = await headers()
 	const userAgent = (headersList.get('user-agent') || 'unknown').substring(0, 200)
 
-	const { data, error } = await supabase.auth.signInWithPassword({
-		email,
-		password,
-	})
-
-  if (error) {
+  let signedIn: Awaited<ReturnType<typeof betterAuth.api.signInEmail>>
+  try {
+    signedIn = await betterAuth.api.signInEmail({
+      headers: headersList,
+      body: { email, password },
+    })
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : 'invalid_credentials'
     await reportAuthFailure('Login attempt failed', {
       email,
       ip,
-      reason: error.message,
+      reason,
     }).catch(() => logError('[AUTH] Failed to report auth failure', new Error('Failed to report auth failure')))
 
     try {
       await sendSecurityAlert('failed_login', {
         email,
 				ip,
-				reason: error.message,
+				reason,
 				user_agent: userAgent
 			})
 		} catch {
@@ -66,28 +69,11 @@ export async function login(formData: FormData): Promise<LoginResult> {
 		return { error: 'Nieprawidłowe dane logowania' }
 	}
 
-	if (!data.user) {
-		return { error: 'Błąd logowania' }
+	if ('twoFactorRedirect' in signedIn && signedIn.twoFactorRedirect) {
+		return { requires2FA: true, factorId: 'totp', challengeId: 'better-auth' }
 	}
 
-	const { data: factors } = await supabase.auth.mfa.listFactors()
-
-	if (factors?.totp && factors.totp.length > 0) {
-		const factor = factors.totp[0]
-
-		const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
-			factorId: factor.id,
-		})
-
-		if (challengeError || !challenge?.id) {
-			await supabase.auth.signOut()
-			return { error: 'Błąd weryfikacji 2FA. Spróbuj ponownie.' }
-		}
-
-		return { requires2FA: true, factorId: factor.id, challengeId: challenge.id }
-	}
-
-	await supabase.auth.refreshSession()
+  const data = { user: signedIn.user }
 
 	const { data: profile } = await supabase
 		.from('profiles')
@@ -136,18 +122,18 @@ export async function verify2FALogin(factorId: string, challengeId: string, code
 
   try {
     const supabase = await createActionClient()
-
-    const { error } = await supabase.auth.mfa.verify({
-      factorId,
-      challengeId,
-      code,
-    })
-
-    if (error) {
+    const requestHeaders = await headers()
+    try {
+      await betterAuth.api.verifyTOTP({
+        headers: requestHeaders,
+        body: { code, trustDevice: false },
+      })
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'invalid_totp'
       await reportAuthFailure('2FA verification failed', {
         factorId,
         challengeId,
-        reason: error.message,
+        reason,
       }).catch(() => logError('[AUTH] Failed to report 2FA failure', new Error('Failed to report 2FA failure')))
 
       try {
@@ -168,7 +154,6 @@ export async function verify2FALogin(factorId: string, challengeId: string, code
 
       return { error: 'Nieprawidłowy kod 2FA' }
     }
-
     try {
       const ip = await getClientIP()
       const headersList = await headers()
@@ -284,5 +269,3 @@ export async function logout(csrfToken: string) {
   revalidatePath('/', 'layout')
   return { success: true }
 }
-
-

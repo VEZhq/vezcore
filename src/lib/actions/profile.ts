@@ -9,6 +9,8 @@ import { getClientIP } from '@/lib/server-utils'
 import { validateCSRFToken } from '@/lib/actions/csrf'
 import { ONE_MINUTE } from '@/lib/constants/time'
 import { logError } from '@/lib/logger'
+import { headers } from 'next/headers'
+import { auth as betterAuth } from '@/lib/auth'
 
 export async function updateProfile(formData: FormData) {
 	const csrfToken = formData.get('csrfToken')
@@ -100,48 +102,25 @@ export async function changePassword(formData: FormData) {
 		return { error: 'Nie jesteś zalogowany' }
 	}
 
-	const { error: signInError } = await supabase.auth.signInWithPassword({
-		email: user.email,
-		password: currentPassword,
-	})
-
-	if (signInError) {
-		return { error: 'Aktualne hasło jest nieprawidłowe' }
-	}
-
-	const { data: factors } = await supabase.auth.mfa.listFactors()
-
-	if (factors?.totp && factors.totp.length > 0) {
-		const factor = factors.totp[0]
-
+	const requestHeaders = await headers()
+	if (user.two_factor_enabled) {
 		if (!code2FA) {
 			return { error: 'Wprowadź kod 2FA' }
 		}
 
-		const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
-			factorId: factor.id,
-		})
-
-		if (challengeError) {
-			return { error: 'Błąd weryfikacji 2FA' }
-		}
-
-		const { error: verifyError } = await supabase.auth.mfa.verify({
-			factorId: factor.id,
-			challengeId: challenge.id,
-			code: code2FA,
-		})
-
-		if (verifyError) {
+		try {
+			await betterAuth.api.verifyTOTP({ headers: requestHeaders, body: { code: code2FA, trustDevice: false } })
+		} catch {
 			return { error: 'Nieprawidłowy kod 2FA' }
 		}
 	}
 
-	const { error } = await supabase.auth.updateUser({
-		password: newPassword,
-	})
-
-	if (error) {
+	try {
+		await betterAuth.api.changePassword({
+			headers: requestHeaders,
+			body: { currentPassword, newPassword, revokeOtherSessions: true },
+		})
+	} catch {
 		return { error: 'Nie udało się zmienić hasła' }
 	}
 

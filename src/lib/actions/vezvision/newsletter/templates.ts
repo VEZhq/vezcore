@@ -3,7 +3,7 @@ import { ONE_MINUTE } from '@/lib/constants/time'
 
 import { revalidatePath } from 'next/cache'
 import { requireVezVisionPermission } from '@/lib/auth/vezvision'
-import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import { guardVezVisionMutation } from '@/lib/actions/vezvision/security'
 import { logError } from '@/lib/logger'
@@ -27,7 +27,7 @@ export async function getNewsletterTemplates(): Promise<ActionResult<NewsletterT
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.NEWSLETTER_VIEW)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv
     .from('vv_newsletter_templates')
     .select('id, name, name_en, content_html, content_html_en, thumbnail_url, is_active, order_index, created_at, updated_at')
@@ -58,7 +58,7 @@ export async function createNewsletterTemplate(
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.NEWSLETTER_MANAGE)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const insertData: TablesInsert<'vv_newsletter_templates'> = {
     name: input.name,
     name_en: input.name_en ?? null,
@@ -101,7 +101,7 @@ export async function updateNewsletterTemplate(
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.NEWSLETTER_MANAGE)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const updateData: TablesUpdate<'vv_newsletter_templates'> = {}
 
   if (input.name !== undefined) updateData.name = input.name
@@ -133,7 +133,7 @@ export async function deleteNewsletterTemplate(id: string, csrfToken: string): P
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.NEWSLETTER_MANAGE)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { error } = await vv.from('vv_newsletter_templates').delete().eq('id', id)
 
   if (error) {

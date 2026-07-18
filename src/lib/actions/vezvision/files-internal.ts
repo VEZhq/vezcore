@@ -7,12 +7,14 @@ import {
   STORAGE_QUOTA_USER,
   STORAGE_QUOTA_DEFAULT,
 } from '@/lib/constants/file-limits'
-import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { createActionClient } from '@/lib/supabase/server'
+import { getAdminClient } from '@/lib/supabase/admin'
 import { getVezVisionPermissionState, hasVezVisionPermission } from '@/lib/auth/vezvision-permissions'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import type { VezVisionPermissionKey } from '@/lib/vezvision-permissions'
 import { getClientIP, validateUUID } from '@/lib/server-utils'
+import { isAdminRole } from '@/lib/roles'
 import type {
   VVFile,
   VVFileAssignableUser,
@@ -70,12 +72,8 @@ export interface CleanupRetentionResult {
   failedCount: number
 }
 
-export function isAdminRole(role: string | null): boolean {
-  return role === 'admin' || role === 'super_admin'
-}
-
 export async function getFolderChain(folderId: string): Promise<VVFolder[] | null> {
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv.rpc('get_folder_chain', { start_folder_id: folderId })
 
   if (error) {
@@ -96,7 +94,7 @@ export async function canViewFolder(
   if (targetFolderId === ROOT_FOLDER_ID) return true
   if (isAdminRole(role)) return true
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: direct, error: directError } = await vv
     .from('vv_file_permissions')
     .select('id')
@@ -155,7 +153,7 @@ export async function canViewFoldersBatch(
 
   if (nonRootIds.length === 0) return result
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
 
   const { data: allFolders, error: foldersError } = await vv.from('vv_folders').select('id, parent_id')
   if (foldersError || !allFolders) {
@@ -243,7 +241,7 @@ export async function canManageFolder(
   if (isAdminRole(role)) return true
   if (!permissions.has(VEZVISION_PERMISSIONS.FILES_MANAGE)) return false
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const chain = await getFolderChain(targetFolderId)
   if (!chain) return false
 
@@ -277,7 +275,7 @@ export async function canUploadToFolder(
   if (isAdminRole(role)) return true
   if (!permissions.has(VEZVISION_PERMISSIONS.FILES_MANAGE)) return false
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const chain = await getFolderChain(targetFolderId)
   if (!chain) return false
 
@@ -313,8 +311,8 @@ export function parseRetentionDays(rawValue: string | undefined): number {
 }
 
 export async function getUserRole(userId: string): Promise<string | null> {
-  const vv = getVezVisionPrivilegedClient()
-  const { data, error } = await vv.from('profiles').select('role').eq('id', userId).single()
+  const core = await createActionClient()
+  const { data, error } = await core.from('profiles').select('role').eq('id', userId).single()
   if (error) {
     logError('files-internal.getUserRole', error)
     return null
@@ -350,7 +348,7 @@ export async function requireAnyVezVisionActionPermission(
 }
 
 export async function getActiveStorageUsedBytes(): Promise<number> {
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv.rpc('get_active_storage_used_bytes')
   if (error) {
     logError('files-internal.getActiveStorageUsedBytes', error)
@@ -391,7 +389,7 @@ export async function getCurrentActorEmail(): Promise<string | null> {
 }
 
 export async function getFolderSummary(folderId: string): Promise<{ id: string; name: string; full_path: string } | null> {
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv.from('vv_folders').select('id, name, full_path').eq('id', folderId).single()
   if (error || !data) {
     logError('files-internal.getFolderSummary', error)
@@ -405,7 +403,7 @@ export async function getFilesForManagedMutation(
   context: { userId: string; role: string | null; permissions: Set<string> },
   actionLabel: string
 ): Promise<{ ok: true; files: Array<{ id: string; folder_id: string | null; storage_path: string; deleted_at: string | null }> } | { ok: false; error: string }> {
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv
     .from('vv_files')
     .select('id, folder_id, storage_path, deleted_at')
@@ -432,7 +430,7 @@ export async function getFilesForManagedMutation(
 }
 
 export async function getResolvedFolderAclEntries(folderId: string): Promise<VVFolderAclEntry[]> {
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const actionClient = await createActionClient()
   const chain = await getFolderChain(folderId)
   if (!chain) return []
@@ -469,11 +467,10 @@ export async function getResolvedFolderAclEntries(folderId: string): Promise<VVF
   const { data: profilesRaw } = await actionClient.from('profiles').select('id').in('id', userIds)
   const profileRows = (profilesRaw ?? []) as Array<{ id: string }>
   const profileIdSet = new Set(profileRows.map((row) => row.id))
-  const { data: userEmails, error: emailsError } = await vv.rpc('get_user_emails_by_ids', { user_ids: userIds })
-  if (emailsError) {
-    logError('files-internal.getResolvedFolderAclEntries.get_user_emails_by_ids', emailsError)
-  }
-  const emailMap = new Map((userEmails ?? []).map((row: { id: string; email: string | null }) => [row.id, row.email]))
+  const adminClient = getAdminClient()
+  const { data: authUsers, error: usersError } = await adminClient.auth.admin.listUsers()
+  if (usersError) logError('files-internal.getResolvedFolderAclEntries.listUsers', usersError)
+  const emailMap = new Map((authUsers?.users ?? []).map((row) => [row.id, row.email ?? null]))
 
   const resolvedMap = new Map<string, VVFolderAclEntry>()
   for (const row of aclRows) {
@@ -540,7 +537,7 @@ export function sanitizeFileName(value: string): string {
 }
 
 export async function privateStorageObjectExists(path: string): Promise<boolean> {
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const parts = path.split('/')
   const name = parts.at(-1)
   const folderPath = parts.slice(0, -1).join('/')
@@ -566,7 +563,7 @@ export async function writeFileEvent(args: {
   eventType: VVFileEventType
   payload: Json
 }): Promise<void> {
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   await vv.from('vv_file_events').insert({
     file_id: args.fileId ?? null,
     folder_id: args.folderId ?? null,
@@ -577,7 +574,7 @@ export async function writeFileEvent(args: {
 }
 
 export async function updateFolderPathWithDescendants(folderId: string, newFullPath: string): Promise<void> {
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: folder, error: folderError } = await vv
     .from('vv_folders')
     .select('full_path')
@@ -619,7 +616,7 @@ export async function updateFolderPathWithDescendants(folderId: string, newFullP
 }
 
 export async function permanentlyDeleteFileById(fileId: string, actorUserId: string | null): Promise<boolean> {
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: file, error: fileError } = await vv
     .from('vv_files')
     .select('id, folder_id, storage_bucket, storage_path, deleted_at')

@@ -1,6 +1,8 @@
 ## VEZcore
 
-Internal VEZ application built with Next.js, React, TypeScript, and Supabase.
+Internal VEZ application built with Next.js, React and TypeScript. In the Lab it
+uses the primary PostgreSQL instance on Proxmox, a separate VEZvision PostgreSQL
+database through private PostgREST services, Better Auth and S3-compatible MinIO.
 
 ## Local development
 
@@ -13,7 +15,11 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Create a local `.env.local` with the Supabase values required by the application. Do not commit credentials or service-role keys.
+Copy the variable names from `.env.example` and fill them from the Lab secret
+store. Never commit database URLs, Better Auth secrets or S3 credentials.
+
+The `develop` deployment is available at
+`https://vezcoretest.vezlabs.dev`. Runtime secrets are managed in Coolify.
 
 ## Quality checks
 

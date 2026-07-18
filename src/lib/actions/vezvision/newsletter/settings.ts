@@ -41,7 +41,7 @@ export async function getNewsletterSettings(): Promise<ActionResult<NewsletterSe
 
   const defaults: NewsletterSettings = {
     brand_name: 'VezVision',
-    logo_url: 'https://pcxcqbpygyidkusetghk.supabase.co/storage/v1/object/public/vezvision-assets/logo-navbar.svg',
+    logo_url: `${process.env.VEZVISION_PUBLIC_URL ?? 'https://vezvision.vezlabs.dev'}/logo-navbar.svg`,
     primary_color: '#04070d',
     background_color: '#f3f4f6',
     surface_color: '#ffffff',

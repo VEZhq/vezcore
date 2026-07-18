@@ -2,7 +2,7 @@
 import { ONE_MINUTE } from '@/lib/constants/time'
 
 import { revalidatePath } from 'next/cache'
-import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { requireVezVisionPermission } from '@/lib/auth/vezvision'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
@@ -85,7 +85,7 @@ export async function upsertFolderAcl(input: {
   const canManageAclTarget = await canManageFolder(context.userId, context.role, context.permissions, input.folderId)
   if (!canManageAclTarget) return { success: false, error: 'Brak uprawnień do zarządzania ACL tego folderu' }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const canView = input.canView || input.canUpload || input.canManage
   const canUpload = input.canUpload || input.canManage
   const actorEmail = await getCurrentActorEmail()
@@ -223,7 +223,7 @@ export async function removeFolderAcl(folderId: string, userId: string, csrfToke
   const canManageAclTarget = await canManageFolder(context.userId, context.role, context.permissions, folderId)
   if (!canManageAclTarget) return { success: false, error: 'Brak uprawnień do zarządzania ACL tego folderu' }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const actorEmail = await getCurrentActorEmail()
   const folderSummary = await getFolderSummary(folderId)
   if (!folderSummary) return { success: false, error: 'Folder nie istnieje' }

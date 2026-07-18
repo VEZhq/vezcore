@@ -5,7 +5,7 @@ import { ONE_MINUTE } from '@/lib/constants/time'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { requireVezVisionPermission } from '@/lib/auth/vezvision'
-import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import { guardVezVisionMutation } from '@/lib/actions/vezvision/security'
 import { logError } from '@/lib/logger'
@@ -43,7 +43,7 @@ export async function listCalendarEvents(
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.CALENDAR_VIEW)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   let query = vv
     .from('vv_calendar_events')
     .select('id, title, description, start_at, end_at, all_day, color, category, created_by, created_at, updated_at, deleted_at')
@@ -67,7 +67,7 @@ export async function getCalendarEvent(id: string): Promise<ActionResult<VVCalen
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.CALENDAR_VIEW)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv
     .from('vv_calendar_events')
     .select('id, title, description, start_at, end_at, all_day, color, category, created_by, created_at, updated_at, deleted_at')
@@ -100,7 +100,7 @@ export async function createCalendarEvent(
     return { success: false, error: parseResult.error.issues[0].message }
   }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv
     .from('vv_calendar_events')
     .insert({
@@ -152,7 +152,7 @@ export async function updateCalendarEvent(
     return { success: false, error: parseResult.error.issues[0].message }
   }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: existing } = await vv.from('vv_calendar_events').select('created_by').eq('id', id).is('deleted_at', null).single()
   if (existing && existing.created_by !== auth.userId) {
     return { success: false, error: 'Brak uprawnień do edycji tego wydarzenia' }
@@ -185,7 +185,7 @@ export async function deleteCalendarEvent(
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.CALENDAR_MANAGE)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: existing } = await vv.from('vv_calendar_events').select('created_by').eq('id', id).is('deleted_at', null).single()
   if (existing && existing.created_by !== auth.userId) {
     return { success: false, error: 'Brak uprawnień do usunięcia tego wydarzenia' }

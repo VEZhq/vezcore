@@ -1,0 +1,14 @@
+.git
+.github
+.next
+.omo
+node_modules
+npm-debug.log*
+playwright-report
+test-results
+tests
+docs
+*.md
+.env
+.env.*
+!.env.example

@@ -7,7 +7,7 @@ import { requireVezVisionPermission } from '@/lib/auth/vezvision'
 import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import { guardVezVisionMutation } from '@/lib/actions/vezvision/security'
-import { sanitizeSearchTerm } from '@/lib/vezvision-security-utils'
+import { sanitizeSearchTerm, sanitizeSlug } from '@/lib/vezvision-security-utils'
 import { logError } from '@/lib/logger'
 import type { TablesInsert, TablesUpdate } from '@/types/vezvision-db'
 import type {
@@ -31,16 +31,6 @@ function validateFaqInput(input: { question_pl?: string; question_en?: string | 
   if (input.answer_pl && input.answer_pl.length > FAQ_LIMITS.answer) return `Odpowiedź PL przekracza ${FAQ_LIMITS.answer / 1024}KB`
   if (input.answer_en && input.answer_en.length > FAQ_LIMITS.answer) return `Odpowiedź EN przekracza ${FAQ_LIMITS.answer / 1024}KB`
   return null
-}
-
-function sanitizeSlug(slug: string): string {
-  return slug
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
 }
 
 async function getOrderedFaqItemIds(vv: VezVisionClient): Promise<ActionResult<string[]>> {

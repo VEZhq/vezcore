@@ -7,7 +7,7 @@ import { requireVezVisionPermission } from '@/lib/auth/vezvision'
 import { revalidatePath } from 'next/cache'
 import type { TablesInsert, TablesUpdate } from '@/types/vezvision-db'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
-import { sanitizeSearchTerm } from '@/lib/vezvision-security-utils'
+import { sanitizeSearchTerm, sanitizeSlug } from '@/lib/vezvision-security-utils'
 import { guardVezVisionMutation } from '@/lib/actions/vezvision/security'
 import { logError } from '@/lib/logger'
 import type {
@@ -19,16 +19,6 @@ import type {
 } from './types'
 
 type VezVisionClient = ReturnType<typeof getVezVisionPrivilegedClient>
-
-function sanitizeSlug(slug: string): string {
-  return slug
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-}
 
 function isValidUrl(url: string | null | undefined): boolean {
   if (!url) return true

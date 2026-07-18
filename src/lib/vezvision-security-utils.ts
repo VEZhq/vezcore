@@ -77,3 +77,18 @@ export function sanitizeSearchTerm(input: string): string {
 		.replace(/\s+/g, ' ')
 		.slice(0, 80)
 }
+
+export function sanitizeSlug(slug: string): string {
+	return slug
+		.toLowerCase()
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.replace(/[^a-z0-9-]/g, '-')
+		.replace(/-+/g, '-')
+		.replace(/^-|-$/g, '')
+}
+
+export function calcReadingTime(content: string): number {
+	const plain = content.replace(/<[^>]+>/g, ' ')
+	return Math.max(1, Math.round(plain.trim().split(/\s+/).length / 200))
+}

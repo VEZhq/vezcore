@@ -25,6 +25,8 @@ export function TwoFactorForm({ isEnabled, factorId }: TwoFactorFormProps) {
   const [success, setSuccess] = useState(false)
   const [showDisableConfirm, setShowDisableConfirm] = useState(false)
   const [disableCode, setDisableCode] = useState('')
+  const [password, setPassword] = useState('')
+  const [disablePassword, setDisablePassword] = useState('')
   const [disableError, setDisableError] = useState<string | null>(null)
 
 	async function handleEnroll() {
@@ -37,7 +39,7 @@ export function TwoFactorForm({ isEnabled, factorId }: TwoFactorFormProps) {
     setIsLoading(true)
     setError(null)
 
-    const result = await enroll2FA(csrfToken)
+    const result = await enroll2FA(csrfToken, password)
 
     if (result.error) {
       setError(result.error)
@@ -114,6 +116,20 @@ export function TwoFactorForm({ isEnabled, factorId }: TwoFactorFormProps) {
             />
           </div>
 
+          <div>
+            <label htmlFor="disable-2fa-password" className="text-[10px] uppercase tracking-wider text-[#666666] light:text-[#999999] block mb-1">
+              Aktualne hasło
+            </label>
+            <input
+              id="disable-2fa-password"
+              type="password"
+              value={disablePassword}
+              onChange={(e) => setDisablePassword(e.target.value)}
+              autoComplete="current-password"
+              className="w-full h-10 px-3 bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] rounded-md text-sm text-white light:text-black focus:outline-none focus:border-red-500/50 transition-colors"
+            />
+          </div>
+
           {disableError && (
             <p className="text-xs text-red-500">{disableError}</p>
           )}
@@ -129,7 +145,7 @@ export function TwoFactorForm({ isEnabled, factorId }: TwoFactorFormProps) {
                 }
                 setIsLoading(true)
                 setDisableError(null)
-                const result = await unenroll2FA(factorId, disableCode, csrfToken)
+                const result = await unenroll2FA(factorId, disableCode, disablePassword, csrfToken)
                 if (result.error) {
                   setDisableError(result.error)
                   setIsLoading(false)
@@ -140,7 +156,7 @@ export function TwoFactorForm({ isEnabled, factorId }: TwoFactorFormProps) {
                   router.refresh()
                 }
               }}
-              disabled={isLoading || disableCode.length !== 6}
+              disabled={isLoading || disableCode.length !== 6 || !disablePassword}
               className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-red-400 bg-red-500/20 border border-red-500/30 rounded-md hover:bg-red-500/30 transition-colors disabled:opacity-50"
             >
               <X className="h-3 w-3" />
@@ -150,6 +166,7 @@ export function TwoFactorForm({ isEnabled, factorId }: TwoFactorFormProps) {
               onClick={() => {
                 setShowDisableConfirm(false)
                 setDisableCode('')
+                setDisablePassword('')
                 setDisableError(null)
               }}
               className="px-3 py-2 text-[10px] uppercase tracking-wider text-[#666666] bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] rounded-md hover:bg-white/[0.06] light:hover:bg-black/[0.06] transition-colors"
@@ -262,10 +279,24 @@ export function TwoFactorForm({ isEnabled, factorId }: TwoFactorFormProps) {
           <p className="text-xs text-red-500">{error}</p>
         )}
 
+        <div>
+          <label htmlFor="enable-2fa-password" className="text-[10px] uppercase tracking-wider text-[#666666] light:text-[#999999] block mb-1">
+            Aktualne hasło
+          </label>
+          <input
+            id="enable-2fa-password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            className="w-full h-10 px-3 bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] rounded-md text-sm text-white light:text-black focus:outline-none focus:border-emerald-500/50 transition-colors"
+          />
+        </div>
+
         <div className="flex items-center gap-2">
           <button
             onClick={handleEnroll}
-            disabled={isLoading}
+            disabled={isLoading || !password}
             className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-white bg-emerald-500/20 border border-emerald-500/30 rounded-md hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
           >
             <Shield className="h-3 w-3" />

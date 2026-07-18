@@ -28,18 +28,7 @@ const securityHeaders = [
   },
 ]
 
-function buildSupabaseWsUrl(supabaseUrl: string): string {
-  try {
-    return `wss://${new URL(supabaseUrl).host}`
-  } catch {
-    return 'wss://glgldtfuvahmrlkywdoy.supabase.co'
-  }
-}
-
 function buildCspHeader(): { key: string; value: string } {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://glgldtfuvahmrlkywdoy.supabase.co'
-  const supabaseWsUrl = buildSupabaseWsUrl(supabaseUrl)
-
   const directives = [
     "default-src 'self'",
     // 'unsafe-inline' required for Next.js RSC hydration scripts
@@ -53,10 +42,7 @@ function buildCspHeader(): { key: string; value: string } {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
-    // wss:// must be listed explicitly — CSP treats https:// and wss:// as
-    // distinct sources, so a connect-src containing only the https:// Supabase
-    // URL blocks Supabase Realtime websockets ("The operation is insecure").
-    `connect-src 'self' ${supabaseUrl} ${supabaseWsUrl} https://api.ipify.org`,
+    "connect-src 'self' https://api.ipify.org",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -83,6 +69,7 @@ const productionOnlyHeaders = forceHttps
   : []
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   experimental: {
     serverActions: {
       bodySizeLimit: '4mb',
@@ -93,12 +80,15 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'pcxcqbpygyidkusetghk.supabase.co',
+        hostname: 's3-dev.vezlabs.dev',
       },
       {
         protocol: 'https',
-        hostname: 'glgldtfuvahmrlkywdoy.supabase.co',
-        pathname: '/storage/v1/object/public/avatars/**',
+        hostname: 's3-core.vezlabs.dev',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.vezvision.com',
       },
     ],
   },

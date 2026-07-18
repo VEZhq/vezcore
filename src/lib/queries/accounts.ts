@@ -139,15 +139,8 @@ export async function getAccountDetailData(id: string): Promise<{
 
   if (!targetProfile) return null
 
-  const [{ data: authUserData }, { data: mfaFactors }, { data: recentActivity }] = await Promise.all([
+  const [{ data: authUserData }, { data: recentActivity }] = await Promise.all([
     adminClient.auth.admin.getUserById(id),
-    adminClient
-      .from('mfa_factors')
-      .select('id')
-      .eq('user_id', id)
-      .eq('factor_type', 'totp')
-      .eq('status', 'verified')
-      .limit(1),
     supabase
       .from('audit_log')
       .select('action, details, created_at')
@@ -166,7 +159,7 @@ export async function getAccountDetailData(id: string): Promise<{
       created_at: profile.created_at,
     },
     recentActivity: (recentActivity ?? []) as ActivityRow[],
-    has2FA: (mfaFactors?.length ?? 0) > 0,
+    has2FA: authUserData?.user?.two_factor_enabled ?? false,
   }
 }
 

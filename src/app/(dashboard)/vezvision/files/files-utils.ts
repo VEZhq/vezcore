@@ -77,8 +77,14 @@ export function buildFolderTree(allFolders: VVFolder[]): FolderTreeNode[] {
   return build(ROOT_FOLDER_ID)
 }
 
+const SAFE_TEXT_MIME_TYPES = new Set(['text/plain', 'text/csv', 'text/markdown'])
+
 export function canPreviewFile(file: VVFile): boolean {
-  return file.mime_type.startsWith('image/') || file.mime_type === 'application/pdf' || file.mime_type.startsWith('text/')
+  if (file.mime_type.startsWith('image/')) return true
+  if (file.mime_type === 'application/pdf') return true
+  // Restrict previewable text types — `text/html` would render script in the
+  // browser context of the dashboard. Whitelist only inert text formats.
+  return SAFE_TEXT_MIME_TYPES.has(file.mime_type)
 }
 
 export function getFileIcon(file: VVFile) {

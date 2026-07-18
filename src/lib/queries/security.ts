@@ -32,20 +32,16 @@ export async function getSecurityPageData(): Promise<{
   const yesterdayDate = new Date()
   yesterdayDate.setHours(yesterdayDate.getHours() - 24)
   const yesterday = yesterdayDate.toISOString()
+  const { data: authUsers } = await adminClient.auth.admin.listUsers()
+  const usersWith2FA = authUsers.users.filter((user) => user.two_factor_enabled).length
 
   const [
     { count: totalUsers },
-    { count: usersWith2FA },
     { count: failedLogins24h },
     { data: recentAlerts },
     ipLists,
   ] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }).is('deleted_at', null),
-    adminClient
-      .from('mfa_factors')
-      .select('user_id', { count: 'exact', head: true })
-      .eq('factor_type', 'totp')
-      .eq('status', 'verified'),
     supabase
       .from('audit_log')
       .select('*', { count: 'exact', head: true })
@@ -65,7 +61,7 @@ export async function getSecurityPageData(): Promise<{
   return {
     ipLists,
     stats: {
-      usersWith2FA: usersWith2FA ?? 0,
+      usersWith2FA,
       totalUsers: totalUsers ?? 0,
       failedLogins24h: failedLogins24h ?? 0,
       blockedIPs: ipLists.blacklist.length,
