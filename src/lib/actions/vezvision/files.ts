@@ -4,7 +4,7 @@ import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT, MIN_PAGE_LIMIT, MAX_TITLE_LENGTH, M
 import { revalidatePath } from 'next/cache'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
-import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { requireVezVisionPermission } from '@/lib/auth/vezvision'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import { guardVezVisionMutation } from '@/lib/actions/vezvision/security'
@@ -56,7 +56,7 @@ export async function listFiles(options: ListFilesOptions = {}): Promise<ActionR
     if (!allowedFolder) return { success: true, data: [] }
   }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   let dbQuery = vv
     .from('vv_files')
     .select('id, folder_id, original_name, storage_bucket, storage_path, mime_type, size_bytes, checksum_sha256, owner_user_id, is_public, owner_type, owner_id, metadata, created_at, updated_at, deleted_at')
@@ -122,7 +122,7 @@ export async function moveFile(fileId: string, targetFolderId: string | null, cs
   const context = await getFilesPermissionContext()
   if ('error' in context) return { success: false, error: context.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: currentFile, error: currentFileError } = await vv
     .from('vv_files')
     .select('id, folder_id')
@@ -197,7 +197,7 @@ export async function registerFile(input: VVFileInput, csrfToken: string): Promi
   }
 
   if (input.folder_id) {
-    const vv = getVezVisionPrivilegedClient()
+    const vv = getCoreModulesPrivilegedClient()
     const { data: folder } = await vv.from('vv_folders').select('id').eq('id', input.folder_id).single()
     if (!folder) {
       return { success: false, error: 'Folder nie istnieje' }
@@ -227,7 +227,7 @@ export async function registerFile(input: VVFileInput, csrfToken: string): Promi
     }
   }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv
     .from('vv_files')
     .insert({
@@ -303,7 +303,7 @@ export async function uploadPrivateFile(input: {
 
   const safeName = sanitizeFileName(input.original_name)
   const storagePath = `root/uploads/${auth.userId}/${Date.now()}-${randomUUID()}-${safeName}`
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { error: uploadError } = await vv.storage
     .from('vv-files-private')
     .upload(storagePath, new Blob([input.file], { type: normalizedMimeType }), {
@@ -344,7 +344,7 @@ export async function softDeleteFile(fileId: string, csrfToken: string): Promise
   const context = await getFilesPermissionContext()
   if ('error' in context) return { success: false, error: context.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: currentFile, error: currentFileError } = await vv
     .from('vv_files')
     .select('folder_id, deleted_at')
@@ -393,7 +393,7 @@ export async function restoreFile(fileId: string, csrfToken: string): Promise<Ac
   const context = await getFilesPermissionContext()
   if ('error' in context) return { success: false, error: context.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: currentFile, error: currentFileError } = await vv
     .from('vv_files')
     .select('folder_id, deleted_at')
@@ -448,7 +448,7 @@ export async function bulkRestoreFiles(fileIds: string[], csrfToken: string): Pr
   const manageableFiles = await getFilesForManagedMutation(uniqueIds, context, 'bulkRestoreFiles')
   if (!manageableFiles.ok) return { success: false, error: manageableFiles.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv
     .from('vv_files')
     .update({ deleted_at: null })
@@ -494,7 +494,7 @@ export async function bulkSoftDeleteFiles(fileIds: string[], csrfToken: string):
   const manageableFiles = await getFilesForManagedMutation(uniqueIds, context, 'bulkSoftDeleteFiles')
   if (!manageableFiles.ok) return { success: false, error: manageableFiles.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv
     .from('vv_files')
     .update({ deleted_at: new Date().toISOString() })
@@ -534,7 +534,7 @@ export async function permanentlyDeleteFile(fileId: string, csrfToken: string): 
   const context = await getFilesPermissionContext()
   if ('error' in context) return { success: false, error: context.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: currentFile, error: currentFileError } = await vv
     .from('vv_files')
     .select('folder_id, deleted_at')
@@ -601,7 +601,7 @@ export async function getFileDownloadUrl(fileId: string): Promise<ActionResult<s
   const context = await getFilesPermissionContext()
   if ('error' in context) return { success: false, error: context.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: file, error } = await vv
     .from('vv_files')
     .select('id, folder_id, storage_bucket, storage_path')

@@ -2,6 +2,7 @@
 
 import { requireVezVisionPermission } from '@/lib/auth/vezvision'
 import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import { logError } from '@/lib/logger'
 import type { ActionResult } from './types'
@@ -15,32 +16,27 @@ export interface VezVisionDashboardStats {
   files: { total: number; private: number; public: number }
 }
 
-interface VezVisionDashboardStatsRpcRow {
-  blog_total: number
-  blog_published: number
-  portfolio_total: number
-  portfolio_published: number
-  services_total: number
-  services_active: number
-  faq_total: number
-  faq_active: number
-  newsletter_total: number
-  newsletter_active: number
-  files_total: number
-  files_public: number
-}
-
 type VezVisionTable =
   | 'vv_blog_posts'
   | 'vv_projects'
   | 'vv_services'
   | 'vv_faq_items'
   | 'vv_newsletter_subscribers'
-  | 'vv_files'
 
 async function countRows(table: VezVisionTable, filters: Record<string, string | boolean> = {}): Promise<number> {
   const vv = getVezVisionPrivilegedClient()
   let query = vv.from(table).select('id', { count: 'exact', head: true })
+  for (const [column, value] of Object.entries(filters)) {
+    query = query.eq(column, value)
+  }
+  const { count, error } = await query
+  if (error) throw error
+  return count ?? 0
+}
+
+async function countInternalFiles(filters: Record<string, string | boolean> = {}): Promise<number> {
+  const core = getCoreModulesPrivilegedClient()
+  let query = core.from('vv_files').select('id', { count: 'exact', head: true })
   for (const [column, value] of Object.entries(filters)) {
     query = query.eq(column, value)
   }
@@ -54,24 +50,6 @@ export async function getVezVisionDashboardStats(): Promise<ActionResult<VezVisi
   if ('error' in auth) return { success: false, error: auth.error }
 
   try {
-    const vv = getVezVisionPrivilegedClient()
-    const { data: rpcStats, error: rpcError } = await vv.rpc('vv_dashboard_stats').single()
-
-    if (!rpcError && rpcStats) {
-      const stats = rpcStats as VezVisionDashboardStatsRpcRow
-      return {
-        success: true,
-        data: {
-          blog: { total: stats.blog_total, published: stats.blog_published, draft: stats.blog_total - stats.blog_published },
-          portfolio: { total: stats.portfolio_total, published: stats.portfolio_published, draft: stats.portfolio_total - stats.portfolio_published },
-          services: { total: stats.services_total, active: stats.services_active, inactive: stats.services_total - stats.services_active },
-          faq: { total: stats.faq_total, active: stats.faq_active, inactive: stats.faq_total - stats.faq_active },
-          newsletter: { total: stats.newsletter_total, active: stats.newsletter_active, inactive: stats.newsletter_total - stats.newsletter_active },
-          files: { total: stats.files_total, private: stats.files_total - stats.files_public, public: stats.files_public },
-        },
-      }
-    }
-
     const [
       blogTotal,
       blogPublished,
@@ -96,8 +74,8 @@ export async function getVezVisionDashboardStats(): Promise<ActionResult<VezVisi
       countRows('vv_faq_items', { is_active: true }),
       countRows('vv_newsletter_subscribers'),
       countRows('vv_newsletter_subscribers', { is_active: true }),
-      countRows('vv_files'),
-      countRows('vv_files', { is_public: true }),
+      countInternalFiles(),
+      countInternalFiles({ is_public: true }),
     ])
 
     return {

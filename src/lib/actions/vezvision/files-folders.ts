@@ -2,7 +2,7 @@
 import { ONE_MINUTE } from '@/lib/constants/time'
 
 import { revalidatePath } from 'next/cache'
-import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { requireVezVisionPermission } from '@/lib/auth/vezvision'
 import { guardVezVisionMutation } from '@/lib/actions/vezvision/security'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
@@ -30,7 +30,7 @@ export async function listFolders(parentId?: string | null): Promise<ActionResul
     if (!canViewParent) return { success: true, data: [] }
   }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const query = vv
     .from('vv_folders')
     .select('id, parent_id, name, slug, full_path, owner_user_id, is_system, created_at, updated_at')
@@ -58,7 +58,7 @@ export async function listAllFolders(): Promise<ActionResult<VVFolder[]>> {
   const context = await getFilesPermissionContext()
   if ('error' in context) return { success: false, error: context.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv.from('vv_folders').select('id, parent_id, name, slug, full_path, owner_user_id, is_system, created_at, updated_at').order('full_path', { ascending: true })
 
   if (error) {
@@ -83,7 +83,7 @@ export async function getFolderById(folderId: string): Promise<ActionResult<VVFo
   const canView = await canViewFolder(context.userId, context.role, context.permissions, folderId)
   if (!canView) return { success: false, error: 'Brak uprawnień do tego folderu' }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv.from('vv_folders').select('id, parent_id, name, slug, full_path, owner_user_id, is_system, created_at, updated_at').eq('id', folderId).single()
   if (error || !data) {
     logError('files-folders getFolderById', error)
@@ -126,7 +126,7 @@ export async function createFolder(input: VVFolderInput, csrfToken: string): Pro
   const slug = sanitizeSegment(name)
   if (!slug) return { success: false, error: 'Nieprawidłowa nazwa folderu' }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
 
   let parentPath = '/root'
   if (normalizedParentId !== ROOT_FOLDER_ID) {
@@ -198,7 +198,7 @@ export async function moveFolder(
     return { success: false, error: 'Brak uprawnień do przenoszenia folderu w tej lokalizacji' }
   }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: folder, error: folderError } = await vv
     .from('vv_folders')
     .select('id, parent_id, slug, full_path, is_system')
@@ -303,7 +303,7 @@ export async function deleteFolder(folderId: string, csrfToken: string): Promise
   const canManage = await canManageFolder(context.userId, context.role, context.permissions, folderId)
   if (!canManage) return { success: false, error: 'Brak uprawnień do usunięcia folderu' }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: folder, error: folderError } = await vv
     .from('vv_folders')
     .select('id, name, full_path, is_system')

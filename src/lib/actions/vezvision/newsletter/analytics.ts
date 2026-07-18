@@ -3,6 +3,7 @@ import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT, MIN_PAGE_LIMIT, MAX_TITLE_LENGTH, M
 
 import { requireVezVisionPermission } from '@/lib/auth/vezvision'
 import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import { logError } from '@/lib/logger'
 import type { ActionResult } from '../types'
@@ -32,9 +33,10 @@ export async function getNewsletterAnalytics(): Promise<ActionResult<NewsletterA
   if ('error' in auth) return { success: false, error: auth.error }
 
   const vv = getVezVisionPrivilegedClient()
+  const core = getCoreModulesPrivilegedClient()
 
   const [campaignsResult, totalSubResult, activeSubResult, logsResult] = await Promise.all([
-    vv
+    core
       .from('vv_newsletter_campaigns')
       .select('id,subject,status,recipient_count,sent_count,sent_at,created_at')
       .eq('status', 'sent')
@@ -42,7 +44,7 @@ export async function getNewsletterAnalytics(): Promise<ActionResult<NewsletterA
       .limit(DEFAULT_PAGE_LIMIT),
     vv.from('vv_newsletter_subscribers').select('*', { count: 'exact', head: true }),
     vv.from('vv_newsletter_subscribers').select('*', { count: 'exact', head: true }).eq('is_active', true),
-    vv
+    core
       .from('vv_newsletter_campaigns')
       .select('sent_count,recipient_count')
       .eq('status', 'sent'),

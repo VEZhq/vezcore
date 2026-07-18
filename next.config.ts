@@ -86,6 +86,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 's3-core.vezlabs.dev',
       },
+      {
+        protocol: 'https',
+        hostname: 'assets.vezvision.com',
+      },
     ],
   },
   allowedDevOrigins: [

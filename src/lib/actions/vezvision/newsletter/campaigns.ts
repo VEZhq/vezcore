@@ -4,6 +4,7 @@ import { ONE_MINUTE } from '@/lib/constants/time'
 
 import { revalidatePath } from 'next/cache'
 import { requireVezVisionPermission } from '@/lib/auth/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import { guardVezVisionMutation } from '@/lib/actions/vezvision/security'
@@ -52,7 +53,7 @@ export async function getNewsletterCampaigns(): Promise<ActionResult<VVNewslette
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.NEWSLETTER_VIEW)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv
     .from('vv_newsletter_campaigns')
     .select('id, subject, subject_en, content_html, content_html_en, template_config, status, recipient_count, sent_count, scheduled_for, segment_tags, segment_language, sent_at, created_by, created_at, updated_at')
@@ -70,7 +71,7 @@ export async function getNewsletterCampaign(id: string): Promise<ActionResult<VV
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.NEWSLETTER_VIEW)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data, error } = await vv
     .from('vv_newsletter_campaigns')
     .select('id, subject, subject_en, content_html, content_html_en, template_config, status, recipient_count, sent_count, scheduled_for, segment_tags, segment_language, sent_at, created_by, created_at, updated_at')
@@ -131,7 +132,7 @@ export async function createNewsletterCampaign(
     return { success: false, error: 'Treść EN jest za krótka' }
   }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const insertData: NewsletterCampaignInsert = {
     subject,
     content_html: injectUnsubscribeFooter(sanitizeVezVisionHtml(content)),
@@ -169,7 +170,7 @@ export async function duplicateNewsletterCampaign(id: string, csrfToken: string)
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.NEWSLETTER_MANAGE)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: original, error: fetchError } = await vv
     .from('vv_newsletter_campaigns')
     .select('id, subject, subject_en, content_html, content_html_en, template_config, status, recipient_count, sent_count, scheduled_for, segment_tags, segment_language, sent_at, created_by, created_at, updated_at')
@@ -266,7 +267,7 @@ export async function updateNewsletterCampaign(
   if (input.segment_tags !== undefined) updateData.segment_tags = input.segment_tags
   if (input.segment_language !== undefined) updateData.segment_language = input.segment_language
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: existing } = await vv.from('vv_newsletter_campaigns').select('created_by').eq('id', id).single()
   if (existing && existing.created_by && existing.created_by !== auth.userId) {
     return { success: false, error: 'Brak uprawnień do edycji tej kampanii' }
@@ -296,7 +297,7 @@ export async function deleteNewsletterCampaign(id: string, csrfToken: string): P
   const auth = await requireVezVisionPermission(VEZVISION_PERMISSIONS.NEWSLETTER_MANAGE)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: existing } = await vv.from('vv_newsletter_campaigns').select('created_by').eq('id', id).single()
   if (existing && existing.created_by && existing.created_by !== auth.userId) {
     return { success: false, error: 'Brak uprawnień do usunięcia tej kampanii' }
@@ -325,7 +326,8 @@ export async function sendNewsletterCampaign(
   const resendApiKey = process.env.RESEND_API_KEY
   if (!resendApiKey) return { success: false, error: 'Brak konfiguracji RESEND_API_KEY' }
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
+  const publicCms = getVezVisionPrivilegedClient()
   const { data: campaign, error: campaignError } = await vv
     .from('vv_newsletter_campaigns')
     .select('id,subject,subject_en,content_html,content_html_en,status,segment_language,segment_tags')
@@ -334,7 +336,7 @@ export async function sendNewsletterCampaign(
   if (campaignError || !campaign) return { success: false, error: 'Kampania nie istnieje' }
   if (!['draft', 'scheduled', 'failed'].includes(campaign.status)) return { success: false, error: 'Kampania nie może zostać wysłana w tym stanie' }
 
-  let subscribersQuery = vv
+  let subscribersQuery = publicCms
     .from('vv_newsletter_subscribers')
     .select('id,email,language,tags,token')
     .eq('is_active', true)
