@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createActionClient } from '@/lib/supabase/server'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { sanitizeSearchTerm } from '@/lib/vezvision-security-utils'
 import { getUserPermissions } from '@/lib/permissions'
 import type { SearchResult } from '@/lib/search/types'
@@ -279,7 +280,7 @@ export const GET = withCors(async (request: Request) => {
   }
 
   if (permissions.canViewVezVisionNewsletter) {
-    const vvClient = getVezVisionPrivilegedClient()
+    const vvClient = getCoreModulesPrivilegedClient()
     const { data: campaigns } = await vvClient
       .from('vv_newsletter_campaigns')
       .select('id, subject, status')

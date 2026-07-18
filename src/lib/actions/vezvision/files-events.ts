@@ -2,7 +2,7 @@
 import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT, MIN_PAGE_LIMIT, MAX_TITLE_LENGTH, MAX_SLUG_LENGTH, MAX_EXCERPT_LENGTH, MAX_CONTENT_LENGTH_KB, MAX_QUESTION_LENGTH, MAX_ANSWER_LENGTH_KB, MAX_CATEGORY_LENGTH, MAX_SUBJECT_LENGTH, MAX_EVENT_TITLE_LENGTH } from '@/lib/constants/pagination'
 
 import { revalidatePath } from 'next/cache'
-import { getVezVisionPrivilegedClient } from '@/lib/supabase/vezvision'
+import { getCoreModulesPrivilegedClient } from '@/lib/supabase/core-modules'
 import { VEZVISION_PERMISSIONS } from '@/lib/vezvision-permissions'
 import { logError } from '@/lib/logger'
 import type { ActionResult, VVFileEvent } from './types'
@@ -40,7 +40,7 @@ export async function cleanupRetentionDeletedFiles(
   const retentionDays = parseRetentionDays(process.env.VEZVISION_FILES_RETENTION_DAYS)
   const thresholdDate = new Date(Date.now() - retentionDays * ONE_DAY_MS).toISOString()
 
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   const { data: candidates, error } = await vv
     .from('vv_files')
     .select('id')
@@ -81,7 +81,7 @@ export async function listFileEvents(limit = DEFAULT_PAGE_LIMIT, folderId: strin
   if (!canView) return { success: true, data: [] }
 
   const safeLimit = Math.min(Math.max(limit, MIN_PAGE_LIMIT), MAX_PAGE_LIMIT)
-  const vv = getVezVisionPrivilegedClient()
+  const vv = getCoreModulesPrivilegedClient()
   let query = vv
     .from('vv_file_events')
     .select('id, file_id, folder_id, actor_user_id, event_type, ip, user_agent, payload, created_at')

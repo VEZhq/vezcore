@@ -110,7 +110,9 @@ create table if not exists public.vv_newsletter_templates (
 create table if not exists public.vv_newsletter_send_logs (
   id uuid primary key default gen_random_uuid(),
   campaign_id uuid not null references public.vv_newsletter_campaigns(id) on delete cascade,
-  subscriber_id uuid not null references public.vv_newsletter_subscribers(id) on delete cascade,
+  -- The subscriber remains in VEZvision. Store only its immutable remote id;
+  -- a cross-database foreign key is intentionally impossible.
+  subscriber_id uuid not null,
   subscriber_email text not null,
   status text not null,
   provider text not null default 'resend',
@@ -178,37 +180,11 @@ returns bigint language sql stable set search_path = pg_catalog, public as $$
   select coalesce(sum(size_bytes), 0)::bigint from public.vv_files where deleted_at is null;
 $$;
 
-create or replace function public.vv_dashboard_stats()
-returns table (
-  blog_total bigint, blog_published bigint,
-  portfolio_total bigint, portfolio_published bigint,
-  services_total bigint, services_active bigint,
-  faq_total bigint, faq_active bigint,
-  newsletter_total bigint, newsletter_active bigint,
-  files_total bigint, files_public bigint
-)
-language sql stable set search_path = pg_catalog, public as $$
-  select
-    (select count(*) from public.vv_blog_posts),
-    (select count(*) from public.vv_blog_posts where status = 'published'),
-    (select count(*) from public.vv_projects),
-    (select count(*) from public.vv_projects where status = 'published'),
-    (select count(*) from public.vv_services),
-    (select count(*) from public.vv_services where status = 'active'),
-    (select count(*) from public.vv_faq_items),
-    (select count(*) from public.vv_faq_items where is_active = true),
-    (select count(*) from public.vv_newsletter_subscribers),
-    (select count(*) from public.vv_newsletter_subscribers where is_active = true),
-    (select count(*) from public.vv_files where deleted_at is null),
-    (select count(*) from public.vv_files where deleted_at is null and is_public = true);
-$$;
-
 grant select, insert, update, delete on public.vv_calendar_events,
   public.vv_folders, public.vv_files, public.vv_file_permissions, public.vv_file_events,
   public.vv_newsletter_campaigns, public.vv_newsletter_templates, public.vv_newsletter_send_logs
-  to vezvision_lab_api;
-grant execute on function public.get_folder_chain(uuid) to vezvision_lab_api;
-grant execute on function public.get_active_storage_used_bytes() to vezvision_lab_api;
-grant execute on function public.vv_dashboard_stats() to vezvision_lab_api;
+  to vezcore_runtime;
+grant execute on function public.get_folder_chain(uuid) to vezcore_runtime;
+grant execute on function public.get_active_storage_used_bytes() to vezcore_runtime;
 
 commit;
