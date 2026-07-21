@@ -6,6 +6,11 @@ if [[ -z "${WEBHOOK_URL:-}" ]]; then
   exit 1
 fi
 
+if [[ -z "${COOLIFY_API_TOKEN:-}" ]]; then
+  echo "::error::The Coolify API token secret is missing."
+  exit 1
+fi
+
 if [[ "$WEBHOOK_URL" != https://* ]]; then
   echo "::error::The Coolify webhook must use HTTPS."
   exit 1
@@ -16,6 +21,7 @@ curl \
   --silent \
   --show-error \
   --request POST \
+  --header "Authorization: Bearer $COOLIFY_API_TOKEN" \
   --retry 2 \
   --retry-all-errors \
   --connect-timeout 10 \
