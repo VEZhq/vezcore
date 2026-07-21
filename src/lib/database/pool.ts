@@ -17,14 +17,25 @@ function createPool() {
     throw new Error('DATABASE_URL is not configured')
   }
 
+  const requireTLS = process.env.DATABASE_SSL === 'require'
+  const rejectUnauthorized = process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false'
+  const encodedCA = process.env.DATABASE_SSL_CA_BASE64?.trim()
+  const certificateAuthority = encodedCA
+    ? Buffer.from(encodedCA, 'base64').toString('utf8')
+    : undefined
+
+  if (certificateAuthority && !certificateAuthority.includes('-----BEGIN CERTIFICATE-----')) {
+    throw new Error('DATABASE_SSL_CA_BASE64 is not a valid PEM certificate')
+  }
+
   return new Pool({
     connectionString,
     max: Number(process.env.DATABASE_POOL_MAX ?? 10),
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 5_000,
     application_name: 'vezcore',
-    ssl: process.env.DATABASE_SSL === 'require'
-      ? { rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false' }
+    ssl: requireTLS
+      ? { rejectUnauthorized, ca: certificateAuthority }
       : undefined,
   })
 }
