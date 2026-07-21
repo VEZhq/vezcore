@@ -7,11 +7,12 @@ import { databasePool } from '@/lib/database/pool'
 
 const isProductionBuild = process.env.NEXT_PHASE === 'phase-production-build'
   || process.env.npm_lifecycle_event === 'build'
+const buildOnlyBaseURL = isProductionBuild ? 'http://localhost:3000' : undefined
 
 export const auth = betterAuth({
   appName: 'VEZcore',
   database: databasePool,
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: process.env.BETTER_AUTH_URL || buildOnlyBaseURL,
   secret: process.env.BETTER_AUTH_SECRET
     || (isProductionBuild ? 'vezcore-build-only-placeholder-secret-32-chars' : undefined),
   trustedOrigins: (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? '')
