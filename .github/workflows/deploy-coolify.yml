@@ -37,6 +37,7 @@ jobs:
       - name: Deploy VEZcore develop
         env:
           WEBHOOK_URL: ${{ secrets.COOLIFY_DEVELOP_WEBHOOK_URL }}
+          COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
         run: ./scripts/trigger-coolify-deploy.sh
 
   production:
@@ -53,4 +54,5 @@ jobs:
       - name: Deploy VEZcore production
         env:
           WEBHOOK_URL: ${{ secrets.COOLIFY_PRODUCTION_WEBHOOK_URL }}
+          COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
         run: ./scripts/trigger-coolify-deploy.sh
