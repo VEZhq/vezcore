@@ -1,0 +1,56 @@
+name: Deploy to Coolify
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [develop, main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment target
+        required: true
+        type: choice
+        options:
+          - develop
+          - production
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coolify-${{ github.event.workflow_run.head_branch || inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  develop:
+    if: >-
+      (github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'develop') ||
+      (github.event_name == 'workflow_dispatch' && inputs.environment == 'develop')
+    runs-on: ubuntu-latest
+    environment: develop
+    steps:
+      - name: Checkout deployment scripts
+        uses: actions/checkout@v6
+      - name: Deploy VEZcore develop
+        env:
+          WEBHOOK_URL: ${{ secrets.COOLIFY_DEVELOP_WEBHOOK_URL }}
+        run: ./scripts/trigger-coolify-deploy.sh
+
+  production:
+    if: >-
+      (github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout deployment scripts
+        uses: actions/checkout@v6
+      - name: Deploy VEZcore production
+        env:
+          WEBHOOK_URL: ${{ secrets.COOLIFY_PRODUCTION_WEBHOOK_URL }}
+        run: ./scripts/trigger-coolify-deploy.sh

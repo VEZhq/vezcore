@@ -70,6 +70,23 @@ export function sanitizeVezVisionHtml(input: string): string {
 	}).replace(/\s+/g, ' ').trim()
 }
 
+export function getVezVisionPlainText(input: string): string {
+	if (!input) return ''
+
+	return DOMPurify.sanitize(input, {
+		ALLOWED_TAGS: [],
+		ALLOWED_ATTR: [],
+		KEEP_CONTENT: true,
+	})
+		.replace(/\u00a0/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim()
+}
+
+export function hasMeaningfulVezVisionHtml(input: string): boolean {
+	return getVezVisionPlainText(input).length > 0
+}
+
 export function sanitizeSearchTerm(input: string): string {
 	return input
 		.trim()
@@ -89,6 +106,6 @@ export function sanitizeSlug(slug: string): string {
 }
 
 export function calcReadingTime(content: string): number {
-	const plain = content.replace(/<[^>]+>/g, ' ')
+	const plain = getVezVisionPlainText(content)
 	return Math.max(1, Math.round(plain.trim().split(/\s+/).length / 200))
 }
