@@ -10,6 +10,8 @@ function createDatabasePool(): Pool {
   }
 
   const requireTLS = process.env.DATABASE_SSL === 'require'
+  const rejectUnauthorized = process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false'
+  const tlsServername = process.env.DATABASE_SSL_SERVERNAME?.trim()
   const encodedCA = process.env.DATABASE_SSL_CA_BASE64?.trim()
   const certificateAuthority = encodedCA
     ? Buffer.from(encodedCA, 'base64').toString('utf8')
@@ -19,6 +21,10 @@ function createDatabasePool(): Pool {
     throw new Error('DATABASE_SSL_CA_BASE64 is not a valid PEM certificate')
   }
 
+  if (requireTLS && rejectUnauthorized && !tlsServername) {
+    throw new Error('DATABASE_SSL_SERVERNAME is required for verified database TLS')
+  }
+
   return new Pool({
     connectionString: requireTLS
       ? withoutConnectionStringTLSOptions(configuredConnectionString)
@@ -26,8 +32,9 @@ function createDatabasePool(): Pool {
     application_name: 'vezcore-auth-cli',
     ssl: requireTLS
       ? {
-          rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false',
+          rejectUnauthorized,
           ca: certificateAuthority,
+          servername: tlsServername,
         }
       : undefined,
   })
