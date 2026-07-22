@@ -9,6 +9,9 @@ Required secret groups:
 - `DATABASE_URL` - least-privileged VEZcore role on the primary PostgreSQL.
 - `DATABASE_SSL_CA_BASE64` - public CA certificate used to verify the private
   PostgreSQL server when `DATABASE_SSL=require`.
+- `DATABASE_SSL_SERVERNAME` - a DNS name or IP address from the PostgreSQL
+  certificate SAN, used even when `DATABASE_URL` connects through a different
+  private address.
 - `BETTER_AUTH_SECRET` and `HEALTH_CHECK_TOKEN` — independent random values.
 - `S3_ACCESS_KEY` and `S3_SECRET_KEY` — scoped to the selected VEZcore bucket.
 - `VEZVISION_S3_ACCESS_KEY` and `VEZVISION_S3_SECRET_KEY` — scoped to the
