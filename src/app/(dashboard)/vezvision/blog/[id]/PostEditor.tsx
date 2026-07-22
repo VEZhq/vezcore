@@ -11,7 +11,7 @@ import { uploadImage } from '@/lib/actions/vezvision/upload'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { VVBlogPost, VVBlogCategory, VVStatus } from '@/lib/actions/vezvision/types'
 import { useCSRFToken } from '@/hooks/useCSRFToken'
-import { sanitizeVezVisionHtml } from '@/lib/vezvision-security-utils'
+import { getVezVisionPlainText, hasMeaningfulVezVisionHtml, sanitizeVezVisionHtml } from '@/lib/vezvision-security-utils'
 import { slugify, calcReadingTime, normalizeLegacyContent, normalizeEditorHtml } from './post-editor-utils'
 import { Collapsible, Field, inputCls, textareaCls } from './post-editor-ui'
 
@@ -180,7 +180,7 @@ export default function PostEditor({ post, categories, canManage, canPublish }: 
   const runAutosave = useCallback(async () => {
     if (!csrfToken) return
     if (autosaveRunningRef.current) return
-    if (!slug.trim() || !titlePl.trim() || !contentPl.replace(/<[^>]+>/g, '').trim()) return
+    if (!slug.trim() || !titlePl.trim() || !hasMeaningfulVezVisionHtml(contentPl)) return
 
     const nextSignature = buildAutosaveSignature()
     if (nextSignature === autosaveSignatureRef.current) return
@@ -229,7 +229,7 @@ export default function PostEditor({ post, categories, canManage, canPublish }: 
       toast.error('Slug jest wymagany')
       return
     }
-    const hasContentPl = Boolean(contentPl.replace(/<[^>]+>/g, '').trim())
+    const hasContentPl = hasMeaningfulVezVisionHtml(contentPl)
     if (targetStatus === 'published' && !hasContentPl) {
       toast.error('Treść PL jest wymagana')
       return
@@ -462,7 +462,7 @@ export default function PostEditor({ post, categories, canManage, canPublish }: 
                         vezvision.com › blog › {slug || 'url-slug'}
                       </p>
                       <p className="text-xs leading-5 text-[#545454]">
-                        {(metaDescPl || excerptPl || contentPl.replace(/<[^>]+>/g, ' ').trim()).slice(0, 160)}{((metaDescPl || excerptPl || contentPl)?.length ?? 0) > 160 ? '...' : ''}
+                        {(metaDescPl || excerptPl || getVezVisionPlainText(contentPl)).slice(0, 160)}{((metaDescPl || excerptPl || getVezVisionPlainText(contentPl))?.length ?? 0) > 160 ? '...' : ''}
                       </p>
                     </div>
                   </div>
@@ -505,7 +505,7 @@ export default function PostEditor({ post, categories, canManage, canPublish }: 
                         vezvision.com › blog › {slug || 'url-slug'}
                       </p>
                       <p className="text-xs leading-5 text-[#545454]">
-                        {(metaDescEn || excerptEn || contentEn.replace(/<[^>]+>/g, ' ').trim()).slice(0, 160)}{((metaDescEn || excerptEn || contentEn)?.length ?? 0) > 160 ? '...' : ''}
+                        {(metaDescEn || excerptEn || getVezVisionPlainText(contentEn)).slice(0, 160)}{((metaDescEn || excerptEn || getVezVisionPlainText(contentEn))?.length ?? 0) > 160 ? '...' : ''}
                       </p>
                     </div>
                   </div>

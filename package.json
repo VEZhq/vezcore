@@ -44,6 +44,7 @@
     "typescript": "^5"
   },
   "overrides": {
+    "brace-expansion": "^1.1.16",
     "postcss": "^8.5.12"
   }
 }

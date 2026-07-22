@@ -1,6 +1,11 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { sanitizeSearchTerm, sanitizeVezVisionHtml } from '../src/lib/vezvision-security-utils.ts'
+import {
+  getVezVisionPlainText,
+  hasMeaningfulVezVisionHtml,
+  sanitizeSearchTerm,
+  sanitizeVezVisionHtml,
+} from '../src/lib/vezvision-security-utils.ts'
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {
@@ -26,6 +31,15 @@ function testSearchSanitizer(): void {
   assert(!sanitized.includes('%'), 'Search sanitizer failed: percent remains')
   assert(!sanitized.includes('(') && !sanitized.includes(')'), 'Search sanitizer failed: parentheses remain')
   assert(sanitized.length <= 80, 'Search sanitizer failed: exceeds max length')
+}
+
+function testPlainTextExtraction(): void {
+  assert(
+    getVezVisionPlainText('<p>Hello <strong>world</strong></p><script>alert(1)</script>') === 'Hello world',
+    'Plain-text extraction must keep text and remove executable markup'
+  )
+  assert(!hasMeaningfulVezVisionHtml('<p><br></p>'), 'Empty editor markup must not count as content')
+  assert(hasMeaningfulVezVisionHtml('<p>Treść</p>'), 'Visible editor text must count as content')
 }
 
 function testGuardPresence(): void {
@@ -77,6 +91,7 @@ function testDashboardPageGuardsBeforeStats(): void {
 function run(): void {
   testHtmlSanitizer()
   testSearchSanitizer()
+  testPlainTextExtraction()
   testGuardPresence()
   testFilesUploadRouteHardening()
   testFilesAclGuardPresence()
