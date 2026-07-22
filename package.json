@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:e2e": "node ./scripts/e2e.mjs",
-    "test:security": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ./scripts/security-hardening-checks.ts"
+    "test:security": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ./scripts/security-hardening-checks.ts && node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test 'src/lib/database/*.node-test.ts'"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1088.0",
