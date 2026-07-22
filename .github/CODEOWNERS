@@ -1,0 +1,10 @@
+# Default ownership
+* @vezcode
+
+# Security-sensitive and deployment configuration
+/.github/ @vezcode
+/Dockerfile @vezcode
+/src/lib/auth/ @vezcode
+/src/lib/database/ @vezcode
+/src/app/api/ @vezcode
+/scripts/ @vezcode
