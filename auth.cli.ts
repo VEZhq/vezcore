@@ -1,8 +1,15 @@
 import { betterAuth } from 'better-auth'
 import { admin, twoFactor } from 'better-auth/plugins'
 import { Pool } from 'pg'
+import { withoutConnectionStringTLSOptions } from './src/lib/database/connection-string'
 
 function createDatabasePool(): Pool {
+  const configuredConnectionString = process.env.DATABASE_URL
+  if (!configuredConnectionString) {
+    throw new Error('DATABASE_URL is not configured')
+  }
+
+  const requireTLS = process.env.DATABASE_SSL === 'require'
   const encodedCA = process.env.DATABASE_SSL_CA_BASE64?.trim()
   const certificateAuthority = encodedCA
     ? Buffer.from(encodedCA, 'base64').toString('utf8')
@@ -13,9 +20,11 @@ function createDatabasePool(): Pool {
   }
 
   return new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: requireTLS
+      ? withoutConnectionStringTLSOptions(configuredConnectionString)
+      : configuredConnectionString,
     application_name: 'vezcore-auth-cli',
-    ssl: process.env.DATABASE_SSL === 'require'
+    ssl: requireTLS
       ? {
           rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false',
           ca: certificateAuthority,

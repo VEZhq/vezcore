@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { Pool } from 'pg'
+import { withoutConnectionStringTLSOptions } from '@/lib/database/connection-string'
 
 declare global {
   // eslint-disable-next-line no-var
@@ -10,14 +11,17 @@ declare global {
 function createPool() {
   const isProductionBuild = process.env.NEXT_PHASE === 'phase-production-build'
     || process.env.npm_lifecycle_event === 'build'
-  const connectionString = process.env.DATABASE_URL
+  const configuredConnectionString = process.env.DATABASE_URL
     || (isProductionBuild ? 'postgresql://build:build@127.0.0.1:5432/build' : '')
 
-  if (!connectionString) {
+  if (!configuredConnectionString) {
     throw new Error('DATABASE_URL is not configured')
   }
 
   const requireTLS = process.env.DATABASE_SSL === 'require'
+  const connectionString = requireTLS
+    ? withoutConnectionStringTLSOptions(configuredConnectionString)
+    : configuredConnectionString
   const rejectUnauthorized = process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false'
   const encodedCA = process.env.DATABASE_SSL_CA_BASE64?.trim()
   const certificateAuthority = encodedCA
