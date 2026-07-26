@@ -1,86 +1,182 @@
 'use client'
 
-import { Users, LogIn, Shield, Activity } from 'lucide-react'
+import { useState } from 'react'
+import {
+  Activity,
+  Check,
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  Eye,
+  FlaskConical,
+  Server,
+} from 'lucide-react'
 
-interface SystemHealthProps {
-  totalUsers: number
-  recentLogins: number
-  activeSessions: number
-  systemStatus: 'healthy' | 'warning' | 'error'
-  errorsCount?: number
+type AccessGroup = {
+  name: string
+  icon: typeof Server
+  color: 'emerald' | 'blue' | 'cyan'
+  description: string
+  items: Array<{
+    label: string
+    href: string
+    alias: string
+  }>
 }
 
-export function SystemHealth({
-  totalUsers,
-  recentLogins,
-  activeSessions,
-  systemStatus,
-  errorsCount = 0
-}: SystemHealthProps) {
-  const stats = [
-    {
-      label: 'Użytkownicy',
-      value: totalUsers,
-      icon: Users,
-      color: 'text-blue-400 light:text-blue-600',
-      tooltip: 'Całkowita liczba kont w systemie'
-    },
-    {
-      label: 'Logowania (24h)',
-      value: recentLogins,
-      icon: LogIn,
-      color: 'text-emerald-400 light:text-emerald-600',
-      tooltip: 'Pomyślne logowania w ostatnich 24 godzinach'
-    },
-    {
-      label: 'Aktywne sesje',
-      value: activeSessions,
-      icon: Shield,
-      color: 'text-purple-400 light:text-purple-600',
-      tooltip: 'Sesje z aktywnością w ciągu ostatniej doby'
-    },
-    {
-      label: 'Status systemu',
-      value: systemStatus === 'healthy' ? 'OK' : systemStatus === 'warning' ? 'Uwaga' : 'Błąd',
-      icon: Activity,
-      color: systemStatus === 'healthy'
-        ? 'text-emerald-400 light:text-emerald-600'
-        : systemStatus === 'warning'
-        ? 'text-yellow-400 light:text-yellow-600'
-        : 'text-red-400 light:text-red-600',
-      tooltip: systemStatus === 'healthy' 
-        ? 'System działa poprawnie' 
-        : systemStatus === 'warning'
-        ? `Wykryto ${errorsCount} problemów w ciągu 24h`
-        : `Wykryto ${errorsCount} błędów - sprawdź audit log`,
-    },
-  ]
+const accessGroups: AccessGroup[] = [
+  {
+    name: 'Hetzner',
+    icon: Server,
+    color: 'emerald',
+    description: 'Produkcja, API i tunel bazy',
+    items: [
+      { label: 'Hetzner Cloud', href: 'https://console.hetzner.cloud/projects', alias: 'ssh vez-prod' },
+      { label: 'VEZvision', href: 'https://vezvision.com', alias: 'ssh vez-prod' },
+      { label: 'API health', href: 'https://api.vezvision.com/healthz', alias: 'ssh vez-prod' },
+      { label: 'DB tunnel', href: 'https://api.vezvision.com/healthz', alias: 'ssh -N vezvision-db-tunnel' },
+    ],
+  },
+  {
+    name: 'Labs',
+    icon: FlaskConical,
+    color: 'blue',
+    description: 'VEZlabs, Proxmox i Coolify',
+    items: [
+      { label: 'VEZcore', href: 'https://vezcore.vezlabs.dev', alias: 'ssh vezlabs-coolify' },
+      { label: 'VEZcore test', href: 'https://vezcoretest.vezlabs.dev', alias: 'ssh vezlabs-coolify' },
+      { label: 'Proxmox', href: 'https://10.77.40.2:8006/', alias: 'ssh vezlabs-pve' },
+      { label: 'Coolify', href: 'https://10.77.30.35:8000/', alias: 'ssh vezlabs-coolify' },
+      { label: 'Router', href: 'https://192.168.2.1/', alias: 'ssh vezlabs-router' },
+    ],
+  },
+  {
+    name: 'Monitor',
+    icon: Activity,
+    color: 'cyan',
+    description: 'Monitoring i healthchecki',
+    items: [
+      { label: 'Monitor', href: 'https://monitor.vezlabs.dev', alias: 'ssh vezlabs-coolify' },
+      { label: 'Lab API health', href: 'https://api.vezlabs.dev/healthz', alias: 'ssh vezlabs-coolify' },
+      { label: 'Prod API health', href: 'https://api.vezvision.com/healthz', alias: 'ssh vez-prod' },
+    ],
+  },
+]
+
+const colorClasses: Record<AccessGroup['color'], { text: string; border: string; bg: string }> = {
+  emerald: {
+    text: 'text-emerald-400 light:text-emerald-600',
+    border: 'hover:border-emerald-400/30 light:hover:border-emerald-600/25',
+    bg: 'hover:bg-emerald-500/[0.04]',
+  },
+  blue: {
+    text: 'text-blue-400 light:text-blue-600',
+    border: 'hover:border-blue-400/30 light:hover:border-blue-600/25',
+    bg: 'hover:bg-blue-500/[0.04]',
+  },
+  cyan: {
+    text: 'text-cyan-400 light:text-cyan-600',
+    border: 'hover:border-cyan-400/30 light:hover:border-cyan-600/25',
+    bg: 'hover:bg-cyan-500/[0.04]',
+  },
+}
+
+export function SystemHealth() {
+  const [openGroup, setOpenGroup] = useState<string | null>(null)
+  const [revealedAliases, setRevealedAliases] = useState<string[]>([])
+  const [copiedAlias, setCopiedAlias] = useState<string | null>(null)
+
+  async function handleAliasClick(key: string, alias: string) {
+    if (!revealedAliases.includes(key)) {
+      setRevealedAliases((current) => [...current, key])
+      return
+    }
+
+    await navigator.clipboard.writeText(alias)
+    setCopiedAlias(key)
+    window.setTimeout(() => setCopiedAlias(null), 1400)
+  }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((stat) => (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {accessGroups.map((group) => {
+        const isOpen = openGroup === group.name
+        const Icon = group.icon
+        const colors = colorClasses[group.color]
+
+        return (
         <div
-          key={stat.label}
-          className="group relative border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl p-4 transition-colors duration-300"
+          key={group.name}
+          className={`border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl transition-all duration-300 ${colors.border} ${colors.bg}`}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <stat.icon className={`h-4 w-4 ${stat.color}`} />
-            <p className="text-[9px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888]">
-              {stat.label}
-            </p>
-          </div>
-          <p className={`text-2xl font-light ${stat.color}`}>
-            {stat.value}
-          </p>
-          
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 opacity-0 group-hover:opacity-100 pointer-events-none z-[9999] transition-opacity duration-200">
-            <div className="bg-[#222222] light:bg-[#f0f0f0] border border-white/10 light:border-black/10 px-3 py-2 rounded shadow-xl whitespace-nowrap">
-              <p className="text-[11px] text-[#cccccc] light:text-[#333333]">{stat.tooltip}</p>
+          <button
+            type="button"
+            onClick={() => setOpenGroup(isOpen ? null : group.name)}
+            className="flex w-full items-center justify-between gap-4 p-4 text-left"
+            aria-expanded={isOpen}
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.06] bg-white/[0.03] light:bg-black/[0.03]">
+                <Icon className={`h-5 w-5 ${colors.text}`} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-white light:text-black">{group.name}</p>
+                <p className="mt-0.5 truncate text-[10px] uppercase tracking-[0.18em] text-[#555555] light:text-[#999999]">
+                  {group.description}
+                </p>
+              </div>
             </div>
-            <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#222222] light:border-t-[#f0f0f0]"></div>
-          </div>
+            <ChevronDown className={`h-4 w-4 shrink-0 text-[#555555] light:text-[#999999] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {isOpen && (
+            <div className="border-t border-white/[0.06] light:border-black/[0.06] p-3">
+              <div className="space-y-2">
+                {group.items.map((item) => {
+                  const itemKey = `${group.name}-${item.label}`
+                  const isRevealed = revealedAliases.includes(itemKey)
+                  const isCopied = copiedAlias === itemKey
+
+                  return (
+                    <div
+                      key={`${group.name}-${item.label}`}
+                      className="flex flex-col gap-2 border border-white/[0.04] light:border-black/[0.04] bg-white/[0.02] light:bg-black/[0.02] p-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex min-w-0 items-center gap-2 text-xs text-white light:text-black hover:text-emerald-400 light:hover:text-emerald-600 transition-colors"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{item.label}</span>
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAliasClick(itemKey, item.alias)}
+                        className="group/alias inline-flex h-8 items-center justify-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-[#050505]/80 light:bg-white px-3 font-mono text-[11px] text-[#777777] light:text-[#777777] hover:text-white light:hover:text-black transition-colors"
+                        title={isRevealed ? 'Kliknij, aby skopiować alias SSH' : 'Najedź lub kliknij, aby odsłonić alias SSH'}
+                      >
+                        {isCopied ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-400 light:text-emerald-600" />
+                        ) : isRevealed ? (
+                          <Copy className="h-3.5 w-3.5" />
+                        ) : (
+                          <Eye className="h-3.5 w-3.5" />
+                        )}
+                        <span className={isRevealed ? '' : 'group-hover/alias:hidden'}>ssh •••••••</span>
+                        <span className={isRevealed ? '' : 'hidden group-hover/alias:inline'}>{item.alias}</span>
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

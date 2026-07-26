@@ -6,7 +6,6 @@ import { NeuralBackground } from '@/components/NeuralBackground'
 import { SystemHealth } from '@/components/SystemHealth'
 import { DashboardModules } from './DashboardModules'
 import { getUserPermissions } from '@/lib/permissions'
-import { getDashboardStats } from '@/lib/queries/dashboard'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 
 export default async function DashboardPage() {
@@ -17,16 +16,6 @@ export default async function DashboardPage() {
   if (!authState) redirect('/login')
 
   const permissions = await getUserPermissions()
-
-  const yesterdayDate = new Date()
-  yesterdayDate.setHours(yesterdayDate.getHours() - 24)
-  const yesterday = yesterdayDate.toISOString()
-
-  const stats = await getDashboardStats(yesterday)
-
-  const systemStatus: 'healthy' | 'warning' | 'error' = 
-    stats.errors_24h > 10 ? 'error' : 
-    stats.errors_24h > 3 ? 'warning' : 'healthy'
 
   const quickLinks = [
     { name: 'Profil', href: '/profile', icon: User },
@@ -69,13 +58,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="w-full max-w-5xl mb-8">
-      <SystemHealth
-        totalUsers={stats.total_users}
-        recentLogins={stats.recent_logins}
-        activeSessions={stats.active_sessions}
-        systemStatus={systemStatus}
-        errorsCount={stats.errors_24h}
-      />
+          <SystemHealth />
         </div>
 
         <DashboardModules canAccessVezVision={permissions.canAccessVezVision} />
