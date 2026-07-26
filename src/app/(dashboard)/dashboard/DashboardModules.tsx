@@ -1,14 +1,91 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { EyeOff, Eye, Settings2 } from 'lucide-react'
+import { Circle, EyeOff, Eye, Settings2 } from 'lucide-react'
 import { useUserPreferences } from '@/components/providers/UserPreferencesProvider'
-import { DASHBOARD_MODULES, DASHBOARD_MODULE_ICON_COLORS } from '@/lib/constants/modules'
+import { DASHBOARD_MODULES, DASHBOARD_MODULE_ICON_COLORS, type DashboardModuleName } from '@/lib/constants/modules'
+
+type HealthStatus = 'checking' | 'healthy' | 'warning' | 'error' | 'unknown'
+type DeployStatus = 'success' | 'failure' | 'pending' | 'unknown'
+
+type InfraData = {
+  checkedAt: string
+  checks: Record<string, {
+    status: Exclude<HealthStatus, 'checking'>
+    label: string
+    detail: string
+    latencyMs?: number
+  }>
+  deploy: {
+    status: DeployStatus
+    shortSha: string | null
+    completedAt: string | null
+  }
+}
+
+const moduleStatusSources: Record<DashboardModuleName, { checks: string[]; deploy?: boolean }> = {
+  vez: { checks: ['vezcore'], deploy: true },
+  vezVision: { checks: ['prodApi'] },
+  vezLabs: { checks: ['labApi', 'monitor'] },
+  vezRent: { checks: [] },
+  vezStudio: { checks: [] },
+  vezWork: { checks: [] },
+  nably: { checks: [] },
+}
+
+const statusMeta: Record<HealthStatus, { label: string; dot: string; text: string }> = {
+  checking: { label: 'Sprawdzam', dot: 'bg-[#555555]', text: 'text-[#888888]' },
+  healthy: { label: 'Działa', dot: 'bg-emerald-400', text: 'text-emerald-400 light:text-emerald-600' },
+  warning: { label: 'Uwaga', dot: 'bg-amber-400', text: 'text-amber-400 light:text-amber-600' },
+  error: { label: 'Nie działa', dot: 'bg-red-400', text: 'text-red-400 light:text-red-600' },
+  unknown: { label: 'Brak monitoringu', dot: 'bg-[#666666]', text: 'text-[#888888]' },
+}
+
+function getWorstStatus(statuses: HealthStatus[]): HealthStatus {
+  if (statuses.includes('error')) return 'error'
+  if (statuses.includes('warning')) return 'warning'
+  if (statuses.includes('unknown')) return 'unknown'
+  if (statuses.includes('checking')) return 'checking'
+  return 'healthy'
+}
+
+function getDeployHealthStatus(status: DeployStatus | undefined): HealthStatus {
+  if (status === 'success') return 'healthy'
+  if (status === 'failure') return 'error'
+  if (status === 'pending') return 'warning'
+  return 'unknown'
+}
+
+function formatStatusTime(value: string | null | undefined): string {
+  if (!value) return 'brak daty'
+  return new Intl.DateTimeFormat('pl-PL', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
 
 export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: boolean }) {
   const { preferences, updatePreferences } = useUserPreferences()
   const [editMode, setEditMode] = useState(false)
+  const [infraData, setInfraData] = useState<InfraData | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    fetch('/api/dashboard-infra', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data: InfraData | null) => {
+        if (!cancelled) setInfraData(data)
+      })
+      .catch(() => {
+        if (!cancelled) setInfraData(null)
+      })
+
+    return () => { cancelled = true }
+  }, [])
 
   const toggleModule = (name: string) => {
     const next = preferences.hiddenModules.includes(name)
@@ -42,6 +119,20 @@ export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: b
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {visibleModules.map((mod) => {
           const isHidden = preferences.hiddenModules.includes(mod.name)
+          const sources = moduleStatusSources[mod.name]
+          const statuses: HealthStatus[] = infraData
+            ? sources.checks.map((key) => infraData.checks[key]?.status ?? 'unknown')
+            : sources.checks.map(() => 'checking')
+
+          if (sources.deploy) {
+            statuses.push(infraData ? getDeployHealthStatus(infraData.deploy.status) : 'checking')
+          }
+
+          const moduleStatus = statuses.length > 0 ? getWorstStatus(statuses) : 'unknown'
+          const status = statusMeta[moduleStatus]
+          const statusTime = sources.checks.length > 0 || sources.deploy
+            ? infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'
+            : 'Monitoring niepodpięty'
 
           const cardContent = (
             <div
@@ -77,6 +168,25 @@ export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: b
               <p className="text-xs text-[#666666] light:text-[#999999] transition-colors duration-300">
                 {mod.description}
               </p>
+
+              <div className="mt-5 border-t border-white/[0.05] light:border-black/[0.06] pt-3 space-y-2">
+                <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em]">
+                  <span className={`inline-flex items-center gap-2 ${status.text}`}>
+                    <Circle className={`h-2 w-2 fill-current ${status.text}`} />
+                    {status.label}
+                  </span>
+                  <span className="truncate text-[#555555] light:text-[#999999]">{statusTime}</span>
+                </div>
+
+                {sources.deploy && (
+                  <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
+                    <span>Deploy</span>
+                    <span className={statusMeta[getDeployHealthStatus(infraData?.deploy.status)].text}>
+                      {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}
+                    </span>
+                  </div>
+                )}
+              </div>
 
               {editMode && isHidden && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

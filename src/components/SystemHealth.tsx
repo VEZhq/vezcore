@@ -1,45 +1,18 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Activity,
-  AlertTriangle,
   Check,
   ChevronDown,
-  Circle,
   Copy,
   ExternalLink,
   Eye,
   FlaskConical,
-  GitBranch,
   Server,
 } from 'lucide-react'
 
 type EnvironmentFilter = 'all' | 'production' | 'labs' | 'monitor'
-type HealthStatus = 'checking' | 'healthy' | 'warning' | 'error' | 'unknown'
-type DeployStatus = 'success' | 'failure' | 'pending' | 'unknown'
-
-type InfraData = {
-  checkedAt: string
-  checks: Record<string, {
-    status: Exclude<HealthStatus, 'checking'>
-    label: string
-    detail: string
-    latencyMs?: number
-  }>
-  deploy: {
-    status: DeployStatus
-    shortSha: string | null
-    message: string
-    completedAt: string | null
-    url: string | null
-  }
-  incidents: Array<{
-    severity: 'info' | 'warning' | 'error'
-    label: string
-    detail: string
-  }>
-}
 
 type AccessGroup = {
   id: Exclude<EnvironmentFilter, 'all'>
@@ -47,7 +20,6 @@ type AccessGroup = {
   icon: typeof Server
   color: 'emerald' | 'blue' | 'cyan'
   description: string
-  healthKeys: string[]
   items: Array<{
     label: string
     href: string
@@ -72,7 +44,6 @@ const accessGroups: AccessGroup[] = [
     icon: Server,
     color: 'emerald',
     description: 'Produkcja, API i tunel bazy',
-    healthKeys: ['prodApi'],
     items: [
       {
         label: 'Hetzner Cloud',
@@ -114,7 +85,6 @@ const accessGroups: AccessGroup[] = [
     icon: FlaskConical,
     color: 'blue',
     description: 'VEZlabs, Proxmox i Coolify',
-    healthKeys: ['labApi', 'vezcore'],
     items: [
       {
         label: 'VEZcore',
@@ -164,7 +134,6 @@ const accessGroups: AccessGroup[] = [
     icon: Activity,
     color: 'cyan',
     description: 'Monitoring i healthchecki',
-    healthKeys: ['monitor', 'labApi', 'prodApi'],
     items: [
       {
         label: 'Monitor',
@@ -212,14 +181,6 @@ const colorClasses: Record<AccessGroup['color'], { text: string; border: string;
   },
 }
 
-const statusClasses: Record<HealthStatus, { dot: string; label: string; text: string }> = {
-  checking: { dot: 'bg-[#555555]', label: 'Sprawdzam', text: 'text-[#888888]' },
-  healthy: { dot: 'bg-emerald-400', label: 'Działa', text: 'text-emerald-400 light:text-emerald-600' },
-  warning: { dot: 'bg-amber-400', label: 'Uwaga', text: 'text-amber-400 light:text-amber-600' },
-  error: { dot: 'bg-red-400', label: 'Nie działa', text: 'text-red-400 light:text-red-600' },
-  unknown: { dot: 'bg-[#666666]', label: 'Brak danych', text: 'text-[#888888]' },
-}
-
 const aliasTypeClasses: Record<AccessGroup['items'][number]['aliasType'], string> = {
   prod: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400 light:text-emerald-700',
   lab: 'border-blue-500/20 bg-blue-500/10 text-blue-400 light:text-blue-700',
@@ -227,52 +188,11 @@ const aliasTypeClasses: Record<AccessGroup['items'][number]['aliasType'], string
   router: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-400 light:text-cyan-700',
 }
 
-function getWorstStatus(statuses: HealthStatus[]): HealthStatus {
-  if (statuses.includes('error')) return 'error'
-  if (statuses.includes('warning')) return 'warning'
-  if (statuses.includes('unknown')) return 'unknown'
-  if (statuses.includes('checking')) return 'checking'
-  return 'healthy'
-}
-
-function formatDeployTime(value: string | null): string {
-  if (!value) return 'brak czasu'
-  return new Intl.DateTimeFormat('pl-PL', {
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value))
-}
-
-function getDeployHealthStatus(status: DeployStatus | undefined): HealthStatus {
-  if (status === 'success') return 'healthy'
-  if (status === 'failure') return 'error'
-  if (status === 'pending') return 'warning'
-  return 'unknown'
-}
-
 export function SystemHealth() {
   const [openGroup, setOpenGroup] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState<EnvironmentFilter>('all')
   const [revealedAliases, setRevealedAliases] = useState<string[]>([])
   const [copiedAlias, setCopiedAlias] = useState<string | null>(null)
-  const [infraData, setInfraData] = useState<InfraData | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-
-    fetch('/api/dashboard-infra', { cache: 'no-store' })
-      .then((response) => response.ok ? response.json() : null)
-      .then((data: InfraData | null) => {
-        if (!cancelled) setInfraData(data)
-      })
-      .catch(() => {
-        if (!cancelled) setInfraData(null)
-      })
-
-    return () => { cancelled = true }
-  }, [])
 
   const visibleGroups = useMemo(
     () => activeFilter === 'all'
@@ -296,40 +216,6 @@ export function SystemHealth() {
     }
   }
 
-  function getGroupStatuses(group: AccessGroup): HealthStatus[] {
-    if (!infraData) return ['checking']
-    const statuses: HealthStatus[] = group.healthKeys.map((key) => infraData.checks[key]?.status ?? 'unknown')
-
-    if (group.id === 'labs') {
-      statuses.push(getDeployHealthStatus(infraData.deploy.status))
-    }
-
-    return statuses
-  }
-
-  function getGroupStatus(group: AccessGroup): HealthStatus {
-    const statuses = getGroupStatuses(group)
-    return getWorstStatus(statuses)
-  }
-
-  function getGroupIssues(group: AccessGroup) {
-    if (!infraData) return []
-
-    const checkLabels = new Set(
-      group.healthKeys
-        .map((key) => infraData.checks[key]?.label)
-        .filter(Boolean)
-    )
-
-    return infraData.incidents.filter((incident) => {
-      if (group.id === 'labs' && incident.label === 'Deploy') return true
-      return checkLabels.has(incident.label)
-    })
-  }
-
-  const deploy = infraData?.deploy
-  const deployStatus = statusClasses[getDeployHealthStatus(deploy?.status)]
-
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -351,7 +237,7 @@ export function SystemHealth() {
         </div>
 
         <p className="text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#999999]">
-          Kafelki pokazują status usług
+          Dostęp techniczny
         </p>
       </div>
 
@@ -360,12 +246,6 @@ export function SystemHealth() {
           const isOpen = openGroup === group.name
           const Icon = group.icon
           const colors = colorClasses[group.color]
-          const status = getGroupStatus(group)
-          const statusMeta = statusClasses[status]
-          const groupIssues = getGroupIssues(group)
-          const statusDetail = infraData
-            ? `Sprawdzono ${formatDeployTime(infraData.checkedAt)}`
-            : 'Sprawdzam usługi'
 
           return (
             <div
@@ -383,87 +263,17 @@ export function SystemHealth() {
                     <Icon className={`h-5 w-5 ${colors.text}`} />
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-white light:text-black">{group.name}</p>
-                      <span className={`inline-flex h-2 w-2 rounded-full ${statusMeta.dot}`} />
-                    </div>
+                    <p className="text-sm font-medium text-white light:text-black">{group.name}</p>
                     <p className="mt-0.5 truncate text-[10px] uppercase tracking-[0.18em] text-[#555555] light:text-[#999999]">
                       {group.description}
                     </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] uppercase tracking-[0.12em] text-[#555555] light:text-[#999999]">
-                      <span>{statusDetail}</span>
-                      {group.id === 'labs' && (
-                        <span className={deployStatus.text}>
-                          Deploy {deploy?.shortSha ?? 'brak nr'} / {formatDeployTime(deploy?.completedAt ?? null)}
-                        </span>
-                      )}
-                    </div>
                   </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-3">
-                  <span className={`text-[9px] uppercase tracking-[0.16em] ${statusMeta.text}`}>
-                    {statusMeta.label}
-                  </span>
-                  <ChevronDown className={`h-4 w-4 text-[#555555] light:text-[#999999] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-                </div>
+                <ChevronDown className={`h-4 w-4 text-[#555555] light:text-[#999999] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isOpen && (
                 <div className="border-t border-white/[0.06] light:border-black/[0.06] p-3">
-                  <div className="mb-3 grid gap-2">
-                    {group.healthKeys.map((key) => {
-                      const check = infraData?.checks[key]
-                      const checkStatus = check ? statusClasses[check.status] : statusClasses.checking
-                      return (
-                        <div key={key} className="flex items-center justify-between gap-3 text-[10px]">
-                          <span className="text-[#777777] light:text-[#888888]">{check?.label ?? key}</span>
-                          <span className={`inline-flex items-center gap-2 ${checkStatus.text}`}>
-                            <Circle className={`h-2 w-2 fill-current ${checkStatus.text}`} />
-                            {check?.latencyMs ? `${check.detail} / ${check.latencyMs}ms` : checkStatus.label}
-                          </span>
-                        </div>
-                      )
-                    })}
-                    {group.id === 'labs' && (
-                      <div className="flex items-center justify-between gap-3 text-[10px]">
-                        <span className="text-[#777777] light:text-[#888888]">Deploy</span>
-                        <div className="inline-flex items-center gap-2">
-                          <span className={`inline-flex items-center gap-2 ${deployStatus.text}`}>
-                            <Circle className={`h-2 w-2 fill-current ${deployStatus.text}`} />
-                            {deploy?.shortSha ? `${deploy.shortSha} / ${formatDeployTime(deploy.completedAt)}` : deployStatus.label}
-                          </span>
-                          {deploy?.url && (
-                            <a href={deploy.url} target="_blank" rel="noreferrer" className="text-[#666666] hover:text-white light:text-[#888888] light:hover:text-black transition-colors">
-                              <GitBranch className="h-3.5 w-3.5" />
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mb-3 space-y-2 border border-white/[0.04] light:border-black/[0.04] bg-white/[0.02] light:bg-black/[0.02] p-3">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-[#555555] light:text-[#999999]">Do sprawdzenia</p>
-                    {(groupIssues.length > 0 ? groupIssues : [{ severity: 'info' as const, label: group.name, detail: 'Brak rzeczy do sprawdzenia' }]).map((incident) => {
-                      const tone = incident.severity === 'error'
-                        ? 'text-red-400 light:text-red-600'
-                        : incident.severity === 'warning'
-                          ? 'text-amber-400 light:text-amber-600'
-                          : 'text-emerald-400 light:text-emerald-600'
-
-                      return (
-                        <div key={`${group.name}-${incident.label}-${incident.detail}`} className="flex items-start gap-2 text-[11px]">
-                          <AlertTriangle className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${tone}`} />
-                          <p className="min-w-0 text-[#777777] light:text-[#777777]">
-                            <span className={`font-medium ${tone}`}>{incident.label}</span>
-                            {' / '}
-                            {incident.detail}
-                          </p>
-                        </div>
-                      )
-                    })}
-                  </div>
-
                   <div className="space-y-2">
                     {group.items.map((item) => {
                       const itemKey = `${group.name}-${item.label}`
@@ -522,7 +332,6 @@ export function SystemHealth() {
           )
         })}
       </div>
-
     </div>
   )
 }
