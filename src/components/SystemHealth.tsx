@@ -214,9 +214,9 @@ const colorClasses: Record<AccessGroup['color'], { text: string; border: string;
 
 const statusClasses: Record<HealthStatus, { dot: string; label: string; text: string }> = {
   checking: { dot: 'bg-[#555555]', label: 'Sprawdzam', text: 'text-[#888888]' },
-  healthy: { dot: 'bg-emerald-400', label: 'OK', text: 'text-emerald-400 light:text-emerald-600' },
+  healthy: { dot: 'bg-emerald-400', label: 'Działa', text: 'text-emerald-400 light:text-emerald-600' },
   warning: { dot: 'bg-amber-400', label: 'Uwaga', text: 'text-amber-400 light:text-amber-600' },
-  error: { dot: 'bg-red-400', label: 'Błąd', text: 'text-red-400 light:text-red-600' },
+  error: { dot: 'bg-red-400', label: 'Nie działa', text: 'text-red-400 light:text-red-600' },
   unknown: { dot: 'bg-[#666666]', label: 'Brak danych', text: 'text-[#888888]' },
 }
 
@@ -243,6 +243,13 @@ function formatDeployTime(value: string | null): string {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value))
+}
+
+function getDeployHealthStatus(status: DeployStatus | undefined): HealthStatus {
+  if (status === 'success') return 'healthy'
+  if (status === 'failure') return 'error'
+  if (status === 'pending') return 'warning'
+  return 'unknown'
 }
 
 export function SystemHealth() {
@@ -289,19 +296,39 @@ export function SystemHealth() {
     }
   }
 
+  function getGroupStatuses(group: AccessGroup): HealthStatus[] {
+    if (!infraData) return ['checking']
+    const statuses: HealthStatus[] = group.healthKeys.map((key) => infraData.checks[key]?.status ?? 'unknown')
+
+    if (group.id === 'labs') {
+      statuses.push(getDeployHealthStatus(infraData.deploy.status))
+    }
+
+    return statuses
+  }
+
   function getGroupStatus(group: AccessGroup): HealthStatus {
-    if (!infraData) return 'checking'
-    return getWorstStatus(group.healthKeys.map((key) => infraData.checks[key]?.status ?? 'unknown'))
+    const statuses = getGroupStatuses(group)
+    return getWorstStatus(statuses)
+  }
+
+  function getGroupIssues(group: AccessGroup) {
+    if (!infraData) return []
+
+    const checkLabels = new Set(
+      group.healthKeys
+        .map((key) => infraData.checks[key]?.label)
+        .filter(Boolean)
+    )
+
+    return infraData.incidents.filter((incident) => {
+      if (group.id === 'labs' && incident.label === 'Deploy') return true
+      return checkLabels.has(incident.label)
+    })
   }
 
   const deploy = infraData?.deploy
-  const deployStatus = deploy?.status === 'success'
-    ? statusClasses.healthy
-    : deploy?.status === 'failure'
-      ? statusClasses.error
-      : deploy?.status === 'pending'
-        ? statusClasses.warning
-        : statusClasses.unknown
+  const deployStatus = statusClasses[getDeployHealthStatus(deploy?.status)]
 
   return (
     <div className="space-y-4">
@@ -324,7 +351,7 @@ export function SystemHealth() {
         </div>
 
         <p className="text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#999999]">
-          {infraData ? `Status: ${formatDeployTime(infraData.checkedAt)}` : 'Status: sprawdzam'}
+          Kafelki pokazują status usług
         </p>
       </div>
 
@@ -335,6 +362,10 @@ export function SystemHealth() {
           const colors = colorClasses[group.color]
           const status = getGroupStatus(group)
           const statusMeta = statusClasses[status]
+          const groupIssues = getGroupIssues(group)
+          const statusDetail = infraData
+            ? `Sprawdzono ${formatDeployTime(infraData.checkedAt)}`
+            : 'Sprawdzam usługi'
 
           return (
             <div
@@ -359,6 +390,14 @@ export function SystemHealth() {
                     <p className="mt-0.5 truncate text-[10px] uppercase tracking-[0.18em] text-[#555555] light:text-[#999999]">
                       {group.description}
                     </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] uppercase tracking-[0.12em] text-[#555555] light:text-[#999999]">
+                      <span>{statusDetail}</span>
+                      {group.id === 'labs' && (
+                        <span className={deployStatus.text}>
+                          Deploy {deploy?.shortSha ?? 'brak nr'} / {formatDeployTime(deploy?.completedAt ?? null)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
@@ -382,6 +421,44 @@ export function SystemHealth() {
                             <Circle className={`h-2 w-2 fill-current ${checkStatus.text}`} />
                             {check?.latencyMs ? `${check.detail} / ${check.latencyMs}ms` : checkStatus.label}
                           </span>
+                        </div>
+                      )
+                    })}
+                    {group.id === 'labs' && (
+                      <div className="flex items-center justify-between gap-3 text-[10px]">
+                        <span className="text-[#777777] light:text-[#888888]">Deploy</span>
+                        <div className="inline-flex items-center gap-2">
+                          <span className={`inline-flex items-center gap-2 ${deployStatus.text}`}>
+                            <Circle className={`h-2 w-2 fill-current ${deployStatus.text}`} />
+                            {deploy?.shortSha ? `${deploy.shortSha} / ${formatDeployTime(deploy.completedAt)}` : deployStatus.label}
+                          </span>
+                          {deploy?.url && (
+                            <a href={deploy.url} target="_blank" rel="noreferrer" className="text-[#666666] hover:text-white light:text-[#888888] light:hover:text-black transition-colors">
+                              <GitBranch className="h-3.5 w-3.5" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mb-3 space-y-2 border border-white/[0.04] light:border-black/[0.04] bg-white/[0.02] light:bg-black/[0.02] p-3">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-[#555555] light:text-[#999999]">Do sprawdzenia</p>
+                    {(groupIssues.length > 0 ? groupIssues : [{ severity: 'info' as const, label: group.name, detail: 'Brak rzeczy do sprawdzenia' }]).map((incident) => {
+                      const tone = incident.severity === 'error'
+                        ? 'text-red-400 light:text-red-600'
+                        : incident.severity === 'warning'
+                          ? 'text-amber-400 light:text-amber-600'
+                          : 'text-emerald-400 light:text-emerald-600'
+
+                      return (
+                        <div key={`${group.name}-${incident.label}-${incident.detail}`} className="flex items-start gap-2 text-[11px]">
+                          <AlertTriangle className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${tone}`} />
+                          <p className="min-w-0 text-[#777777] light:text-[#777777]">
+                            <span className={`font-medium ${tone}`}>{incident.label}</span>
+                            {' / '}
+                            {incident.detail}
+                          </p>
                         </div>
                       )
                     })}
@@ -446,56 +523,6 @@ export function SystemHealth() {
         })}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)]">
-        <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[10px] uppercase tracking-[0.25em] text-[#444444] light:text-[#888888]">Last deploy</p>
-              <p className="mt-2 truncate text-sm text-white light:text-black">
-                {deploy?.message ?? 'Sprawdzam ostatni deploy'}
-              </p>
-              <p className="mt-1 text-[11px] text-[#666666] light:text-[#999999]">
-                {deploy?.shortSha ? `${deploy.shortSha} / ${formatDeployTime(deploy.completedAt)}` : 'GitHub Actions / Coolify'}
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-3">
-              <span className={`inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] ${deployStatus.text}`}>
-                <span className={`h-2 w-2 rounded-full ${deployStatus.dot}`} />
-                {deployStatus.label}
-              </span>
-              {deploy?.url && (
-                <a href={deploy.url} target="_blank" rel="noreferrer" className="text-[#666666] hover:text-white light:text-[#888888] light:hover:text-black transition-colors">
-                  <GitBranch className="h-4 w-4" />
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 p-4">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-[#444444] light:text-[#888888]">Rzeczy do sprawdzenia</p>
-          <div className="mt-3 space-y-2">
-            {(infraData?.incidents ?? [{ severity: 'info' as const, label: 'Operacje', detail: 'Sprawdzam statusy' }]).map((incident) => {
-              const tone = incident.severity === 'error'
-                ? 'text-red-400 light:text-red-600'
-                : incident.severity === 'warning'
-                  ? 'text-amber-400 light:text-amber-600'
-                  : 'text-emerald-400 light:text-emerald-600'
-
-              return (
-                <div key={`${incident.label}-${incident.detail}`} className="flex items-start gap-2 text-xs">
-                  <AlertTriangle className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${tone}`} />
-                  <p className="min-w-0 text-[#777777] light:text-[#777777]">
-                    <span className={`font-medium ${tone}`}>{incident.label}</span>
-                    {' / '}
-                    {incident.detail}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
