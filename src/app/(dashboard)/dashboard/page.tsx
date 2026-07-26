@@ -1,13 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { User, ClipboardList, Settings, UserCog } from 'lucide-react'
+import { Clock3, User, ClipboardList, Settings, UserCog } from 'lucide-react'
 import { NeuralBackground } from '@/components/NeuralBackground'
-import { ActivityFeed } from '@/components/ActivityFeed'
 import { SystemHealth } from '@/components/SystemHealth'
 import { DashboardModules } from './DashboardModules'
 import { getUserPermissions } from '@/lib/permissions'
-import { getDashboardStats, getRecentDashboardActivity } from '@/lib/queries/dashboard'
+import { getDashboardStats } from '@/lib/queries/dashboard'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 
 export default async function DashboardPage() {
@@ -23,10 +22,7 @@ export default async function DashboardPage() {
   yesterdayDate.setHours(yesterdayDate.getHours() - 24)
   const yesterday = yesterdayDate.toISOString()
 
-  const [stats, recentActivity] = await Promise.all([
-    getDashboardStats(yesterday),
-    getRecentDashboardActivity(permissions.canAccessAudit),
-  ])
+  const stats = await getDashboardStats(yesterday)
 
   const systemStatus: 'healthy' | 'warning' | 'error' = 
     stats.errors_24h > 10 ? 'error' : 
@@ -36,6 +32,7 @@ export default async function DashboardPage() {
     { name: 'Profil', href: '/profile', icon: User },
     ...(permissions.canAccessKonta ? [{ name: 'Konta', href: '/konta', icon: UserCog }] : []),
     ...(permissions.canAccessAudit ? [{ name: 'Audit Log', href: '/audit', icon: ClipboardList }] : []),
+    ...(permissions.canAccessAudit ? [{ name: 'Ostatnia aktywność', href: '/audit', icon: Clock3 }] : []),
     ...(permissions.canAccessSettings ? [{ name: 'Ustawienia', href: '/settings', icon: Settings }] : []),
   ]
   return (
@@ -69,9 +66,6 @@ export default async function DashboardPage() {
             className="h-auto w-[280px] max-w-[72vw] opacity-0 light:opacity-80 dark:hidden transition-opacity duration-300"
             priority
           />
-          <p className="text-center text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mt-3 transition-colors duration-300">
-            Ekosystem VEZ
-          </p>
         </div>
 
         <div className="w-full max-w-5xl mb-8">
@@ -86,10 +80,10 @@ export default async function DashboardPage() {
 
         <DashboardModules canAccessVezVision={permissions.canAccessVezVision} />
 
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
           {quickLinks.map((link) => (
             <Link
-              key={link.href}
+              key={`${link.href}-${link.name}`}
               href={link.href}
               className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] hover:text-emerald-500 light:hover:text-emerald-600 transition-colors duration-300"
             >
@@ -99,15 +93,6 @@ export default async function DashboardPage() {
           ))}
         </div>
 
-        {recentActivity && recentActivity.length > 0 && (
-          <div className="w-full max-w-2xl mt-8">
-            <ActivityFeed entries={recentActivity} canViewAll={permissions.canAccessAudit} />
-          </div>
-        )}
-
-        <p className="mt-8 text-[9px] uppercase tracking-[0.4em] text-[#333333] light:text-[#cccccc] transition-colors duration-300">
-          NEURAL INTERFACE ACTIVE
-        </p>
       </div>
     </div>
   )

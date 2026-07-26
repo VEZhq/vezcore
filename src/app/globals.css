@@ -235,3 +235,8 @@
   border-color: rgba(253, 164, 175, 0.3);
   background: rgba(253, 164, 175, 0.04);
 }
+
+.tile-cyan:hover {
+  border-color: rgba(103, 232, 249, 0.3);
+  background: rgba(103, 232, 249, 0.04);
+}
