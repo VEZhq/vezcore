@@ -25,8 +25,8 @@ type InfraData = {
 }
 
 const moduleStatusSources: Record<DashboardModuleName, { checks: string[]; deploy?: boolean }> = {
-  vez: { checks: ['vezcore'], deploy: true },
-  vezVision: { checks: ['prodApi'] },
+  vez: { checks: [] },
+  vezVision: { checks: ['prodApi'], deploy: true },
   vezLabs: { checks: ['labApi', 'monitor'] },
   vezRent: { checks: [] },
   vezStudio: { checks: [] },
@@ -120,6 +120,7 @@ export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: b
         {visibleModules.map((mod) => {
           const isHidden = preferences.hiddenModules.includes(mod.name)
           const sources = moduleStatusSources[mod.name]
+          const hasStatus = sources.checks.length > 0 || sources.deploy
           const statuses: HealthStatus[] = infraData
             ? sources.checks.map((key) => infraData.checks[key]?.status ?? 'unknown')
             : sources.checks.map(() => 'checking')
@@ -128,11 +129,9 @@ export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: b
             statuses.push(infraData ? getDeployHealthStatus(infraData.deploy.status) : 'checking')
           }
 
-          const moduleStatus = statuses.length > 0 ? getWorstStatus(statuses) : 'unknown'
+          const moduleStatus = hasStatus ? getWorstStatus(statuses) : 'unknown'
           const status = statusMeta[moduleStatus]
-          const statusTime = sources.checks.length > 0 || sources.deploy
-            ? infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'
-            : 'Monitoring niepodpięty'
+          const statusTime = infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'
 
           const cardContent = (
             <div
@@ -169,24 +168,26 @@ export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: b
                 {mod.description}
               </p>
 
-              <div className="mt-5 border-t border-white/[0.05] light:border-black/[0.06] pt-3 space-y-2">
-                <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em]">
-                  <span className={`inline-flex items-center gap-2 ${status.text}`}>
-                    <Circle className={`h-2 w-2 fill-current ${status.text}`} />
-                    {status.label}
-                  </span>
-                  <span className="truncate text-[#555555] light:text-[#999999]">{statusTime}</span>
-                </div>
-
-                {sources.deploy && (
-                  <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
-                    <span>Deploy</span>
-                    <span className={statusMeta[getDeployHealthStatus(infraData?.deploy.status)].text}>
-                      {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}
+              {hasStatus && (
+                <div className="mt-5 border-t border-white/[0.05] light:border-black/[0.06] pt-3 space-y-2">
+                  <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em]">
+                    <span className={`inline-flex items-center gap-2 ${status.text}`}>
+                      <Circle className={`h-2 w-2 fill-current ${status.text}`} />
+                      {status.label}
                     </span>
+                    <span className="truncate text-[#555555] light:text-[#999999]">{statusTime}</span>
                   </div>
-                )}
-              </div>
+
+                  {sources.deploy && (
+                    <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
+                      <span>Deploy</span>
+                      <span className={statusMeta[getDeployHealthStatus(infraData?.deploy.status)].text}>
+                        {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {editMode && isHidden && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

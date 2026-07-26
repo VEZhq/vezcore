@@ -1,10 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Activity,
   Check,
   ChevronDown,
+  Circle,
   Copy,
   ExternalLink,
   Eye,
@@ -13,6 +14,23 @@ import {
 } from 'lucide-react'
 
 type EnvironmentFilter = 'all' | 'production' | 'labs' | 'monitor'
+type HealthStatus = 'checking' | 'healthy' | 'warning' | 'error' | 'unknown'
+type DeployStatus = 'success' | 'failure' | 'pending' | 'unknown'
+
+type InfraData = {
+  checkedAt: string
+  checks: Record<string, {
+    status: Exclude<HealthStatus, 'checking'>
+    label: string
+    detail: string
+    latencyMs?: number
+  }>
+  deploy: {
+    status: DeployStatus
+    shortSha: string | null
+    completedAt: string | null
+  }
+}
 
 type AccessGroup = {
   id: Exclude<EnvironmentFilter, 'all'>
@@ -188,11 +206,52 @@ const aliasTypeClasses: Record<AccessGroup['items'][number]['aliasType'], string
   router: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-400 light:text-cyan-700',
 }
 
+const statusClasses: Record<HealthStatus, { dot: string; label: string; text: string }> = {
+  checking: { dot: 'bg-[#555555]', label: 'Sprawdzam', text: 'text-[#888888]' },
+  healthy: { dot: 'bg-emerald-400', label: 'Działa', text: 'text-emerald-400 light:text-emerald-600' },
+  warning: { dot: 'bg-amber-400', label: 'Uwaga', text: 'text-amber-400 light:text-amber-600' },
+  error: { dot: 'bg-red-400', label: 'Nie działa', text: 'text-red-400 light:text-red-600' },
+  unknown: { dot: 'bg-[#666666]', label: 'Brak danych', text: 'text-[#888888]' },
+}
+
+function getDeployHealthStatus(status: DeployStatus | undefined): HealthStatus {
+  if (status === 'success') return 'healthy'
+  if (status === 'failure') return 'error'
+  if (status === 'pending') return 'warning'
+  return 'unknown'
+}
+
+function formatStatusTime(value: string | null | undefined): string {
+  if (!value) return 'brak daty'
+  return new Intl.DateTimeFormat('pl-PL', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
+
 export function SystemHealth() {
   const [openGroup, setOpenGroup] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState<EnvironmentFilter>('all')
   const [revealedAliases, setRevealedAliases] = useState<string[]>([])
   const [copiedAlias, setCopiedAlias] = useState<string | null>(null)
+  const [infraData, setInfraData] = useState<InfraData | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    fetch('/api/dashboard-infra', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data: InfraData | null) => {
+        if (!cancelled) setInfraData(data)
+      })
+      .catch(() => {
+        if (!cancelled) setInfraData(null)
+      })
+
+    return () => { cancelled = true }
+  }, [])
 
   const visibleGroups = useMemo(
     () => activeFilter === 'all'
@@ -279,6 +338,10 @@ export function SystemHealth() {
                       const itemKey = `${group.name}-${item.label}`
                       const isRevealed = revealedAliases.includes(itemKey)
                       const isCopied = copiedAlias === itemKey
+                      const showVezCoreStatus = group.id === 'labs' && item.label === 'VEZcore'
+                      const vezCoreStatus = infraData?.checks.vezcore?.status ?? 'checking'
+                      const vezCoreStatusMeta = statusClasses[vezCoreStatus]
+                      const deployStatusMeta = statusClasses[getDeployHealthStatus(infraData?.deploy.status)]
 
                       return (
                         <div
@@ -300,6 +363,26 @@ export function SystemHealth() {
                             </span>
                           </div>
                           <p className="text-[11px] text-[#666666] light:text-[#999999]">{item.description}</p>
+
+                          {showVezCoreStatus && (
+                            <div className="grid gap-2 border border-white/[0.04] light:border-black/[0.04] bg-white/[0.02] light:bg-black/[0.02] p-3">
+                              <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em]">
+                                <span className={`inline-flex items-center gap-2 ${vezCoreStatusMeta.text}`}>
+                                  <Circle className={`h-2 w-2 fill-current ${vezCoreStatusMeta.text}`} />
+                                  {vezCoreStatusMeta.label}
+                                </span>
+                                <span className="truncate text-[#555555] light:text-[#999999]">
+                                  {infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
+                                <span>Deploy</span>
+                                <span className={deployStatusMeta.text}>
+                                  {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}
+                                </span>
+                              </div>
+                            </div>
+                          )}
 
                           <button
                             type="button"
