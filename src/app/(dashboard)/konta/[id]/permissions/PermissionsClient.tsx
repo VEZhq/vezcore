@@ -515,7 +515,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-3">
                                 <p className="text-sm font-medium text-white light:text-black">
-                                  {option.name === 'core' ? option.label : option.name}
+                                  {option.label}
                                 </p>
                                 {isActive && (
                                   <span className="text-[9px] uppercase tracking-[0.2em] text-emerald-400">

@@ -24,7 +24,7 @@ const VALID_DATE_FORMATS = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'] as const
 
 const VALID_SESSION_TIMEOUTS = [15, 30, 60, 120]
 
-const VALID_MODULE_NAMES = ['vezVision', 'vezCRM', 'vezBrain', 'vezAI', 'vezHome', 'vezLab']
+const VALID_MODULE_NAMES = ['vez', 'vezVision', 'vezLabs', 'vezRent', 'vezStudio', 'vezWork', 'nably']
 
 const defaultPreferences: UserPreferences = {
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Warsaw',

@@ -56,19 +56,17 @@ export default async function DashboardPage() {
           <Image
             src="/logo/vezcore_logo_white_full.svg"
             alt="vezCore"
-            width={180}
-            height={50}
-            className="opacity-80 light:opacity-0 light:hidden transition-opacity duration-300"
-            style={{ width: 'auto' }}
+            width={280}
+            height={78}
+            className="h-auto w-[280px] max-w-[72vw] opacity-80 light:opacity-0 light:hidden transition-opacity duration-300"
             priority
           />
           <Image
             src="/logo/vezcore_logo_black_full.svg"
             alt="vezCore"
-            width={180}
-            height={50}
-            className="opacity-0 light:opacity-80 dark:hidden transition-opacity duration-300"
-            style={{ width: 'auto' }}
+            width={280}
+            height={78}
+            className="h-auto w-[280px] max-w-[72vw] opacity-0 light:opacity-80 dark:hidden transition-opacity duration-300"
             priority
           />
           <p className="text-center text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mt-3 transition-colors duration-300">

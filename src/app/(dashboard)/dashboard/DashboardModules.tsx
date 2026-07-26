@@ -72,7 +72,7 @@ export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: b
               </div>
 
               <h3 className="text-base font-medium text-white light:text-black mb-1 transition-colors duration-300">
-                {mod.name}
+                {mod.label}
               </h3>
               <p className="text-xs text-[#666666] light:text-[#999999] transition-colors duration-300">
                 {mod.description}
