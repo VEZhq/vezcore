@@ -122,13 +122,9 @@ function LoginPageContent() {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [twoFACode, setTwoFACode] = useState('')
-	const { token: csrfToken } = useCSRFToken()
+	const { refreshToken } = useCSRFToken()
 
 	async function handleFormSubmit() {
-		if (!csrfToken) {
-			setError('Błąd bezpieczeństwa. Odśwież stronę.')
-			return
-		}
 		if (isLoading) return
 
 		const emailVal = email.trim()
@@ -142,11 +138,18 @@ function LoginPageContent() {
 		setIsLoading(true)
 		setError(null)
 
+		const freshCsrfToken = await refreshToken().catch(() => null)
+		if (!freshCsrfToken) {
+			setError('Błąd bezpieczeństwa. Odśwież stronę.')
+			setIsLoading(false)
+			return
+		}
+
 		try {
 			const formData = new FormData()
 			formData.append('email', emailVal)
 			formData.append('password', passwordVal)
-			formData.append('csrfToken', csrfToken)
+			formData.append('csrfToken', freshCsrfToken)
 
 			const result = await login(formData)
 
@@ -175,18 +178,20 @@ function LoginPageContent() {
 			return
 		}
 
-		if (!csrfToken) {
-			setError('Błąd bezpieczeństwa. Odśwież stronę.')
-			return
-		}
-
 		if (twoFACode.length !== 6) return
 
 		setIsLoading(true)
 		setError(null)
 
+		const freshCsrfToken = await refreshToken().catch(() => null)
+		if (!freshCsrfToken) {
+			setError('Błąd bezpieczeństwa. Odśwież stronę.')
+			setIsLoading(false)
+			return
+		}
+
 		try {
-			const result = await verify2FALogin(factorId, challengeId, twoFACode, csrfToken)
+			const result = await verify2FALogin(factorId, challengeId, twoFACode, freshCsrfToken)
 
 			if (result?.error) {
 				setError(result.error)
