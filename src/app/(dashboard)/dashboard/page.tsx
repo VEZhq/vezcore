@@ -7,7 +7,6 @@ import { SystemHealth } from '@/components/SystemHealth'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { DashboardModules } from './DashboardModules'
 import { DashboardCommandCenter } from './DashboardCommandCenter'
-import { VezCoreStatusBadge } from './VezCoreStatusBadge'
 import { getUserPermissions } from '@/lib/permissions'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 
@@ -33,7 +32,6 @@ export default async function DashboardPage() {
   return (
     <div className="relative min-h-screen bg-[#0a0a0a] light:bg-[#f5f5f5] transition-colors duration-300">
       <NeuralBackground />
-      {permissions.canAccessInfrastructure && <VezCoreStatusBadge />}
 
       <div
         className="fixed inset-0 pointer-events-none opacity-20 light:opacity-10 transition-opacity duration-300"
@@ -45,23 +43,23 @@ export default async function DashboardPage() {
       />
 
       <div className="relative z-10 min-h-screen px-4 py-8 sm:py-10">
-        <div className="mx-auto w-full max-w-7xl">
-          <header className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto w-full max-w-6xl">
+          <header className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <Image
                 src="/logo/vezcore_logo_white_full.svg"
                 alt="vezCore"
-                width={210}
+                width={190}
                 height={58}
-                className="h-auto w-[210px] max-w-[64vw] opacity-85 light:opacity-0 light:hidden transition-opacity duration-300"
+                className="h-auto w-[190px] max-w-[60vw] opacity-85 light:opacity-0 light:hidden transition-opacity duration-300"
                 priority
               />
               <Image
                 src="/logo/vezcore_logo_black_full.svg"
                 alt="vezCore"
-                width={210}
+                width={190}
                 height={58}
-                className="h-auto w-[210px] max-w-[64vw] opacity-0 light:opacity-85 dark:hidden transition-opacity duration-300"
+                className="h-auto w-[190px] max-w-[60vw] opacity-0 light:opacity-85 dark:hidden transition-opacity duration-300"
                 priority
               />
             </div>
@@ -80,44 +78,40 @@ export default async function DashboardPage() {
             </nav>
           </header>
 
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
-            <main className="min-w-0">
-              <DashboardModules
-                canAccessVezVision={permissions.canAccessVezVision}
-                canAccessInfrastructure={permissions.canAccessInfrastructure}
-              />
+          <DashboardCommandCenter
+            access={{
+              canAccessKonta: permissions.canAccessKonta,
+              canAccessAudit: permissions.canAccessAudit,
+              canAccessSettings: permissions.canAccessSettings,
+              canAccessInfrastructure: permissions.canAccessInfrastructure,
+              canAccessVezVision: permissions.canAccessVezVision,
+              canViewVezVisionBlog: permissions.canViewVezVisionBlog,
+              canViewVezVisionPortfolio: permissions.canViewVezVisionPortfolio,
+              canViewVezVisionServices: permissions.canViewVezVisionServices,
+              canViewVezVisionFaq: permissions.canViewVezVisionFaq,
+              canViewVezVisionNewsletter: permissions.canViewVezVisionNewsletter,
+              canViewVezVisionFiles: permissions.canViewVezVisionFiles,
+              canViewVezVisionSettings: permissions.canViewVezVisionSettings,
+              canViewVezVisionCalendar: permissions.canViewVezVisionCalendar,
+              role: permissions.role,
+            }}
+            user={{
+              id: user.id,
+              email: user.email,
+              lastSignInAt: user.last_sign_in_at,
+            }}
+          />
 
-              {permissions.canAccessInfrastructure && (
-                <div id="infrastructure" className="w-full scroll-mt-8">
-                  <SystemHealth />
-                </div>
-              )}
-            </main>
+          <DashboardModules
+            canAccessVezVision={permissions.canAccessVezVision}
+            canAccessInfrastructure={permissions.canAccessInfrastructure}
+          />
 
-            <DashboardCommandCenter
-              access={{
-                canAccessKonta: permissions.canAccessKonta,
-                canAccessAudit: permissions.canAccessAudit,
-                canAccessSettings: permissions.canAccessSettings,
-                canAccessInfrastructure: permissions.canAccessInfrastructure,
-                canAccessVezVision: permissions.canAccessVezVision,
-                canViewVezVisionBlog: permissions.canViewVezVisionBlog,
-                canViewVezVisionPortfolio: permissions.canViewVezVisionPortfolio,
-                canViewVezVisionServices: permissions.canViewVezVisionServices,
-                canViewVezVisionFaq: permissions.canViewVezVisionFaq,
-                canViewVezVisionNewsletter: permissions.canViewVezVisionNewsletter,
-                canViewVezVisionFiles: permissions.canViewVezVisionFiles,
-                canViewVezVisionSettings: permissions.canViewVezVisionSettings,
-                canViewVezVisionCalendar: permissions.canViewVezVisionCalendar,
-                role: permissions.role,
-              }}
-              user={{
-                id: user.id,
-                email: user.email,
-                lastSignInAt: user.last_sign_in_at,
-              }}
-            />
-          </div>
+          {permissions.canAccessInfrastructure && (
+            <div id="infrastructure" className="w-full scroll-mt-8">
+              <SystemHealth />
+            </div>
+          )}
         </div>
       </div>
     </div>

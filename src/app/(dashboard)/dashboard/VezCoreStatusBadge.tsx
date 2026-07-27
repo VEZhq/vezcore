@@ -92,7 +92,7 @@ export function VezCoreStatusBadge() {
 
   return (
     <div
-      className="group/status absolute right-4 top-4 z-20 hidden min-w-[220px] border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/80 light:bg-white/90 px-3 py-2 text-[10px] uppercase tracking-[0.16em] backdrop-blur-xl sm:block"
+      className="group/status relative min-h-[66px] border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/75 light:bg-white/90 px-3 py-2 text-[10px] uppercase tracking-[0.16em] backdrop-blur-xl"
     >
       <div className="flex items-center justify-between gap-3">
         <span className="font-medium text-white light:text-black">VEZcore</span>
