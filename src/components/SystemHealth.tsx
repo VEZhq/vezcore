@@ -342,6 +342,12 @@ export function SystemHealth() {
                       const vezCoreStatus = infraData?.checks.vezcore?.status ?? 'checking'
                       const vezCoreStatusMeta = statusClasses[vezCoreStatus]
                       const deployStatusMeta = statusClasses[getDeployHealthStatus(infraData?.deploy.status)]
+                      const vezCoreLatency = infraData?.checks.vezcore?.latencyMs ? ` / ${infraData.checks.vezcore.latencyMs}ms` : ''
+                      const vezCoreDetails = [
+                        `VEZcore: ${infraData?.checks.vezcore ? `${vezCoreStatusMeta.label} / ${infraData.checks.vezcore.detail}${vezCoreLatency}` : 'pobieram dane'}`,
+                        `Deploy: ${deployStatusMeta.label} / ${infraData?.deploy.shortSha ?? 'brak nr'} / ${formatStatusTime(infraData?.deploy.completedAt)}`,
+                        infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status',
+                      ]
 
                       return (
                         <div
@@ -367,9 +373,17 @@ export function SystemHealth() {
                           {showVezCoreStatus && (
                             <div className="grid gap-2 border border-white/[0.04] light:border-black/[0.04] bg-white/[0.02] light:bg-black/[0.02] p-3">
                               <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em]">
-                                <span className={`inline-flex items-center gap-2 ${vezCoreStatusMeta.text}`}>
+                                <span
+                                  className={`group/status relative inline-flex items-center gap-2 ${vezCoreStatusMeta.text}`}
+                                  title={vezCoreDetails.join('\n')}
+                                >
                                   <Circle className={`h-2 w-2 fill-current ${vezCoreStatusMeta.text}`} />
                                   {vezCoreStatusMeta.label}
+                                  <span className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/status:block">
+                                    {vezCoreDetails.map((detail) => (
+                                      <span key={detail} className="block leading-relaxed">{detail}</span>
+                                    ))}
+                                  </span>
                                 </span>
                                 <span className="truncate text-[#555555] light:text-[#999999]">
                                   {infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'}

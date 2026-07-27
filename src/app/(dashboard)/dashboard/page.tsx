@@ -5,6 +5,7 @@ import { Clock3, User, ClipboardList, Settings, UserCog } from 'lucide-react'
 import { NeuralBackground } from '@/components/NeuralBackground'
 import { SystemHealth } from '@/components/SystemHealth'
 import { DashboardModules } from './DashboardModules'
+import { VezCoreStatusBadge } from './VezCoreStatusBadge'
 import { getUserPermissions } from '@/lib/permissions'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 
@@ -27,6 +28,7 @@ export default async function DashboardPage() {
   return (
     <div className="relative min-h-screen bg-[#0a0a0a] light:bg-[#f5f5f5] transition-colors duration-300">
       <NeuralBackground />
+      <VezCoreStatusBadge />
 
       <div
         className="fixed inset-0 pointer-events-none opacity-20 light:opacity-10 transition-opacity duration-300"
