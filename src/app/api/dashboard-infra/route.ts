@@ -151,6 +151,9 @@ function buildIncidents(checks: Record<string, HealthCheckResult>, deploy: Deplo
 export async function GET() {
   const authState = await getAuthenticatedUserPermissionState()
   if (!authState) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  if (!authState.permissions.canAccessInfrastructure) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  }
 
   const [healthResults, deploy] = await Promise.all([
     Promise.all(HEALTH_CHECKS.map(async (check) => [check.key, await checkEndpoint(check.url, check.label)] as const)),

@@ -24,6 +24,7 @@ export const AVAILABLE_PERMISSIONS = [
   { key: 'audit.view', label: 'Audit - podgląd', description: 'Może widzieć logi audytu' },
   { key: 'settings.view', label: 'Ustawienia - podgląd', description: 'Może widzieć ustawienia' },
   { key: 'settings.edit', label: 'Ustawienia - edycja', description: 'Może zmieniać ustawienia' },
+  { key: 'infrastructure.access', label: 'Infrastruktura - dostęp', description: 'Może widzieć Hetzner, Labs, Monitor, aliasy SSH i statusy techniczne' },
   { key: 'vezvision.access', label: 'VezVision - dostęp', description: 'Może widzieć kartę/moduł VezVision' },
   { key: 'vezvision.blog.view', label: 'VezVision Blog - podgląd', description: 'Może widzieć listę i szczegóły wpisów' },
   { key: 'vezvision.blog.manage', label: 'VezVision Blog - zarządzanie', description: 'Może tworzyć, edytować i usuwać wpisy' },

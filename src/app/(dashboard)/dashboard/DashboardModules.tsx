@@ -94,12 +94,20 @@ function getProblemDetails(infraData: InfraData | null, sources: { checks: strin
   return details.filter((detail) => detail.status === 'warning' || detail.status === 'error')
 }
 
-export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: boolean }) {
+export function DashboardModules({
+  canAccessVezVision,
+  canAccessInfrastructure,
+}: {
+  canAccessVezVision: boolean
+  canAccessInfrastructure: boolean
+}) {
   const { preferences, updatePreferences } = useUserPreferences()
   const [editMode, setEditMode] = useState(false)
   const [infraData, setInfraData] = useState<InfraData | null>(null)
 
   useEffect(() => {
+    if (!canAccessInfrastructure) return
+
     let cancelled = false
 
     fetch('/api/dashboard-infra', { cache: 'no-store' })
@@ -112,7 +120,7 @@ export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: b
       })
 
     return () => { cancelled = true }
-  }, [])
+  }, [canAccessInfrastructure])
 
   const toggleModule = (name: string) => {
     const next = preferences.hiddenModules.includes(name)
@@ -147,7 +155,7 @@ export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: b
         {visibleModules.map((mod) => {
           const isHidden = preferences.hiddenModules.includes(mod.name)
           const sources = moduleStatusSources[mod.name]
-          const hasStatus = sources.checks.length > 0 || sources.deploy
+          const hasStatus = canAccessInfrastructure && (sources.checks.length > 0 || sources.deploy)
           const statuses: HealthStatus[] = infraData
             ? sources.checks.map((key) => infraData.checks[key]?.status ?? 'unknown')
             : sources.checks.map(() => 'checking')

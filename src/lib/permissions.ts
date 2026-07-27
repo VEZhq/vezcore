@@ -9,6 +9,7 @@ export interface UserPermissions {
   canAccessKonta: boolean
   canAccessAudit: boolean
   canAccessSettings: boolean
+  canAccessInfrastructure: boolean
   canAccessProfile: boolean
   canAddUsers: boolean
   canDeleteUsers: boolean
@@ -44,6 +45,7 @@ type PermissionKey =
   | 'konta.permissions'
   | 'audit.view'
   | 'settings.view'
+  | 'infrastructure.access'
   | 'vezvision.access'
   | 'vezvision.blog.view'
   | 'vezvision.blog.manage'
@@ -77,6 +79,7 @@ const EMPTY_PERMISSIONS: UserPermissions = {
   canAccessKonta: false,
   canAccessAudit: false,
   canAccessSettings: false,
+  canAccessInfrastructure: false,
   canAccessProfile: false,
   canAddUsers: false,
   canDeleteUsers: false,
@@ -108,6 +111,7 @@ const FIELD_TO_PERMISSION: Record<Exclude<keyof UserPermissions, 'canAccessProfi
   canAccessKonta: 'konta.view',
   canAccessAudit: 'audit.view',
   canAccessSettings: 'settings.view',
+  canAccessInfrastructure: 'infrastructure.access',
   canAddUsers: 'konta.create',
   canDeleteUsers: 'konta.delete',
   canEditUsers: 'konta.edit',
@@ -159,6 +163,7 @@ async function buildUserPermissions(userId: string, role: string | null): Promis
     canAccessKonta: hasPermission(FIELD_TO_PERMISSION.canAccessKonta),
     canAccessAudit: hasPermission(FIELD_TO_PERMISSION.canAccessAudit),
     canAccessSettings: hasPermission(FIELD_TO_PERMISSION.canAccessSettings),
+    canAccessInfrastructure: hasPermission(FIELD_TO_PERMISSION.canAccessInfrastructure),
     canAccessProfile: true,
     canAddUsers: hasPermission(FIELD_TO_PERMISSION.canAddUsers),
     canDeleteUsers: hasPermission(FIELD_TO_PERMISSION.canDeleteUsers),
@@ -219,5 +224,4 @@ const getUserPermissionState = cache(async (): Promise<UserPermissions> => {
 export async function getUserPermissions(): Promise<UserPermissions> {
   return getUserPermissionState()
 }
-
 

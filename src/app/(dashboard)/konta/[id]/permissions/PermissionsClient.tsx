@@ -54,6 +54,13 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     keys: ['konta.view', 'konta.create', 'konta.edit', 'konta.delete', 'konta.permissions', 'audit.view', 'settings.view', 'settings.edit'],
   },
   {
+    id: 'infrastructure',
+    label: 'Infrastruktura',
+    icon: <HardDrive className="h-4 w-4" />,
+    ecosystem: 'core',
+    keys: ['infrastructure.access'],
+  },
+  {
     id: 'vezvision-access',
     label: 'VezVision — Dostęp',
     icon: <Globe className="h-4 w-4" />,
@@ -189,7 +196,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
     {
       name: 'core' as const,
       label: 'Core',
-      description: 'Konta, audit i ustawienia systemowe',
+      description: 'Konta, audit, ustawienia i infrastruktura',
       color: 'emerald' as const,
       icon: Shield,
     },

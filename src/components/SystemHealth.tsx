@@ -51,7 +51,7 @@ type AccessGroup = {
 
 const filters: Array<{ id: EnvironmentFilter; label: string }> = [
   { id: 'all', label: 'Wszystko' },
-  { id: 'production', label: 'Production' },
+  { id: 'production', label: 'Produkcja' },
   { id: 'labs', label: 'Labs' },
   { id: 'monitor', label: 'Monitor' },
 ]
@@ -62,12 +62,12 @@ const accessGroups: AccessGroup[] = [
     name: 'Hetzner',
     icon: Server,
     color: 'emerald',
-    description: 'Produkcja, API i tunel bazy',
+    description: 'Produkcja i hosty',
     items: [
       {
         label: 'Hetzner Cloud',
         href: 'https://console.hetzner.cloud/projects',
-        description: 'Panel infrastruktury produkcyjnej',
+        description: 'Panel chmury',
         alias: 'ssh vez-prod',
         aliasType: 'prod',
         aliasDescription: 'root na hoście produkcyjnym',
@@ -75,7 +75,7 @@ const accessGroups: AccessGroup[] = [
       {
         label: 'VEZvision',
         href: 'https://vezvision.com',
-        description: 'Publiczna produkcja VEZvision',
+        description: 'Strona produkcyjna',
         alias: 'ssh vez-prod',
         aliasType: 'prod',
         aliasDescription: 'wejście na host produkcji',
@@ -83,7 +83,7 @@ const accessGroups: AccessGroup[] = [
       {
         label: 'API health',
         href: 'https://api.vezvision.com/healthz',
-        description: 'Publiczny healthcheck API',
+        description: 'Status API produkcji',
         alias: 'ssh vez-prod',
         aliasType: 'prod',
         aliasDescription: 'diagnostyka usług API',
@@ -91,7 +91,7 @@ const accessGroups: AccessGroup[] = [
       {
         label: 'DB tunnel',
         href: 'https://api.vezvision.com/healthz',
-        description: 'Tunel do bazy przez host produkcyjny',
+        description: 'Tunel do bazy',
         alias: 'ssh -N vezvision-db-tunnel',
         aliasType: 'tunnel',
         aliasDescription: 'lokalny tunel PostgreSQL',
@@ -103,12 +103,12 @@ const accessGroups: AccessGroup[] = [
     name: 'Labs',
     icon: FlaskConical,
     color: 'blue',
-    description: 'VEZlabs, Proxmox i Coolify',
+    description: 'VEZcore, testy i self-hosting',
     items: [
       {
         label: 'VEZcore',
         href: 'https://vezcore.vezlabs.dev',
-        description: 'Prywatny VEZcore w labie',
+        description: 'Dashboard produkcyjny VEZcore',
         alias: 'ssh vezlabs-coolify',
         aliasType: 'lab',
         aliasDescription: 'VM Coolify w VLAN Servers',
@@ -116,7 +116,7 @@ const accessGroups: AccessGroup[] = [
       {
         label: 'VEZcore test',
         href: 'https://vezcoretest.vezlabs.dev',
-        description: 'Pre-production dla develop',
+        description: 'Środowisko testowe',
         alias: 'ssh vezlabs-coolify',
         aliasType: 'lab',
         aliasDescription: 'host deployów testowych',
@@ -124,7 +124,7 @@ const accessGroups: AccessGroup[] = [
       {
         label: 'Proxmox',
         href: 'https://10.77.40.2:8006/',
-        description: 'Hypervisor VEZlab',
+        description: 'Maszyny wirtualne',
         alias: 'ssh vezlabs-pve',
         aliasType: 'lab',
         aliasDescription: 'Proxmox przez router',
@@ -132,7 +132,7 @@ const accessGroups: AccessGroup[] = [
       {
         label: 'Coolify',
         href: 'https://10.77.30.35:8000/',
-        description: 'Panel self-hostingu labu',
+        description: 'Deploy i aplikacje',
         alias: 'ssh vezlabs-coolify',
         aliasType: 'lab',
         aliasDescription: 'root na VM Coolify',
@@ -140,7 +140,7 @@ const accessGroups: AccessGroup[] = [
       {
         label: 'Router',
         href: 'https://192.168.2.1/',
-        description: 'OpenWrt i trasy VLAN',
+        description: 'Sieć i VLAN',
         alias: 'ssh vezlabs-router',
         aliasType: 'router',
         aliasDescription: 'router VEZlab',
@@ -152,12 +152,12 @@ const accessGroups: AccessGroup[] = [
     name: 'Monitor',
     icon: Activity,
     color: 'cyan',
-    description: 'Monitoring i healthchecki',
+    description: 'Status usług',
     items: [
       {
         label: 'Monitor',
         href: 'https://monitor.vezlabs.dev',
-        description: 'Dashboard monitoringu',
+        description: 'Panel monitoringu',
         alias: 'ssh vezlabs-coolify',
         aliasType: 'lab',
         aliasDescription: 'serwis monitoringu w labie',
@@ -165,7 +165,7 @@ const accessGroups: AccessGroup[] = [
       {
         label: 'Lab API health',
         href: 'https://api.vezlabs.dev/healthz',
-        description: 'Healthcheck API labu',
+        description: 'Status API labu',
         alias: 'ssh vezlabs-coolify',
         aliasType: 'lab',
         aliasDescription: 'diagnostyka lab gateway',
@@ -173,7 +173,7 @@ const accessGroups: AccessGroup[] = [
       {
         label: 'Prod API health',
         href: 'https://api.vezvision.com/healthz',
-        description: 'Healthcheck API produkcji',
+        description: 'Status API produkcji',
         alias: 'ssh vez-prod',
         aliasType: 'prod',
         aliasDescription: 'diagnostyka produkcji',
@@ -205,6 +205,13 @@ const aliasTypeClasses: Record<AccessGroup['items'][number]['aliasType'], string
   lab: 'border-blue-500/20 bg-blue-500/10 text-blue-400 light:text-blue-700',
   tunnel: 'border-purple-500/20 bg-purple-500/10 text-purple-400 light:text-purple-700',
   router: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-400 light:text-cyan-700',
+}
+
+const aliasTypeLabels: Record<AccessGroup['items'][number]['aliasType'], string> = {
+  prod: 'Prod',
+  lab: 'Lab',
+  tunnel: 'Tunel',
+  router: 'Router',
 }
 
 const statusClasses: Record<HealthStatus, { dot: string; label: string; text: string }> = {
@@ -297,7 +304,7 @@ export function SystemHealth() {
         </div>
 
         <p className="text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#999999]">
-          Dostęp techniczny
+          Infrastruktura
         </p>
       </div>
 
@@ -373,7 +380,7 @@ export function SystemHealth() {
                                 <span className="truncate">{item.label}</span>
                               </a>
                               <span className={`w-fit rounded-full border px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] ${aliasTypeClasses[item.aliasType]}`}>
-                                {item.aliasType}
+                                {aliasTypeLabels[item.aliasType]}
                               </span>
                               {showVezCoreStatus && (
                                 <span
@@ -426,11 +433,11 @@ export function SystemHealth() {
                               ) : (
                                 <Eye className="h-3.5 w-3.5 shrink-0" />
                               )}
-                              <span className={isRevealed ? 'hidden' : 'truncate group-hover/alias:hidden'}>ssh •••••••</span>
+                              <span className={isRevealed ? 'hidden' : 'truncate group-hover/alias:hidden'}>Alias SSH ukryty</span>
                               <span className={isRevealed ? 'truncate' : 'hidden truncate group-hover/alias:inline'}>{item.alias}</span>
                             </span>
                             <span className="shrink-0 text-[10px] text-[#555555] light:text-[#999999]">
-                              {isCopied ? 'Skopiowano' : isRevealed ? 'Kopiuj' : item.aliasType}
+                              {isCopied ? 'Skopiowano' : isRevealed ? 'Kopiuj' : 'Pokaż'}
                             </span>
                           </button>
                         </div>

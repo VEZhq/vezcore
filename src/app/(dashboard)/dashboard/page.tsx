@@ -28,7 +28,7 @@ export default async function DashboardPage() {
   return (
     <div className="relative min-h-screen bg-[#0a0a0a] light:bg-[#f5f5f5] transition-colors duration-300">
       <NeuralBackground />
-      <VezCoreStatusBadge />
+      {permissions.canAccessInfrastructure && <VezCoreStatusBadge />}
 
       <div
         className="fixed inset-0 pointer-events-none opacity-20 light:opacity-10 transition-opacity duration-300"
@@ -59,11 +59,16 @@ export default async function DashboardPage() {
           />
         </div>
 
-        <div className="w-full max-w-5xl mb-8">
-          <SystemHealth />
-        </div>
+        {permissions.canAccessInfrastructure && (
+          <div className="w-full max-w-5xl mb-8">
+            <SystemHealth />
+          </div>
+        )}
 
-        <DashboardModules canAccessVezVision={permissions.canAccessVezVision} />
+        <DashboardModules
+          canAccessVezVision={permissions.canAccessVezVision}
+          canAccessInfrastructure={permissions.canAccessInfrastructure}
+        />
 
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
           {quickLinks.map((link) => (
