@@ -44,22 +44,22 @@ export default async function DashboardPage() {
         }}
       />
 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
-        <div className="mb-12">
+      <div className="relative z-10 flex min-h-screen flex-col items-center px-4 pb-12 pt-16 sm:pt-20">
+        <div className="mb-8">
           <Image
             src="/logo/vezcore_logo_white_full.svg"
             alt="vezCore"
-            width={280}
+            width={220}
             height={78}
-            className="h-auto w-[280px] max-w-[72vw] opacity-80 light:opacity-0 light:hidden transition-opacity duration-300"
+            className="h-auto w-[220px] max-w-[64vw] opacity-80 light:opacity-0 light:hidden transition-opacity duration-300"
             priority
           />
           <Image
             src="/logo/vezcore_logo_black_full.svg"
             alt="vezCore"
-            width={280}
+            width={220}
             height={78}
-            className="h-auto w-[280px] max-w-[72vw] opacity-0 light:opacity-80 dark:hidden transition-opacity duration-300"
+            className="h-auto w-[220px] max-w-[64vw] opacity-0 light:opacity-80 dark:hidden transition-opacity duration-300"
             priority
           />
         </div>
@@ -89,7 +89,7 @@ export default async function DashboardPage() {
         />
 
         {permissions.canAccessInfrastructure && (
-          <div id="infrastructure" className="w-full max-w-5xl mb-8 scroll-mt-8">
+          <div id="infrastructure" className="w-full max-w-6xl mb-7 scroll-mt-8">
             <SystemHealth />
           </div>
         )}
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
           canAccessInfrastructure={permissions.canAccessInfrastructure}
         />
 
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
           {quickLinks.map((link) => (
             <Link
               key={`${link.href}-${link.name}`}

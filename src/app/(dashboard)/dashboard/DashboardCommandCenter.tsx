@@ -263,7 +263,11 @@ export function DashboardCommandCenter({
   const allowedRecentPages = recentPages
     .filter((page) => canShowRecent(page.href, access))
     .filter((page, index, pages) => pages.findIndex((item) => item.href === page.href) === index)
-    .slice(0, 5)
+    .slice(0, 4)
+
+  const primaryActions = actions
+    .filter((action) => ['vezvision', 'infra', 'audit', 'konta', 'settings', 'profile'].includes(action.id))
+    .slice(0, 4)
 
   const openItem = (href: string) => {
     setOpen(false)
@@ -288,10 +292,10 @@ export function DashboardCommandCenter({
   }
 
   return (
-    <div className="w-full max-w-5xl mb-8 space-y-3">
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl p-3">
-          <div className="flex items-center gap-2">
+    <div className="w-full max-w-6xl mb-7 space-y-3">
+      <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="relative border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl">
+          <div className="flex items-center gap-2 px-3 py-2.5">
             <Search className="h-4 w-4 shrink-0 text-[#555555] light:text-[#999999]" />
             <input
               ref={searchInputRef}
@@ -305,7 +309,7 @@ export function DashboardCommandCenter({
                 }
               }}
               placeholder="Szukaj w VEZcore"
-              className="h-9 min-w-0 flex-1 bg-transparent text-sm text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
+              className="h-8 min-w-0 flex-1 bg-transparent text-sm text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
             />
             <button
               type="button"
@@ -313,7 +317,7 @@ export function DashboardCommandCenter({
                 setOpen(true)
                 window.setTimeout(() => searchInputRef.current?.focus(), 0)
               }}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.08] text-[#777777] light:text-[#777777] hover:text-white light:hover:text-black"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.08] text-[#777777] light:text-[#777777] hover:text-white light:hover:text-black"
               aria-label="Otwórz command palette"
             >
               <Command className="h-4 w-4" />
@@ -321,8 +325,8 @@ export function DashboardCommandCenter({
           </div>
 
           {open && (
-            <div className="mt-3 border-t border-white/[0.06] light:border-black/[0.06] pt-2">
-              <div className="max-h-72 overflow-y-auto">
+            <div className="absolute left-0 right-0 top-full z-30 mt-2 border border-white/[0.08] light:border-black/[0.08] bg-[#070707] light:bg-white p-1.5 shadow-2xl">
+              <div className="max-h-80 overflow-y-auto">
                 {commandItems.length === 0 ? (
                   <p className="px-2 py-3 text-xs text-[#666666] light:text-[#999999]">Brak wyników</p>
                 ) : (
@@ -333,7 +337,7 @@ export function DashboardCommandCenter({
                         key={`${item.href}-${item.id}`}
                         type="button"
                         onClick={() => openItem(item.href)}
-                        className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-white/[0.04] light:hover:bg-black/[0.04]"
+                        className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-white/[0.05] light:hover:bg-black/[0.04]"
                       >
                         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.08] bg-white/[0.02] light:bg-black/[0.02]">
                           <Icon className="h-4 w-4 text-emerald-400 light:text-emerald-600" />
@@ -351,46 +355,55 @@ export function DashboardCommandCenter({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2 border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl p-3">
-          <div className="min-w-0">
-            <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
-              <CalendarDays className="h-3 w-3" />
-              Dzisiaj
-            </p>
-            <p className="mt-1 truncate text-sm text-white light:text-black">{formatToday()}</p>
-          </div>
-          <div className="min-w-0">
-            <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
-              <LogIn className="h-3 w-3" />
-              Login
-            </p>
-            <p className="mt-1 truncate text-sm text-white light:text-black">{formatShortDate(user.lastSignInAt)}</p>
-          </div>
-          <div className="min-w-0">
-            <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
-              <Shield className="h-3 w-3" />
-              Rola
-            </p>
-            <p className="mt-1 truncate text-sm text-white light:text-black">{access.role ?? 'user'}</p>
-          </div>
-          <div className="min-w-0">
-            <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
-              <User className="h-3 w-3" />
-              Użytkownik
-            </p>
-            <p className="mt-1 truncate text-sm text-white light:text-black">{user.email ?? 'konto'}</p>
-          </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
+          {[
+            { label: 'Dzisiaj', value: formatToday(), icon: CalendarDays },
+            { label: 'Login', value: formatShortDate(user.lastSignInAt), icon: LogIn },
+            { label: 'Rola', value: access.role ?? 'user', icon: Shield },
+            { label: 'Konto', value: user.email ?? 'konto', icon: User },
+          ].map((item) => {
+            const Icon = item.icon
+            return (
+              <div key={item.label} className="min-w-0 border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 px-3 py-2 backdrop-blur-xl">
+                <p className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
+                  <Icon className="h-3 w-3" />
+                  {item.label}
+                </p>
+                <p className="mt-1 truncate text-xs text-white light:text-black">{item.value}</p>
+              </div>
+            )
+          })}
         </div>
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl p-4">
+      {primaryActions.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {primaryActions.map((action) => {
+            const Icon = action.icon
+            return (
+              <Link
+                key={action.id}
+                href={action.href}
+                className="inline-flex min-h-8 max-w-full items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-white/[0.02] light:bg-black/[0.02] px-3 py-1.5 text-[11px] text-[#b5b5b5] light:text-[#444444] hover:border-emerald-400/25 light:hover:border-emerald-600/25 hover:text-white light:hover:text-black transition-colors"
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0 text-emerald-400 light:text-emerald-600" />
+                <span className="truncate">{action.title}</span>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl px-3 py-2.5">
           <div className="flex items-center justify-between gap-3">
-            <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#555555] light:text-[#999999]">
+            <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#555555] light:text-[#999999]">
               <StickyNote className="h-3.5 w-3.5" />
               Notatka
             </p>
-            <span className="text-[10px] text-[#555555] light:text-[#999999]">{note.length}/{noteLimit}</span>
+            <span className="shrink-0 text-[10px] text-[#555555] light:text-[#999999]">
+              {lastUpdated && access.canAccessSettings ? `Zapisano ${formatShortDate(lastUpdated)}` : `${note.length}/${noteLimit}`}
+            </span>
           </div>
 
           {access.canAccessSettings ? (
@@ -398,28 +411,22 @@ export function DashboardCommandCenter({
               value={note}
               onChange={(event) => saveNote(event.target.value)}
               maxLength={noteLimit}
-              rows={2}
+              rows={1}
               placeholder="Krótki kontekst na teraz"
-              className="mt-3 w-full resize-none bg-transparent text-sm leading-relaxed text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
+              className="mt-2 h-9 w-full resize-none bg-transparent text-sm leading-relaxed text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
             />
           ) : (
-            <p className="mt-3 text-sm text-[#666666] light:text-[#999999]">Brak dostępu do notatki operacyjnej.</p>
-          )}
-
-          {lastUpdated && access.canAccessSettings && (
-            <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[#444444] light:text-[#999999]">
-              Zapisano {formatShortDate(lastUpdated)}
-            </p>
+            <p className="mt-2 text-sm text-[#666666] light:text-[#999999]">Brak dostępu do notatki operacyjnej.</p>
           )}
         </div>
 
-        <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl p-4">
-          <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#555555] light:text-[#999999]">
+        <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl px-3 py-2.5">
+          <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#555555] light:text-[#999999]">
             <History className="h-3.5 w-3.5" />
             Ostatnio
           </p>
 
-          <div className="mt-3 space-y-2">
+          <div className="mt-2 grid gap-1.5">
             {allowedRecentPages.length === 0 ? (
               <p className="text-sm text-[#666666] light:text-[#999999]">Brak historii</p>
             ) : (
@@ -427,9 +434,9 @@ export function DashboardCommandCenter({
                 <Link
                   key={`${page.href}-${page.visitedAt}`}
                   href={page.href}
-                  className="flex items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-white/[0.04] light:hover:bg-black/[0.04]"
+                  className="flex min-h-7 items-center justify-between gap-3 rounded-md px-2 text-xs hover:bg-white/[0.04] light:hover:bg-black/[0.04]"
                 >
-                  <span className="truncate text-sm text-white light:text-black">{getRecentLabel(page.href)}</span>
+                  <span className="truncate text-white light:text-black">{getRecentLabel(page.href)}</span>
                   <span className="shrink-0 text-[10px] text-[#555555] light:text-[#999999]">{formatShortDate(page.visitedAt)}</span>
                 </Link>
               ))

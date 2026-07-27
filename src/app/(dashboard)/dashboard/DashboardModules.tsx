@@ -136,8 +136,8 @@ export function DashboardModules({
     : permissionFilteredModules.filter((m) => !preferences.hiddenModules.includes(m.name))
 
   return (
-    <div className="w-full max-w-5xl mb-8">
-      <div className="flex justify-end mb-3">
+    <div className="w-full max-w-6xl mb-7">
+      <div className="flex justify-end mb-2">
         <button
           onClick={() => setEditMode((v) => !v)}
           className={`flex items-center gap-1.5 text-[10px] uppercase tracking-[0.25em] transition-colors duration-200 ${
@@ -151,7 +151,7 @@ export function DashboardModules({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
         {visibleModules.map((mod) => {
           const isHidden = preferences.hiddenModules.includes(mod.name)
           const sources = moduleStatusSources[mod.name]
@@ -172,14 +172,14 @@ export function DashboardModules({
 
           const cardContent = (
             <div
-              className={`relative tile-${mod.color} tile-hover group bg-[#111111]/80 light:bg-white/90 backdrop-blur-xl border border-white/[0.06] light:border-black/[0.08] p-6 transition-all duration-300 ${
+              className={`relative tile-${mod.color} tile-hover group min-h-[168px] bg-[#111111]/80 light:bg-white/90 backdrop-blur-xl border border-white/[0.06] light:border-black/[0.08] p-4 transition-all duration-300 ${
                 editMode ? 'cursor-default' : mod.href ? 'cursor-pointer' : 'cursor-default'
               } ${isHidden ? 'opacity-40' : ''}`}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-md bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] flex items-center justify-center transition-colors duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-md bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] flex items-center justify-center transition-colors duration-300">
                   <mod.icon
-                    className={`h-6 w-6 ${DASHBOARD_MODULE_ICON_COLORS[mod.color].dark} light:${DASHBOARD_MODULE_ICON_COLORS[mod.color].light} transition-colors duration-300`}
+                    className={`h-5 w-5 ${DASHBOARD_MODULE_ICON_COLORS[mod.color].dark} light:${DASHBOARD_MODULE_ICON_COLORS[mod.color].light} transition-colors duration-300`}
                   />
                 </div>
 
@@ -198,16 +198,16 @@ export function DashboardModules({
                 )}
               </div>
 
-              <h3 className="text-base font-medium text-white light:text-black mb-1 transition-colors duration-300">
+              <h3 className="text-sm font-medium text-white light:text-black mb-1 transition-colors duration-300">
                 {mod.label}
               </h3>
-              <p className="text-xs text-[#666666] light:text-[#999999] transition-colors duration-300">
+              <p className="line-clamp-2 text-[11px] leading-relaxed text-[#666666] light:text-[#999999] transition-colors duration-300">
                 {mod.description}
               </p>
 
               {hasStatus && (
-                <div className="mt-5 border-t border-white/[0.05] light:border-black/[0.06] pt-3 space-y-2">
-                  <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em]">
+                <div className="mt-4 border-t border-white/[0.05] light:border-black/[0.06] pt-2.5 space-y-1.5">
+                  <div className="flex items-center justify-between gap-3 text-[9px] uppercase tracking-[0.14em]">
                     <span
                       className={`group/status relative inline-flex items-center gap-2 ${status.text}`}
                     >
@@ -226,7 +226,7 @@ export function DashboardModules({
                   </div>
 
                   {sources.deploy && (
-                    <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
+                    <div className="flex items-center justify-between gap-3 text-[9px] uppercase tracking-[0.14em] text-[#555555] light:text-[#999999]">
                       <span>Deploy</span>
                       <span className={statusMeta[getDeployHealthStatus(infraData?.deploy.status)].text}>
                         {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}
