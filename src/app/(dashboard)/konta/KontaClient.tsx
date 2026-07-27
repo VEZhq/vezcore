@@ -1,9 +1,31 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useMemo, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { Home, User, Settings, Search, Filter, ChevronLeft, ChevronRight, Edit, Plus, X, Trash2, Download } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import type { LucideIcon } from 'lucide-react'
+import {
+  ArrowLeft,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Edit,
+  Home,
+  KeyRound,
+  Mail,
+  Plus,
+  Search,
+  Settings,
+  Shield,
+  ShieldCheck,
+  Trash2,
+  User,
+  UserCog,
+  Users,
+  X,
+} from 'lucide-react'
 import { useUserPreferences } from '@/components/providers/UserPreferencesProvider'
 import { Checkbox } from '@/components/ui/checkbox'
 import { createUser, deleteUser, updateUser } from '@/lib/actions/users'
@@ -35,6 +57,107 @@ interface KontaClientProps {
   canAccessSettings: boolean
 }
 
+function roleLabel(role: string | null) {
+  if (!role) return 'user'
+  if (role === 'super_admin') return 'super admin'
+  return role
+}
+
+function roleTone(role: string | null) {
+  if (role === 'super_admin') return 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300 light:text-emerald-700'
+  if (role === 'admin') return 'border-blue-500/25 bg-blue-500/10 text-blue-300 light:text-blue-700'
+  return 'border-white/[0.07] bg-white/[0.03] text-[#999999] light:border-black/[0.08] light:bg-black/[0.03] light:text-[#666666]'
+}
+
+function NavLink({
+  href,
+  label,
+  icon: Icon,
+  active,
+}: {
+  href: string
+  label: string
+  icon?: LucideIcon
+  active?: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex h-10 items-center gap-2 rounded-md border px-3 text-xs transition-colors ${
+        active
+          ? 'border-white/[0.12] bg-white/[0.06] text-white light:border-black/[0.12] light:bg-black/[0.05] light:text-black'
+          : 'border-white/[0.07] text-[#888888] hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black'
+      }`}
+    >
+      {Icon && <Icon className="h-4 w-4" />}
+      {label}
+    </Link>
+  )
+}
+
+function MetricCard({
+  label,
+  value,
+  helper,
+  icon: Icon,
+}: {
+  label: string
+  value: string | number
+  helper: string
+  icon: LucideIcon
+}) {
+  return (
+    <div className="rounded-md border border-white/[0.07] bg-[#0d0d0d]/85 p-4 light:border-black/[0.08] light:bg-white/90">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#888888]">{label}</p>
+          <p className="mt-2 text-2xl font-semibold text-white light:text-black">{value}</p>
+        </div>
+        <div className="flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] bg-white/[0.03] light:border-black/[0.08] light:bg-black/[0.03]">
+          <Icon className="h-4 w-4 text-emerald-400 light:text-emerald-600" />
+        </div>
+      </div>
+      <p className="mt-3 text-xs text-[#777777] light:text-[#777777]">{helper}</p>
+    </div>
+  )
+}
+
+function PermissionPill({
+  label,
+  enabled,
+}: {
+  label: string
+  enabled: boolean
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-white/[0.05] py-3 last:border-b-0 light:border-black/[0.06]">
+      <span className="text-xs text-[#888888] light:text-[#666666]">{label}</span>
+      <span
+        className={`inline-flex items-center gap-2 text-xs ${
+          enabled ? 'text-emerald-400 light:text-emerald-600' : 'text-[#666666] light:text-[#999999]'
+        }`}
+      >
+        <span className={`h-2 w-2 rounded-full ${enabled ? 'bg-emerald-400 light:bg-emerald-600' : 'bg-[#444444] light:bg-[#b5b5b5]'}`} />
+        {enabled ? 'aktywny' : 'brak'}
+      </span>
+    </div>
+  )
+}
+
+function EmptyState({ search }: { search: string }) {
+  return (
+    <div className="flex min-h-[340px] flex-col items-center justify-center px-6 text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-md border border-white/[0.07] bg-white/[0.03] light:border-black/[0.08] light:bg-black/[0.03]">
+        <Users className="h-5 w-5 text-[#777777] light:text-[#777777]" />
+      </div>
+      <p className="mt-4 text-sm font-medium text-white light:text-black">Brak kont do wyświetlenia</p>
+      <p className="mt-2 max-w-sm text-xs text-[#777777] light:text-[#777777]">
+        {search ? 'Nie znaleziono kont pasujących do wpisanej frazy.' : 'Lista kont jest pusta albo nie została jeszcze zsynchronizowana.'}
+      </p>
+    </div>
+  )
+}
+
 export default function KontaClient({
   users,
   total,
@@ -47,14 +170,12 @@ export default function KontaClient({
   canAccessAudit,
   canAccessSettings,
 }: KontaClientProps) {
-  void userRole
   const router = useRouter()
   const searchParams = useSearchParams()
   const { preferences } = useUserPreferences()
   const { confirm } = useConfirm()
   const { token: csrfToken } = useCSRFToken()
   const [search, setSearch] = useState(searchParams.get('search') || '')
-  const [showFilters, setShowFilters] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [addEmail, setAddEmail] = useState('')
   const [addPassword, setAddPassword] = useState('')
@@ -66,6 +187,16 @@ export default function KontaClient({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkActionLoading, setBulkActionLoading] = useState(false)
   const [bulkRole, setBulkRole] = useState('')
+
+  const page = initialPage
+  const paginatedUsers = users
+  const totalPages = Math.ceil(total / limit)
+  const selectedCount = selectedIds.size
+  const visibleAdmins = useMemo(
+    () => users.filter(user => user.role === 'admin' || user.role === 'super_admin').length,
+    [users]
+  )
+  const visibleClients = users.length - visibleAdmins
 
   const handleSearchChange = (value: string) => {
     setSearch(value)
@@ -156,12 +287,6 @@ export default function KontaClient({
 
     downloadUserCsv(result as Array<{ email: string; full_name: string | null; role: string; created_at: string; last_sign_in: string | null }>)
   }
-
-  const page = initialPage
-  const filteredUsers = users
-  const paginatedUsers = filteredUsers
-  const filteredTotal = total
-  const filteredTotalPages = Math.ceil(filteredTotal / limit)
 
   const toggleSelectAll = useCallback(() => {
     setSelectedIds(prev => {
@@ -266,421 +391,476 @@ export default function KontaClient({
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] light:bg-[#f5f5f5] transition-colors duration-300">
-      <MobileNav currentPath="/konta" showKonta={true} showAudit={canAccessAudit} showSettings={canAccessSettings} />
+    <div className="min-h-screen bg-[#080808] light:bg-[#f6f6f6] transition-colors duration-300">
+      <MobileNav currentPath="/konta" showKonta showAudit={canAccessAudit} showSettings={canAccessSettings} />
 
-      <div className="hidden lg:flex fixed top-6 left-6 right-6 z-50 items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-          >
-            <Home className="h-3 w-3" />
-            Dashboard
-          </Link>
-          <Link
-            href="/profile"
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-          >
-            <User className="h-3 w-3" />
-            Profil
-          </Link>
-          <Link
-            href="/konta"
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white light:text-black"
-          >
-            Konta
-          </Link>
-          {canAccessAudit && (
-            <Link
-              href="/audit"
-              className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-            >
-              Audit Log
-            </Link>
-          )}
-          {canAccessSettings && (
-            <Link
-              href="/settings"
-              className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-            >
-              <Settings className="h-3 w-3" />
-              Ustawienia
-            </Link>
-          )}
+      <div className="mx-auto min-h-screen w-full max-w-7xl px-4 py-8 sm:py-10">
+        <header className="mb-6 flex flex-col gap-5 border-b border-white/[0.07] pb-5 light:border-black/[0.08] lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <Image
+              src="/logo/vezcore_logo_white_full.svg"
+              alt="vezCore"
+              width={178}
+              height={52}
+              className="h-auto w-[178px] max-w-[60vw] opacity-85 light:hidden"
+              priority
+            />
+            <Image
+              src="/logo/vezcore_logo_black_full.svg"
+              alt="vezCore"
+              width={178}
+              height={52}
+              className="hidden h-auto w-[178px] max-w-[60vw] opacity-85 light:block"
+              priority
+            />
+            <p className="mt-4 text-[10px] uppercase tracking-[0.26em] text-[#666666] light:text-[#888888]">
+              Administracja
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold text-white light:text-black">
+              Konta użytkowników
+            </h1>
+          </div>
+
+          <nav className="flex flex-wrap gap-2">
+            <NavLink href="/dashboard" label="Dashboard" icon={ArrowLeft} />
+            <NavLink href="/profile" label="Profil" icon={User} />
+            <NavLink href="/konta" label="Konta" icon={Users} active />
+            {canAccessAudit && <NavLink href="/audit" label="Audit Log" icon={ShieldCheck} />}
+            {canAccessSettings && <NavLink href="/settings" label="Ustawienia" icon={Settings} />}
+          </nav>
+        </header>
+
+        <div className="mb-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <MetricCard label="Wszystkie konta" value={total} helper="Łączna liczba kont w systemie" icon={Users} />
+          <MetricCard label="Na tej stronie" value={paginatedUsers.length} helper={`Strona ${page}${totalPages > 0 ? ` z ${totalPages}` : ''}`} icon={Home} />
+          <MetricCard label="Admini" value={visibleAdmins} helper="Widoczni admini i super admini" icon={Shield} />
+          <MetricCard label="Zaznaczone" value={selectedCount} helper={selectedCount > 0 ? 'Gotowe do akcji zbiorczej' : 'Brak aktywnego zaznaczenia'} icon={Check} />
         </div>
-      </div>
 
-      <div className="p-4 lg:p-8 pt-20 lg:pt-24">
-        <div className="max-w-6xl mx-auto space-y-6 lg:space-y-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-medium text-white light:text-black transition-colors duration-300">
-                Konta użytkowników
-              </h1>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mt-1 transition-colors duration-300">
-                Zarządzanie kontami systemu
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-[10px] text-[#666666] light:text-[#999999]">
-                {filteredTotal} użytkowników
-              </span>
-              {canAddUsers && (
-                <button
-                  onClick={() => setShowAddModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-emerald-400 light:text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
-                >
-                  <Plus className="h-3 w-3" />
-                  Dodaj
-                </button>
-              )}
-              <button
-                onClick={handleExport}
-                className="flex items-center gap-2 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] border border-white/[0.06] light:border-black/[0.06] hover:bg-white/[0.02] light:hover:bg-black/[0.02] transition-colors"
-              >
-                <Download className="h-3 w-3" />
-                Eksportuj
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#444444] light:text-[#888888]" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  placeholder="Szukaj po email lub nazwie..."
-                  className="w-full h-12 pl-12 pr-4 bg-white/[0.02] light:bg-black/[0.02] border border-white/[0.06] light:border-black/[0.06] text-white light:text-black text-sm placeholder:text-[#444444] light:placeholder:text-[#888888] focus:outline-none focus:border-white/[0.12] light:focus:border-black/[0.12] transition-colors duration-300"
-                />
-              </div>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-4 h-12 text-[10px] uppercase tracking-[0.2em] border transition-colors duration-300 ${
-                  showFilters
-                    ? 'bg-white/[0.05] light:bg-black/[0.05] border-white/[0.12] light:border-black/[0.12] text-white light:text-black'
-                    : 'border-white/[0.06] light:border-black/[0.06] text-[#666666] light:text-[#999999] hover:bg-white/[0.02] light:hover:bg-black/[0.02]'
-                }`}
-              >
-                <Filter className="h-3 w-3" />
-                Filtry
-              </button>
-            </div>
-
-            {showFilters && (
-              <div className="flex items-center gap-4 p-4 bg-white/[0.02] light:bg-black/[0.02] border border-white/[0.06] light:border-black/[0.06] transition-colors duration-300">
-                <div className="flex-1">
-                  <p className="text-[10px] text-[#444444] light:text-[#888888]">
-                    Filtry będą dostępne wkrótce
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {selectedIds.size > 0 && (
-            <div className="flex flex-wrap items-center gap-3 p-3 bg-[#111111] light:bg-white border border-white/[0.06] light:border-black/[0.06] transition-colors duration-300">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999]">
-                Zaznaczono {selectedIds.size} użytkowników
-              </span>
-              {canDeleteUsers && (
-                <button
-                  onClick={handleBulkDelete}
-                  disabled={bulkActionLoading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <Trash2 className="h-3 w-3" />
-                  Usuń zaznaczone
-                </button>
-              )}
-              <button
-                onClick={handleBulkExport}
-                disabled={bulkActionLoading}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] border border-white/[0.06] light:border-black/[0.06] hover:bg-white/[0.02] light:hover:bg-black/[0.02] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <Download className="h-3 w-3" />
-                Eksportuj zaznaczone
-              </button>
-              {canEditUsers && (
-                <div className="flex items-center gap-1.5">
-                  <select
-                    value={bulkRole}
-                    onChange={(e) => setBulkRole(e.target.value)}
-                    className="h-8 px-2 text-[10px] bg-white/[0.02] light:bg-black/[0.02] border border-white/[0.06] light:border-black/[0.06] text-white light:text-black focus:outline-none focus:border-white/[0.12] light:focus:border-black/[0.12] transition-colors"
-                  >
-                    <option value="">Zmień rolę...</option>
-                    <option value="client">client</option>
-                    <option value="admin">admin</option>
-                    <option value="super_admin">super_admin</option>
-                  </select>
-                  {bulkRole && (
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
+          <main className="space-y-5">
+            <section className="rounded-md border border-white/[0.07] bg-[#0d0d0d]/85 light:border-black/[0.08] light:bg-white/90">
+              <div className="border-b border-white/[0.06] p-4 light:border-black/[0.06]">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white light:text-black">Lista kont</p>
+                    <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
+                      Szukaj, zaznaczaj i edytuj konta z jednego miejsca.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <div className="relative min-w-0 sm:w-[320px]">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666666] light:text-[#888888]" />
+                      <input
+                        type="text"
+                        value={search}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        placeholder="Szukaj po email lub nazwie"
+                        className="h-10 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-emerald-500/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                      />
+                    </div>
                     <button
-                      onClick={handleBulkRoleChange}
-                      disabled={bulkActionLoading}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-emerald-400 light:text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      onClick={handleExport}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
                     >
-                      Zatwierdź
+                      <Download className="h-4 w-4" />
+                      Eksport
                     </button>
-                  )}
+                    {canAddUsers && (
+                      <button
+                        onClick={() => setShowAddModal(true)}
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-emerald-500/25 bg-emerald-500/10 px-3 text-xs text-emerald-300 transition-colors hover:bg-emerald-500/15 light:text-emerald-700"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Dodaj
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {deleteError && (
+                <div className="border-b border-red-500/20 bg-red-500/10 px-4 py-3">
+                  <p className="text-xs text-red-300 light:text-red-700">{deleteError}</p>
                 </div>
               )}
-              <button
-                onClick={clearSelection}
-                className="ml-auto p-1.5 text-[#666666] light:text-[#999999] hover:text-white light:hover:text-black transition-colors"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
 
-          <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl transition-colors duration-300">
-            {deleteError && (
-              <div className="px-6 py-3 border-b border-white/[0.06] light:border-black/[0.06] bg-red-500/10">
-                <p className="text-xs text-red-400">{deleteError}</p>
-              </div>
-            )}
-            {paginatedUsers.length === 0 ? (
-              <div className="p-12 text-center">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
-                  Brak użytkowników
-                </p>
-                <p className="text-xs text-[#666666] light:text-[#999999] mt-2">
-                  {search
-                    ? 'Brak wyników dla wyszukiwania'
-                    : 'Nie znaleziono użytkowników'}
-                </p>
-              </div>
-            ) : (
-              <div>
-                <div className="flex items-center gap-3 px-4 lg:px-6 py-3 border-b border-white/[0.06] light:border-black/[0.06]">
-                  <Checkbox
-                    checked={paginatedUsers.length > 0 && selectedIds.size === paginatedUsers.length}
-                    indeterminate={selectedIds.size > 0 && selectedIds.size < paginatedUsers.length}
-                    onChange={toggleSelectAll}
-                    aria-label="Zaznacz wszystkich użytkowników"
-                    className="cursor-pointer"
-                  />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888]">
-                    {paginatedUsers.length > 0 && selectedIds.size === paginatedUsers.length
-                      ? 'Odznacz wszystkie'
-                      : 'Zaznacz wszystkie'}
-                  </span>
+              {selectedCount > 0 && (
+                <div className="border-b border-white/[0.06] bg-white/[0.03] px-4 py-3 light:border-black/[0.06] light:bg-black/[0.03]">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-md border border-white/[0.07] px-3 py-2 text-xs text-white light:border-black/[0.08] light:text-black">
+                      Zaznaczono: {selectedCount}
+                    </span>
+                    <button
+                      onClick={handleBulkExport}
+                      disabled={bulkActionLoading}
+                      className="inline-flex h-9 items-center gap-2 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50 light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                    >
+                      <Download className="h-4 w-4" />
+                      Eksportuj
+                    </button>
+                    {canEditUsers && (
+                      <>
+                        <select
+                          value={bulkRole}
+                          onChange={(e) => setBulkRole(e.target.value)}
+                          className="h-9 rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-xs text-white outline-none light:border-black/[0.08] light:bg-white light:text-black"
+                        >
+                          <option value="">Zmień rolę</option>
+                          <option value="client">client</option>
+                          <option value="admin">admin</option>
+                          <option value="super_admin">super_admin</option>
+                        </select>
+                        {bulkRole && (
+                          <button
+                            onClick={handleBulkRoleChange}
+                            disabled={bulkActionLoading}
+                            className="inline-flex h-9 items-center rounded-md border border-emerald-500/25 bg-emerald-500/10 px-3 text-xs text-emerald-300 transition-colors hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50 light:text-emerald-700"
+                          >
+                            Zatwierdź
+                          </button>
+                        )}
+                      </>
+                    )}
+                    {canDeleteUsers && (
+                      <button
+                        onClick={handleBulkDelete}
+                        disabled={bulkActionLoading}
+                        className="inline-flex h-9 items-center gap-2 rounded-md border border-red-500/25 bg-red-500/10 px-3 text-xs text-red-300 transition-colors hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50 light:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Usuń
+                      </button>
+                    )}
+                    <button
+                      onClick={clearSelection}
+                      className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                      aria-label="Wyczyść zaznaczenie"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="divide-y divide-white/[0.06] light:divide-black/[0.06]">
-                  {paginatedUsers.map((user) => (
-                    <div key={user.id} className="p-4 lg:p-6 hover:bg-white/[0.02] light:hover:bg-black/[0.02] transition-colors duration-300">
-                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <div className="flex items-center gap-4">
+              )}
+
+              {paginatedUsers.length === 0 ? (
+                <EmptyState search={search} />
+              ) : (
+                <div>
+                  <div className="grid grid-cols-[34px_minmax(0,1.5fr)_120px_170px_96px] items-center gap-4 border-b border-white/[0.06] px-4 py-3 light:border-black/[0.06] max-lg:hidden">
+                    <Checkbox
+                      checked={paginatedUsers.length > 0 && selectedIds.size === paginatedUsers.length}
+                      indeterminate={selectedIds.size > 0 && selectedIds.size < paginatedUsers.length}
+                      onChange={toggleSelectAll}
+                      aria-label="Zaznacz wszystkich użytkowników"
+                      className="cursor-pointer"
+                    />
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-[#666666] light:text-[#888888]">Użytkownik</p>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-[#666666] light:text-[#888888]">Rola</p>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-[#666666] light:text-[#888888]">Utworzono</p>
+                    <p className="text-right text-[10px] uppercase tracking-[0.18em] text-[#666666] light:text-[#888888]">Akcje</p>
+                  </div>
+
+                  <div className="divide-y divide-white/[0.06] light:divide-black/[0.06]">
+                    {paginatedUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        className="grid gap-4 px-4 py-4 transition-colors hover:bg-white/[0.025] light:hover:bg-black/[0.025] lg:grid-cols-[34px_minmax(0,1.5fr)_120px_170px_96px] lg:items-center"
+                      >
+                        <div className="flex items-center justify-between gap-3 lg:block">
                           <Checkbox
                             checked={selectedIds.has(user.id)}
                             onChange={() => toggleSelect(user.id)}
                             aria-label={`Zaznacz użytkownika ${user.email}`}
                             className="cursor-pointer"
                           />
-                          <div className={`w-10 h-10 rounded-lg ${getAvatarColor(user.full_name, user.email)} flex items-center justify-center text-sm font-medium flex-shrink-0`}>
+                          <span className={`rounded-md border px-2 py-1 text-[10px] uppercase tracking-[0.12em] lg:hidden ${roleTone(user.role)}`}>
+                            {roleLabel(user.role)}
+                          </span>
+                        </div>
+
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-sm font-semibold ${getAvatarColor(user.full_name, user.email)}`}>
                             {getInitials(user.full_name, user.email)}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm text-white light:text-black font-medium truncate">
+                            <p className="truncate text-sm font-medium text-white light:text-black">
                               {user.full_name || user.email.split('@')[0]}
                             </p>
-                            <p className="text-[10px] text-[#666666] light:text-[#999999] font-mono truncate">
+                            <p className="mt-1 truncate font-mono text-xs text-[#777777] light:text-[#777777]">
                               {user.email}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between lg:justify-end gap-4 lg:gap-6">
-                          <div className="flex items-center gap-4 lg:gap-6">
-                            <div className="text-left lg:text-right">
-                              <p className="text-[9px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888]">
-                                Rola
-                              </p>
-                              <p className="text-xs text-white light:text-black">
-                                {user.role || 'user'}
-                              </p>
-                            </div>
+                        <div className="hidden lg:block">
+                          <span className={`inline-flex rounded-md border px-2 py-1 text-[10px] uppercase tracking-[0.12em] ${roleTone(user.role)}`}>
+                            {roleLabel(user.role)}
+                          </span>
+                        </div>
 
-                            <div className="hidden md:block text-right">
-                              <p className="text-[9px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888]">
-                                Data
-                              </p>
-                              <p className="text-xs text-[#666666] light:text-[#999999] font-mono">
-                                {formatDate(user.created_at)}
-                              </p>
-                            </div>
-                          </div>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-[#666666] light:text-[#888888] lg:hidden">
+                            Utworzono
+                          </p>
+                          <p className="mt-1 font-mono text-xs text-[#888888] light:text-[#666666] lg:mt-0">
+                            {formatDate(user.created_at)}
+                          </p>
+                        </div>
 
-                          <div className="flex items-center gap-2">
-                            {canEditUsers && (
-                              <Link
-                                href={`/konta/${user.id}`}
-                                className="p-2 text-[#666666] light:text-[#999999] hover:text-white light:hover:text-black transition-colors"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Link>
-                            )}
-                            {canDeleteUsers && (
-                              <button
-                                onClick={() => handleDelete(user.id, user.email)}
-                                disabled={deleteLoading === user.id}
-                                className="p-2 text-[#666666] light:text-[#999999] hover:text-red-400 light:hover:text-red-600 transition-colors disabled:opacity-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            )}
-                          </div>
+                        <div className="flex items-center justify-end gap-2">
+                          {canEditUsers && (
+                            <Link
+                              href={`/konta/${user.id}`}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                              aria-label={`Edytuj użytkownika ${user.email}`}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Link>
+                          )}
+                          {canDeleteUsers && (
+                            <button
+                              onClick={() => handleDelete(user.id, user.email)}
+                              disabled={deleteLoading === user.id}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] text-[#999999] transition-colors hover:border-red-500/30 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50 light:border-black/[0.08] light:text-[#666666] light:hover:text-red-700"
+                              aria-label={`Usuń użytkownika ${user.email}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {totalPages > 1 && (
+              <div className="flex flex-col gap-3 rounded-md border border-white/[0.07] bg-[#0d0d0d]/85 p-3 light:border-black/[0.08] light:bg-white/90 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-[#777777] light:text-[#777777]">
+                  Wyświetlane {((page - 1) * limit) + 1}-{Math.min(page * limit, total)} z {total} kont
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => handlePageChange(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="inline-flex h-9 items-center gap-1 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-40 light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Poprzednia
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum: number
+                      if (totalPages <= 5) {
+                        pageNum = i + 1
+                      } else if (page <= 3) {
+                        pageNum = i + 1
+                      } else if (page >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i
+                      } else {
+                        pageNum = page - 2 + i
+                      }
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`h-9 w-9 rounded-md text-xs transition-colors ${
+                            page === pageNum
+                              ? 'bg-white/[0.08] text-white light:bg-black/[0.08] light:text-black'
+                              : 'text-[#999999] hover:bg-white/[0.03] hover:text-white light:text-[#666666] light:hover:bg-black/[0.03] light:hover:text-black'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
+                    disabled={page === totalPages}
+                    className="inline-flex h-9 items-center gap-1 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-40 light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                  >
+                    Następna
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             )}
-          </div>
+          </main>
 
-          {filteredTotalPages > 1 && (
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] text-[#444444] light:text-[#888888]">
-                Wyświetlane {((page - 1) * limit) + 1}-{Math.min(page * limit, filteredTotal)} z {filteredTotal} użytkowników
+          <aside className="space-y-5">
+            <section className="rounded-md border border-white/[0.07] bg-[#0d0d0d]/85 p-5 light:border-black/[0.08] light:bg-white/90">
+              <p className="text-sm font-medium text-white light:text-black">Zakres dostępu</p>
+              <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
+                Twoja rola: <span className="text-white light:text-black">{roleLabel(userRole)}</span>
               </p>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handlePageChange(Math.max(1, page - 1))}
-                  disabled={page === 1}
-                  className="flex items-center gap-1 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] border border-white/[0.06] light:border-black/[0.06] hover:bg-white/[0.02] light:hover:bg-black/[0.02] disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-300"
-                >
-                  <ChevronLeft className="h-3 w-3" />
-                  Poprzednia
-                </button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, filteredTotalPages) }, (_, i) => {
-                    let pageNum: number
-                    if (filteredTotalPages <= 5) {
-                      pageNum = i + 1
-                    } else if (page <= 3) {
-                      pageNum = i + 1
-                    } else if (page >= filteredTotalPages - 2) {
-                      pageNum = filteredTotalPages - 4 + i
-                    } else {
-                      pageNum = page - 2 + i
-                    }
-
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`w-8 h-8 text-[10px] transition-colors duration-300 ${
-                          page === pageNum
-                            ? 'bg-white/[0.08] light:bg-black/[0.08] text-white light:text-black'
-                            : 'text-[#666666] light:text-[#999999] hover:bg-white/[0.02] light:hover:bg-black/[0.02]'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    )
-                  })}
-                </div>
-
-                <button
-                  onClick={() => handlePageChange(Math.min(filteredTotalPages, page + 1))}
-                  disabled={page === filteredTotalPages}
-                  className="flex items-center gap-1 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] border border-white/[0.06] light:border-black/[0.06] hover:bg-white/[0.02] light:hover:bg-black/[0.02] disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-300"
-                >
-                  Następna
-                  <ChevronRight className="h-3 w-3" />
-                </button>
+              <div className="mt-4">
+                <PermissionPill label="Dodawanie kont" enabled={canAddUsers} />
+                <PermissionPill label="Edycja danych" enabled={canEditUsers} />
+                <PermissionPill label="Usuwanie kont" enabled={canDeleteUsers} />
+                <PermissionPill label="Audit log" enabled={canAccessAudit} />
+                <PermissionPill label="Ustawienia" enabled={canAccessSettings} />
               </div>
-            </div>
-          )}
+            </section>
+
+            <section className="rounded-md border border-white/[0.07] bg-[#0d0d0d]/85 p-5 light:border-black/[0.08] light:bg-white/90">
+              <p className="text-sm font-medium text-white light:text-black">Szybkie akcje</p>
+              <div className="mt-4 space-y-2">
+                {canAddUsers && (
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Plus className="h-4 w-4 text-emerald-400 light:text-emerald-600" />
+                      Nowe konto
+                    </span>
+                    <span className="text-xs text-[#777777]">formularz</span>
+                  </button>
+                )}
+                <button
+                  onClick={handleExport}
+                  className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Download className="h-4 w-4 text-blue-400 light:text-blue-600" />
+                    Eksport CSV
+                  </span>
+                  <span className="text-xs text-[#777777]">pełna lista</span>
+                </button>
+                {canAccessAudit && (
+                  <Link
+                    href="/audit"
+                    className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <KeyRound className="h-4 w-4 text-amber-300 light:text-amber-600" />
+                      Audit Log
+                    </span>
+                    <span className="text-xs text-[#777777]">zdarzenia</span>
+                  </Link>
+                )}
+              </div>
+            </section>
+
+            <section className="rounded-md border border-white/[0.07] bg-[#0d0d0d]/85 p-5 light:border-black/[0.08] light:bg-white/90">
+              <p className="text-sm font-medium text-white light:text-black">Widoczna strona</p>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="rounded-md bg-white/[0.03] p-3 light:bg-black/[0.03]">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#777777]">Admini</p>
+                  <p className="mt-1 text-lg font-semibold text-white light:text-black">{visibleAdmins}</p>
+                </div>
+                <div className="rounded-md bg-white/[0.03] p-3 light:bg-black/[0.03]">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#777777]">Pozostałe</p>
+                  <p className="mt-1 text-lg font-semibold text-white light:text-black">{visibleClients}</p>
+                </div>
+              </div>
+            </section>
+          </aside>
         </div>
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowAddModal(false)}
           />
 
-          <div className="relative bg-[#111111] light:bg-white border border-white/[0.06] light:border-black/[0.06] w-full max-w-md mx-4 overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-white/[0.06] light:border-black/[0.06]">
-              <h3 className="text-sm font-medium text-white light:text-black">
-                Dodaj użytkownika
-              </h3>
+          <div className="relative w-full max-w-lg overflow-hidden rounded-md border border-white/[0.07] bg-[#0d0d0d] shadow-2xl light:border-black/[0.08] light:bg-white">
+            <div className="flex items-start justify-between gap-4 border-b border-white/[0.06] p-5 light:border-black/[0.06]">
+              <div>
+                <p className="text-sm font-medium text-white light:text-black">Dodaj konto</p>
+                <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
+                  Utwórz konto z hasłem startowym. Rolę można zmienić po dodaniu.
+                </p>
+              </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-[#444444] hover:text-white light:hover:text-black transition-colors"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                aria-label="Zamknij formularz"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="p-4 space-y-4">
+            <div className="p-5">
               {addError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded">
-                  <p className="text-xs text-red-400">{addError}</p>
+                <div className="mb-4 rounded-md border border-red-500/20 bg-red-500/10 p-3">
+                  <p className="text-xs text-red-300 light:text-red-700">{addError}</p>
                 </div>
               )}
 
-              <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] block mb-1">
-                  Email
+              <div className="space-y-4">
+                <label className="block">
+                  <span className="mb-1 block text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">
+                    Email
+                  </span>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666666]" />
+                    <input
+                      type="email"
+                      value={addEmail}
+                      onChange={(e) => setAddEmail(e.target.value)}
+                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-emerald-500/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                      placeholder="user@example.com"
+                    />
+                  </div>
                 </label>
-                <input
-                  type="email"
-                  value={addEmail}
-                  onChange={(e) => setAddEmail(e.target.value)}
-                  className="w-full h-10 px-3 bg-white/[0.02] light:bg-black/[0.02] border border-white/[0.06] light:border-black/[0.06] text-white light:text-black text-sm focus:outline-none focus:border-emerald-500/50 transition-colors"
-                  placeholder="user@example.com"
-                />
-              </div>
 
-              <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] block mb-1">
-                  Hasło
+                <label className="block">
+                  <span className="mb-1 block text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">
+                    Hasło startowe
+                  </span>
+                  <div className="relative">
+                    <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666666]" />
+                    <input
+                      type="password"
+                      value={addPassword}
+                      onChange={(e) => setAddPassword(e.target.value)}
+                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-emerald-500/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                      placeholder="Minimum bezpiecznego hasła"
+                    />
+                  </div>
                 </label>
-                <input
-                  type="password"
-                  value={addPassword}
-                  onChange={(e) => setAddPassword(e.target.value)}
-                  className="w-full h-10 px-3 bg-white/[0.02] light:bg-black/[0.02] border border-white/[0.06] light:border-black/[0.06] text-white light:text-black text-sm focus:outline-none focus:border-emerald-500/50 transition-colors"
-                  placeholder="••••••••"
-                />
-              </div>
 
-              <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] block mb-1">
-                  Imię i nazwisko
+                <label className="block">
+                  <span className="mb-1 block text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">
+                    Imię i nazwisko
+                  </span>
+                  <div className="relative">
+                    <UserCog className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666666]" />
+                    <input
+                      type="text"
+                      value={addName}
+                      onChange={(e) => setAddName(e.target.value)}
+                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-emerald-500/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                      placeholder="Jan Kowalski"
+                    />
+                  </div>
                 </label>
-                <input
-                  type="text"
-                  value={addName}
-                  onChange={(e) => setAddName(e.target.value)}
-                  className="w-full h-10 px-3 bg-white/[0.02] light:bg-black/[0.02] border border-white/[0.06] light:border-black/[0.06] text-white light:text-black text-sm focus:outline-none focus:border-emerald-500/50 transition-colors"
-                  placeholder="Jan Kowalski"
-                />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-white/[0.06] light:border-black/[0.06]">
+            <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] p-5 light:border-black/[0.06]">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] border border-white/[0.06] light:border-black/[0.06] hover:bg-white/[0.02] light:hover:bg-black/[0.02] transition-colors"
+                className="inline-flex h-10 items-center rounded-md border border-white/[0.07] px-4 text-xs text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
               >
                 Anuluj
               </button>
               <button
                 onClick={handleAddUser}
                 disabled={addLoading || !addEmail || !addPassword}
-                className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-emerald-400 light:text-emerald-600 bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex h-10 items-center rounded-md border border-emerald-500/25 bg-emerald-500/10 px-4 text-xs text-emerald-300 transition-colors hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50 light:text-emerald-700"
               >
-                {addLoading ? 'Dodawanie...' : 'Dodaj'}
+                {addLoading ? 'Dodawanie...' : 'Dodaj konto'}
               </button>
             </div>
           </div>
