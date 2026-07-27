@@ -28,6 +28,7 @@ type InfraData = {
   deploy: {
     status: DeployStatus
     shortSha: string | null
+    message: string
     completedAt: string | null
   }
 }
@@ -341,13 +342,19 @@ export function SystemHealth() {
                       const showVezCoreStatus = group.id === 'labs' && item.label === 'VEZcore'
                       const vezCoreStatus = infraData?.checks.vezcore?.status ?? 'checking'
                       const vezCoreStatusMeta = statusClasses[vezCoreStatus]
-                      const deployStatusMeta = statusClasses[getDeployHealthStatus(infraData?.deploy.status)]
+                      const deployStatus = getDeployHealthStatus(infraData?.deploy.status)
+                      const deployStatusMeta = statusClasses[deployStatus]
                       const vezCoreLatency = infraData?.checks.vezcore?.latencyMs ? ` / ${infraData.checks.vezcore.latencyMs}ms` : ''
-                      const vezCoreDetails = [
-                        `VEZcore: ${infraData?.checks.vezcore ? `${vezCoreStatusMeta.label} / ${infraData.checks.vezcore.detail}${vezCoreLatency}` : 'pobieram dane'}`,
-                        `Deploy: ${deployStatusMeta.label} / ${infraData?.deploy.shortSha ?? 'brak nr'} / ${formatStatusTime(infraData?.deploy.completedAt)}`,
-                        infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status',
-                      ]
+                      const vezCoreProblemDetails = [
+                        infraData?.checks.vezcore && (vezCoreStatus === 'warning' || vezCoreStatus === 'error')
+                          ? `VEZcore: ${infraData.checks.vezcore.detail}${vezCoreLatency}`
+                          : null,
+                        deployStatus === 'warning' || deployStatus === 'error'
+                          ? `Deploy: ${infraData?.deploy.message ?? deployStatusMeta.label} / ${infraData?.deploy.shortSha ?? 'brak nr'} / ${formatStatusTime(infraData?.deploy.completedAt)}`
+                          : null,
+                      ].filter((detail): detail is string => Boolean(detail))
+                      const showVezCoreProblemTooltip = vezCoreStatus === 'warning' || vezCoreStatus === 'error'
+                      const showDeployProblemTooltip = deployStatus === 'warning' || deployStatus === 'error'
 
                       return (
                         <div
@@ -375,15 +382,17 @@ export function SystemHealth() {
                               <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em]">
                                 <span
                                   className={`group/status relative inline-flex items-center gap-2 ${vezCoreStatusMeta.text}`}
-                                  title={vezCoreDetails.join('\n')}
                                 >
                                   <Circle className={`h-2 w-2 fill-current ${vezCoreStatusMeta.text}`} />
                                   {vezCoreStatusMeta.label}
-                                  <span className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/status:block">
-                                    {vezCoreDetails.map((detail) => (
-                                      <span key={detail} className="block leading-relaxed">{detail}</span>
-                                    ))}
-                                  </span>
+                                  {showVezCoreProblemTooltip && vezCoreProblemDetails.length > 0 && (
+                                    <span className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/status:block">
+                                      <span className="mb-1 block font-medium uppercase tracking-[0.14em] text-white light:text-black">Co się stało</span>
+                                      {vezCoreProblemDetails.map((detail) => (
+                                        <span key={detail} className="block leading-relaxed">{detail}</span>
+                                      ))}
+                                    </span>
+                                  )}
                                 </span>
                                 <span className="truncate text-[#555555] light:text-[#999999]">
                                   {infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'}
@@ -391,8 +400,14 @@ export function SystemHealth() {
                               </div>
                               <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
                                 <span>Deploy</span>
-                                <span className={deployStatusMeta.text}>
+                                <span className={`group/deploy relative ${deployStatusMeta.text}`}>
                                   {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}
+                                  {showDeployProblemTooltip && (
+                                    <span className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/deploy:block">
+                                      <span className="mb-1 block font-medium uppercase tracking-[0.14em] text-white light:text-black">Co się stało</span>
+                                      <span className="block leading-relaxed">Deploy: {infraData?.deploy.message ?? deployStatusMeta.label} / {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}</span>
+                                    </span>
+                                  )}
                                 </span>
                               </div>
                             </div>

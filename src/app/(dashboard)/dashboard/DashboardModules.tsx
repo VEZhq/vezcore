@@ -20,6 +20,7 @@ type InfraData = {
   deploy: {
     status: DeployStatus
     shortSha: string | null
+    message: string
     completedAt: string | null
   }
 }
@@ -67,24 +68,30 @@ function formatStatusTime(value: string | null | undefined): string {
   }).format(new Date(value))
 }
 
-function getCheckDetail(infraData: InfraData | null, key: string): string {
-  const check = infraData?.checks[key]
-  if (!check) return `${key}: pobieram dane`
-  const latency = check.latencyMs ? ` / ${check.latencyMs}ms` : ''
-  return `${check.label}: ${statusMeta[check.status].label} / ${check.detail}${latency}`
+type StatusDetail = {
+  status: HealthStatus
+  text: string
 }
 
-function getStatusDetails(infraData: InfraData | null, sources: { checks: string[]; deploy?: boolean }) {
+function getCheckDetail(infraData: InfraData | null, key: string): StatusDetail {
+  const check = infraData?.checks[key]
+  if (!check) return { status: 'unknown', text: `${key}: brak danych z monitoringu` }
+  const latency = check.latencyMs ? ` / ${check.latencyMs}ms` : ''
+  return { status: check.status, text: `${check.label}: ${check.detail}${latency}` }
+}
+
+function getProblemDetails(infraData: InfraData | null, sources: { checks: string[]; deploy?: boolean }) {
   const details = sources.checks.map((key) => getCheckDetail(infraData, key))
 
   if (sources.deploy) {
     const deployStatus = getDeployHealthStatus(infraData?.deploy.status)
-    details.push(
-      `Deploy: ${statusMeta[deployStatus].label} / ${infraData?.deploy.shortSha ?? 'brak nr'} / ${formatStatusTime(infraData?.deploy.completedAt)}`
-    )
+    details.push({
+      status: deployStatus,
+      text: `Deploy: ${infraData?.deploy.message ?? statusMeta[deployStatus].label} / ${infraData?.deploy.shortSha ?? 'brak nr'} / ${formatStatusTime(infraData?.deploy.completedAt)}`,
+    })
   }
 
-  return details.length > 0 ? details : ['Brak podpiętego monitoringu']
+  return details.filter((detail) => detail.status === 'warning' || detail.status === 'error')
 }
 
 export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: boolean }) {
@@ -152,8 +159,8 @@ export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: b
           const moduleStatus = hasStatus ? getWorstStatus(statuses) : 'unknown'
           const status = statusMeta[moduleStatus]
           const statusTime = infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'
-          const statusDetails = getStatusDetails(infraData, sources)
-          const tooltipText = statusDetails.join('\n')
+          const problemDetails = getProblemDetails(infraData, sources)
+          const showProblemTooltip = moduleStatus === 'warning' || moduleStatus === 'error'
 
           const cardContent = (
             <div
@@ -195,15 +202,17 @@ export function DashboardModules({ canAccessVezVision }: { canAccessVezVision: b
                   <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em]">
                     <span
                       className={`group/status relative inline-flex items-center gap-2 ${status.text}`}
-                      title={tooltipText}
                     >
                       <Circle className={`h-2 w-2 fill-current ${status.text}`} />
                       {status.label}
-                      <span className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/status:block">
-                        {statusDetails.map((detail) => (
-                          <span key={detail} className="block leading-relaxed">{detail}</span>
-                        ))}
-                      </span>
+                      {showProblemTooltip && problemDetails.length > 0 && (
+                        <span className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/status:block">
+                          <span className="mb-1 block font-medium uppercase tracking-[0.14em] text-white light:text-black">Co się stało</span>
+                          {problemDetails.map((detail) => (
+                            <span key={detail.text} className="block leading-relaxed">{detail.text}</span>
+                          ))}
+                        </span>
+                      )}
                     </span>
                     <span className="truncate text-[#555555] light:text-[#999999]">{statusTime}</span>
                   </div>

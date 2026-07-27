@@ -17,6 +17,7 @@ type InfraData = {
   deploy: {
     status: DeployStatus
     shortSha: string | null
+    message: string
     completedAt: string | null
   }
 }
@@ -81,16 +82,17 @@ export function VezCoreStatusBadge() {
   const meta = statusMeta[status]
   const deployMeta = statusMeta[deployStatus]
   const latency = check?.latencyMs ? ` / ${check.latencyMs}ms` : ''
-  const details = [
-    `VEZcore: ${check ? `${statusMeta[check.status].label} / ${check.detail}${latency}` : 'pobieram dane'}`,
-    `Deploy: ${deployMeta.label} / ${infraData?.deploy.shortSha ?? 'brak nr'} / ${formatStatusTime(infraData?.deploy.completedAt)}`,
-    infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status',
-  ]
+  const problemDetails = [
+    check && (check.status === 'warning' || check.status === 'error') ? `VEZcore: ${check.detail}${latency}` : null,
+    deployStatus === 'warning' || deployStatus === 'error'
+      ? `Deploy: ${infraData?.deploy.message ?? deployMeta.label} / ${infraData?.deploy.shortSha ?? 'brak nr'} / ${formatStatusTime(infraData?.deploy.completedAt)}`
+      : null,
+  ].filter((detail): detail is string => Boolean(detail))
+  const showProblemTooltip = status === 'warning' || status === 'error'
 
   return (
     <div
       className="group/status absolute right-4 top-4 z-20 hidden min-w-[220px] border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/80 light:bg-white/90 px-3 py-2 text-[10px] uppercase tracking-[0.16em] backdrop-blur-xl sm:block"
-      title={details.join('\n')}
     >
       <div className="flex items-center justify-between gap-3">
         <span className="font-medium text-white light:text-black">VEZcore</span>
@@ -106,11 +108,14 @@ export function VezCoreStatusBadge() {
         </span>
         <span className={deployMeta.text}>{infraData?.deploy.shortSha ?? 'brak nr'}</span>
       </div>
-      <div className="pointer-events-none absolute right-0 top-full z-30 mt-2 hidden w-80 max-w-[80vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/status:block">
-        {details.map((detail) => (
-          <span key={detail} className="block leading-relaxed">{detail}</span>
-        ))}
-      </div>
+      {showProblemTooltip && problemDetails.length > 0 && (
+        <div className="pointer-events-none absolute right-0 top-full z-30 mt-2 hidden w-80 max-w-[80vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/status:block">
+          <span className="mb-1 block font-medium uppercase tracking-[0.14em] text-white light:text-black">Co się stało</span>
+          {problemDetails.map((detail) => (
+            <span key={detail} className="block leading-relaxed">{detail}</span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
