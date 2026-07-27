@@ -301,7 +301,7 @@ export function SystemHealth() {
         </p>
       </div>
 
-      <div className={`grid grid-cols-1 gap-4 ${visibleGroups.length === 1 ? '' : 'lg:grid-cols-3'}`}>
+      <div className={`grid grid-cols-1 gap-4 ${visibleGroups.length === 1 || openGroup ? '' : 'lg:grid-cols-3'}`}>
         {visibleGroups.map((group) => {
           const isOpen = openGroup === group.name
           const Icon = group.icon
@@ -333,8 +333,8 @@ export function SystemHealth() {
               </button>
 
               {isOpen && (
-                <div className="border-t border-white/[0.06] light:border-black/[0.06] p-3">
-                  <div className="space-y-2">
+                <div className="border-t border-white/[0.06] light:border-black/[0.06]">
+                  <div className="divide-y divide-white/[0.05] light:divide-black/[0.06]">
                     {group.items.map((item) => {
                       const itemKey = `${group.name}-${item.label}`
                       const isRevealed = revealedAliases.includes(itemKey)
@@ -359,29 +359,25 @@ export function SystemHealth() {
                       return (
                         <div
                           key={`${group.name}-${item.label}`}
-                          className="flex flex-col gap-3 border border-white/[0.04] light:border-black/[0.04] bg-white/[0.02] light:bg-black/[0.02] p-3"
+                          className="grid gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_minmax(220px,270px)] sm:items-center"
                         >
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <a
-                              href={item.href}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex min-w-0 items-center gap-2 text-xs text-white light:text-black hover:text-emerald-400 light:hover:text-emerald-600 transition-colors"
-                            >
-                              <ExternalLink className="h-3.5 w-3.5 shrink-0" />
-                              <span className="truncate">{item.label}</span>
-                            </a>
-                            <span className={`w-fit rounded-full border px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] ${aliasTypeClasses[item.aliasType]}`}>
-                              {item.aliasType}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-[#666666] light:text-[#999999]">{item.description}</p>
-
-                          {showVezCoreStatus && (
-                            <div className="grid gap-2 border border-white/[0.04] light:border-black/[0.04] bg-white/[0.02] light:bg-black/[0.02] p-3">
-                              <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em]">
+                          <div className="min-w-0">
+                            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
+                              <a
+                                href={item.href}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex min-w-0 items-center gap-2 text-xs font-medium text-white light:text-black hover:text-emerald-400 light:hover:text-emerald-600 transition-colors"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate">{item.label}</span>
+                              </a>
+                              <span className={`w-fit rounded-full border px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] ${aliasTypeClasses[item.aliasType]}`}>
+                                {item.aliasType}
+                              </span>
+                              {showVezCoreStatus && (
                                 <span
-                                  className={`group/status relative inline-flex items-center gap-2 ${vezCoreStatusMeta.text}`}
+                                  className={`group/status relative inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] ${vezCoreStatusMeta.text}`}
                                 >
                                   <Circle className={`h-2 w-2 fill-current ${vezCoreStatusMeta.text}`} />
                                   {vezCoreStatusMeta.label}
@@ -394,30 +390,33 @@ export function SystemHealth() {
                                     </span>
                                   )}
                                 </span>
-                                <span className="truncate text-[#555555] light:text-[#999999]">
-                                  {infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
-                                <span>Deploy</span>
+                              )}
+                            </div>
+
+                            <p className="mt-1.5 text-[11px] leading-relaxed text-[#666666] light:text-[#999999]">{item.description}</p>
+
+                            {showVezCoreStatus && (
+                              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] uppercase tracking-[0.14em] text-[#555555] light:text-[#999999]">
                                 <span className={`group/deploy relative ${deployStatusMeta.text}`}>
-                                  {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}
+                                  Deploy {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}
                                   {showDeployProblemTooltip && (
-                                    <span className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/deploy:block">
+                                    <span className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/deploy:block">
                                       <span className="mb-1 block font-medium uppercase tracking-[0.14em] text-white light:text-black">Co się stało</span>
                                       <span className="block leading-relaxed">Deploy: {infraData?.deploy.message ?? deployStatusMeta.label} / {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}</span>
                                     </span>
                                   )}
                                 </span>
+                                <span>
+                                  {infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'}
+                                </span>
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
 
                           <button
                             type="button"
                             onClick={() => handleAliasClick(itemKey, item.alias)}
-                            className="group/alias inline-flex min-h-8 w-full items-center justify-between gap-3 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-[#050505]/80 light:bg-white px-3 py-2 font-mono text-[11px] text-[#777777] light:text-[#777777] hover:text-white light:hover:text-black transition-colors"
-                            title={isRevealed ? 'Kliknij, aby skopiować alias SSH' : 'Najedź lub kliknij, aby odsłonić alias SSH'}
+                            className="group/alias inline-flex min-h-9 w-full min-w-0 items-center justify-between gap-3 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-[#050505]/70 light:bg-black/[0.02] px-3 py-2 font-mono text-[11px] text-[#777777] light:text-[#777777] hover:border-white/[0.12] light:hover:border-black/[0.14] hover:text-white light:hover:text-black transition-colors"
                           >
                             <span className="flex min-w-0 items-center gap-2">
                               {isCopied ? (
@@ -430,8 +429,8 @@ export function SystemHealth() {
                               <span className={isRevealed ? 'hidden' : 'truncate group-hover/alias:hidden'}>ssh •••••••</span>
                               <span className={isRevealed ? 'truncate' : 'hidden truncate group-hover/alias:inline'}>{item.alias}</span>
                             </span>
-                            <span className="hidden shrink-0 text-[10px] text-[#555555] light:text-[#999999] sm:inline">
-                              {item.aliasDescription}
+                            <span className="shrink-0 text-[10px] text-[#555555] light:text-[#999999]">
+                              {isCopied ? 'Skopiowano' : isRevealed ? 'Kopiuj' : item.aliasType}
                             </span>
                           </button>
                         </div>
