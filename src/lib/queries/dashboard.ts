@@ -69,6 +69,11 @@ export async function getDashboardStats(since: string): Promise<DashboardStats> 
   }
 }
 
+export async function getDashboardStatsForLast24Hours(): Promise<DashboardStats> {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  return getDashboardStats(since)
+}
+
 export async function getRecentDashboardActivity(canAccessAudit: boolean): Promise<DashboardActivityEntry[] | null> {
   if (!canAccessAudit) return null
 
