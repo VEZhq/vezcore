@@ -8,9 +8,45 @@ import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { DashboardModules } from './DashboardModules'
 import { DashboardCommandCenter } from './DashboardCommandCenter'
 import { DashboardHeaderStatus } from './DashboardHeaderStatus'
-import { getDashboardStatsForLast24Hours } from '@/lib/queries/dashboard'
+import { getDashboardStatsForLast24Hours, getRecentDashboardActivity } from '@/lib/queries/dashboard'
 import { getUserPermissions } from '@/lib/permissions'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
+
+type QuickCardTone = 'ok' | 'warning' | 'danger' | 'neutral'
+
+function formatCardDate(value: string | null | undefined) {
+  if (!value) return 'Brak danych'
+  return new Intl.DateTimeFormat('pl-PL', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
+
+function getAuditLabel(action: string) {
+  const labels: Record<string, string> = {
+    login: 'Logowanie',
+    logout: 'Wylogowanie',
+    failed_login: 'Nieudane logowanie',
+    ip_blocked: 'IP zablokowane',
+    '2fa_verify': '2FA potwierdzone',
+    '2fa_failed': 'Błąd 2FA',
+    '2fa_disable': '2FA wyłączone',
+    profile_update: 'Profil zmieniony',
+    password_change: 'Hasło zmienione',
+    user_create: 'Użytkownik dodany',
+    user_update: 'Użytkownik zmieniony',
+    user_delete: 'Użytkownik usunięty',
+    email_change: 'Email zmieniony',
+    permission_grant: 'Nadano pozwolenie',
+    permission_revoke: 'Cofnięto pozwolenie',
+    session_revoke: 'Sesja cofnięta',
+    all_sessions_revoked: 'Sesje wyczyszczone',
+  }
+
+  return labels[action] ?? action.replaceAll('_', ' ')
+}
 
 export default async function DashboardPage() {
   // Next.js can render a page in parallel with its parent layout. Guard the
@@ -26,29 +62,38 @@ export default async function DashboardPage() {
   const dashboardStats = permissions.canAccessKonta || permissions.canAccessAudit
     ? await getDashboardStatsForLast24Hours()
     : null
+  const recentActivity = permissions.canAccessAudit
+    ? await getRecentDashboardActivity(true)
+    : null
+  const latestActivity = recentActivity?.[0] ?? null
   const errors24h = dashboardStats?.errors_24h ?? 0
   const auditTone = errors24h > 4 ? 'danger' : errors24h > 0 ? 'warning' : 'ok'
+  const profileStatus = user.email_confirmed_at ? 'Email OK' : 'Potwierdź email'
+  const profileTone: QuickCardTone = user.email_confirmed_at ? 'neutral' : 'warning'
 
   const quickLinks = [
     {
       name: 'Profil',
-      detail: user.email ?? 'Moje konto',
-      status: permissions.role ?? 'user',
-      tone: 'neutral',
+      value: formatCardDate(user.last_sign_in_at),
+      detail: `Ostatni login · ${permissions.role ?? 'user'}`,
+      status: profileStatus,
+      tone: profileTone,
       href: '/profile',
       icon: User,
     },
     ...(permissions.canAccessKonta ? [{
       name: 'Konta',
-      detail: `${dashboardStats?.total_users ?? 0} użytkowników`,
-      status: 'Pozwolenia',
-      tone: 'ok',
+      value: `${dashboardStats?.total_users ?? 0}`,
+      detail: `${dashboardStats?.active_sessions ?? 0} aktywnych sesji`,
+      status: permissions.canManagePermissions ? 'Możesz edytować' : 'Podgląd',
+      tone: 'neutral' as QuickCardTone,
       href: '/konta',
       icon: UserCog,
     }] : []),
     ...(permissions.canAccessAudit ? [{
       name: 'Audit Log',
-      detail: errors24h > 0 ? `${errors24h} błędów / 24h` : 'Brak błędów / 24h',
+      value: `${errors24h}`,
+      detail: errors24h === 1 ? 'błąd bezpieczeństwa / 24h' : 'błędów bezpieczeństwa / 24h',
       status: errors24h > 0 ? 'Sprawdź' : 'Czysto',
       tone: auditTone,
       href: '/audit',
@@ -56,17 +101,19 @@ export default async function DashboardPage() {
     }] : []),
     ...(permissions.canAccessAudit ? [{
       name: 'Ostatnia aktywność',
-      detail: `${dashboardStats?.active_sessions ?? 0} sesji aktywnych`,
-      status: `${dashboardStats?.recent_logins ?? 0} logowań`,
-      tone: 'neutral',
+      value: latestActivity ? getAuditLabel(latestActivity.action) : 'Brak zdarzeń',
+      detail: latestActivity ? formatCardDate(latestActivity.created_at) : `${dashboardStats?.recent_logins ?? 0} logowań / 24h`,
+      status: `${dashboardStats?.recent_logins ?? 0} logowań / 24h`,
+      tone: 'neutral' as QuickCardTone,
       href: '/audit',
       icon: Clock3,
     }] : []),
     ...(permissions.canAccessSettings ? [{
       name: 'Ustawienia',
-      detail: 'Konfiguracja VEZcore',
+      value: permissions.canAccessInfrastructure ? 'Infra + Core' : 'Core',
+      detail: permissions.canAccessInfrastructure ? 'Konfiguracja i infrastruktura' : 'Konfiguracja VEZcore',
       status: permissions.canAccessInfrastructure ? 'Infra dostępna' : 'Dostępne',
-      tone: 'neutral',
+      tone: 'neutral' as QuickCardTone,
       href: '/settings',
       icon: Settings,
     }] : []),
@@ -117,12 +164,12 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            <nav className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(180px,1fr))]">
+            <nav className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(190px,1fr))]">
               {quickLinks.map((link) => (
                 <Link
                   key={`${link.href}-${link.name}`}
                   href={link.href}
-                  className="group min-h-[92px] rounded-lg border border-white/[0.07] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-3 backdrop-blur-xl transition-colors duration-300 hover:border-emerald-400/30 light:hover:border-emerald-600/25"
+                  className="group min-h-[124px] rounded-lg border border-white/[0.07] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-3 backdrop-blur-xl transition-colors duration-300 hover:border-emerald-400/30 light:hover:border-emerald-600/25"
                 >
                   <span className="flex h-full flex-col justify-between gap-3">
                     <span className="flex min-w-0 items-start gap-3">
@@ -131,6 +178,7 @@ export default async function DashboardPage() {
                       </span>
                       <span className="min-w-0">
                         <span className="block truncate text-sm font-medium text-white light:text-black">{link.name}</span>
+                        <span className="mt-3 block truncate text-2xl font-semibold text-white light:text-black">{link.value}</span>
                         <span className="mt-1 block truncate text-[11px] text-[#777777] light:text-[#777777]">{link.detail}</span>
                       </span>
                     </span>
