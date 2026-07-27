@@ -4,7 +4,9 @@ import { redirect } from 'next/navigation'
 import { Clock3, User, ClipboardList, Settings, UserCog } from 'lucide-react'
 import { NeuralBackground } from '@/components/NeuralBackground'
 import { SystemHealth } from '@/components/SystemHealth'
+import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { DashboardModules } from './DashboardModules'
+import { DashboardCommandCenter } from './DashboardCommandCenter'
 import { VezCoreStatusBadge } from './VezCoreStatusBadge'
 import { getUserPermissions } from '@/lib/permissions'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
@@ -15,6 +17,9 @@ export default async function DashboardPage() {
   // sensitive dashboard data into an unauthenticated RSC response.
   const authState = await getAuthenticatedUserPermissionState()
   if (!authState) redirect('/login')
+
+  const user = await getDashboardAuthUser()
+  if (!user) redirect('/login')
 
   const permissions = await getUserPermissions()
 
@@ -59,8 +64,32 @@ export default async function DashboardPage() {
           />
         </div>
 
+        <DashboardCommandCenter
+          access={{
+            canAccessKonta: permissions.canAccessKonta,
+            canAccessAudit: permissions.canAccessAudit,
+            canAccessSettings: permissions.canAccessSettings,
+            canAccessInfrastructure: permissions.canAccessInfrastructure,
+            canAccessVezVision: permissions.canAccessVezVision,
+            canViewVezVisionBlog: permissions.canViewVezVisionBlog,
+            canViewVezVisionPortfolio: permissions.canViewVezVisionPortfolio,
+            canViewVezVisionServices: permissions.canViewVezVisionServices,
+            canViewVezVisionFaq: permissions.canViewVezVisionFaq,
+            canViewVezVisionNewsletter: permissions.canViewVezVisionNewsletter,
+            canViewVezVisionFiles: permissions.canViewVezVisionFiles,
+            canViewVezVisionSettings: permissions.canViewVezVisionSettings,
+            canViewVezVisionCalendar: permissions.canViewVezVisionCalendar,
+            role: permissions.role,
+          }}
+          user={{
+            id: user.id,
+            email: user.email,
+            lastSignInAt: user.last_sign_in_at,
+          }}
+        />
+
         {permissions.canAccessInfrastructure && (
-          <div className="w-full max-w-5xl mb-8">
+          <div id="infrastructure" className="w-full max-w-5xl mb-8 scroll-mt-8">
             <SystemHealth />
           </div>
         )}
