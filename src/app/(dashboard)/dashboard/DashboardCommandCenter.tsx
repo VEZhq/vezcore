@@ -266,10 +266,6 @@ export function DashboardCommandCenter({
     .filter((page, index, pages) => pages.findIndex((item) => item.href === page.href) === index)
     .slice(0, 4)
 
-  const primaryActions = actions
-    .filter((action) => ['vezvision', 'infra', 'audit', 'konta', 'settings', 'profile'].includes(action.id))
-    .slice(0, 4)
-
   const openItem = (href: string) => {
     setOpen(false)
     setQuery('')
@@ -296,53 +292,33 @@ export function DashboardCommandCenter({
     <section className="mb-6 space-y-3">
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="relative border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/80 light:bg-white/90 p-3 backdrop-blur-xl">
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-            <div className="flex min-w-0 items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-black/25 light:bg-black/[0.02] px-3">
-              <Search className="h-4 w-4 shrink-0 text-[#555555] light:text-[#999999]" />
-              <input
-                ref={searchInputRef}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                onFocus={() => setOpen(true)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && commandItems[0]) {
-                    event.preventDefault()
-                    openItem(commandItems[0].href)
-                  }
-                }}
-                placeholder="Szukaj w VEZcore"
-                className="h-10 min-w-0 flex-1 bg-transparent text-sm text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(true)
-                  window.setTimeout(() => searchInputRef.current?.focus(), 0)
-                }}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#777777] light:text-[#777777] hover:text-white light:hover:text-black"
-                aria-label="Otwórz command palette"
-              >
-                <Command className="h-4 w-4" />
-              </button>
-            </div>
-
-            {primaryActions.length > 0 && (
-              <div className="flex flex-wrap gap-2 md:justify-end">
-                {primaryActions.map((action) => {
-                  const Icon = action.icon
-                  return (
-                    <Link
-                      key={action.id}
-                      href={action.href}
-                      className="inline-flex h-10 max-w-[180px] items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-white/[0.02] light:bg-black/[0.02] px-3 text-xs text-[#b5b5b5] light:text-[#444444] hover:border-emerald-400/25 light:hover:border-emerald-600/25 hover:text-white light:hover:text-black transition-colors"
-                    >
-                      <Icon className="h-3.5 w-3.5 shrink-0 text-emerald-400 light:text-emerald-600" />
-                      <span className="truncate">{action.title}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            )}
+          <div className="flex min-w-0 items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-black/25 light:bg-black/[0.02] px-3">
+            <Search className="h-4 w-4 shrink-0 text-[#555555] light:text-[#999999]" />
+            <input
+              ref={searchInputRef}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onFocus={() => setOpen(true)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && commandItems[0]) {
+                  event.preventDefault()
+                  openItem(commandItems[0].href)
+                }
+              }}
+              placeholder="Szukaj w VEZcore"
+              className="h-10 min-w-0 flex-1 bg-transparent text-sm text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(true)
+                window.setTimeout(() => searchInputRef.current?.focus(), 0)
+              }}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#777777] light:text-[#777777] hover:text-white light:hover:text-black"
+              aria-label="Otwórz command palette"
+            >
+              <Command className="h-4 w-4" />
+            </button>
           </div>
 
           {open && (

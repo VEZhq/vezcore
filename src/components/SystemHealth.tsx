@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Activity,
   Check,
@@ -13,7 +13,6 @@ import {
   Server,
 } from 'lucide-react'
 
-type EnvironmentFilter = 'all' | 'production' | 'labs' | 'monitor'
 type HealthStatus = 'checking' | 'healthy' | 'warning' | 'error' | 'unknown'
 type DeployStatus = 'success' | 'failure' | 'pending' | 'unknown'
 
@@ -34,7 +33,7 @@ type InfraData = {
 }
 
 type AccessGroup = {
-  id: Exclude<EnvironmentFilter, 'all'>
+  id: 'production' | 'labs' | 'monitor'
   name: string
   icon: typeof Server
   color: 'emerald' | 'blue' | 'cyan'
@@ -48,13 +47,6 @@ type AccessGroup = {
     aliasDescription: string
   }>
 }
-
-const filters: Array<{ id: EnvironmentFilter; label: string }> = [
-  { id: 'all', label: 'Wszystko' },
-  { id: 'production', label: 'Produkcja' },
-  { id: 'labs', label: 'Labs' },
-  { id: 'monitor', label: 'Monitor' },
-]
 
 const accessGroups: AccessGroup[] = [
   {
@@ -241,7 +233,6 @@ function formatStatusTime(value: string | null | undefined): string {
 
 export function SystemHealth() {
   const [openGroup, setOpenGroup] = useState<string | null>(null)
-  const [activeFilter, setActiveFilter] = useState<EnvironmentFilter>('all')
   const [revealedAliases, setRevealedAliases] = useState<string[]>([])
   const [copiedAlias, setCopiedAlias] = useState<string | null>(null)
   const [infraData, setInfraData] = useState<InfraData | null>(null)
@@ -260,13 +251,6 @@ export function SystemHealth() {
 
     return () => { cancelled = true }
   }, [])
-
-  const visibleGroups = useMemo(
-    () => activeFilter === 'all'
-      ? accessGroups
-      : accessGroups.filter((group) => group.id === activeFilter),
-    [activeFilter]
-  )
 
   async function handleAliasClick(key: string, alias: string) {
     if (!revealedAliases.includes(key)) {
@@ -294,27 +278,10 @@ export function SystemHealth() {
             Hetzner, Labs, Monitor
           </p>
         </div>
-
-        <div className="flex items-center gap-1 rounded-md border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/60 light:bg-white/80 p-1">
-          {filters.map((filter) => (
-            <button
-              key={filter.id}
-              type="button"
-              onClick={() => setActiveFilter(filter.id)}
-              className={`rounded px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] transition-colors ${
-                activeFilter === filter.id
-                  ? 'bg-white/[0.08] text-white light:bg-black/[0.06] light:text-black'
-                  : 'text-[#555555] light:text-[#999999] hover:text-white light:hover:text-black'
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
       </div>
 
-      <div className={`grid grid-cols-1 gap-3 ${visibleGroups.length === 1 || openGroup ? '' : 'lg:grid-cols-3'}`}>
-        {visibleGroups.map((group) => {
+      <div className={`grid grid-cols-1 gap-3 ${openGroup ? '' : 'lg:grid-cols-3'}`}>
+        {accessGroups.map((group) => {
           const isOpen = openGroup === group.name
           const Icon = group.icon
           const colors = colorClasses[group.color]

@@ -159,7 +159,7 @@ export function DashboardModules({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {visibleModules.map((mod) => {
           const isHidden = preferences.hiddenModules.includes(mod.name)
           const sources = moduleStatusSources[mod.name]
@@ -174,20 +174,26 @@ export function DashboardModules({
 
           const moduleStatus = hasStatus ? getWorstStatus(statuses) : 'unknown'
           const status = statusMeta[moduleStatus]
-          const statusTime = infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'
+          const statusTime = hasStatus
+            ? infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'
+            : 'Brak danych'
+          const deployHealthStatus = sources.deploy ? getDeployHealthStatus(infraData?.deploy.status) : 'unknown'
+          const deployText = sources.deploy
+            ? `${infraData?.deploy.shortSha ?? 'brak nr'} / ${formatStatusTime(infraData?.deploy.completedAt)}`
+            : 'Brak'
           const problemDetails = getProblemDetails(infraData, sources)
           const showProblemTooltip = moduleStatus === 'warning' || moduleStatus === 'error'
 
           const cardContent = (
             <div
-              className={`relative tile-${mod.color} tile-hover group min-h-[138px] bg-[#111111]/80 light:bg-white/90 backdrop-blur-xl border border-white/[0.06] light:border-black/[0.08] p-3 transition-all duration-300 ${
+              className={`relative tile-${mod.color} tile-hover group flex min-h-[198px] h-full flex-col bg-[#111111]/80 light:bg-white/90 backdrop-blur-xl border border-white/[0.06] light:border-black/[0.08] p-5 transition-all duration-300 ${
                 editMode ? 'cursor-default' : mod.href ? 'cursor-pointer' : 'cursor-default'
               } ${isHidden ? 'opacity-40' : ''}`}
             >
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="w-9 h-9 rounded-md bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] flex items-center justify-center transition-colors duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-11 h-11 rounded-md bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] flex items-center justify-center transition-colors duration-300">
                   <mod.icon
-                    className={`h-4 w-4 ${DASHBOARD_MODULE_ICON_COLORS[mod.color].dark} light:${DASHBOARD_MODULE_ICON_COLORS[mod.color].light} transition-colors duration-300`}
+                    className={`h-5 w-5 ${DASHBOARD_MODULE_ICON_COLORS[mod.color].dark} light:${DASHBOARD_MODULE_ICON_COLORS[mod.color].light} transition-colors duration-300`}
                   />
                 </div>
 
@@ -206,43 +212,39 @@ export function DashboardModules({
                 )}
               </div>
 
-              <h3 className="text-sm font-medium text-white light:text-black mb-1 transition-colors duration-300">
+              <h3 className="text-base font-medium text-white light:text-black mb-1 transition-colors duration-300">
                 {mod.label}
               </h3>
-              <p className="line-clamp-2 min-h-[32px] text-[10px] leading-relaxed text-[#666666] light:text-[#999999] transition-colors duration-300">
+              <p className="line-clamp-2 min-h-[38px] text-xs leading-relaxed text-[#666666] light:text-[#999999] transition-colors duration-300">
                 {mod.description}
               </p>
 
-              {hasStatus && (
-                <div className="mt-3 border-t border-white/[0.05] light:border-black/[0.06] pt-2 space-y-1.5">
-                  <div className="flex items-center justify-between gap-2 text-[9px] uppercase tracking-[0.12em]">
-                    <span
-                      className={`group/status relative inline-flex items-center gap-2 ${status.text}`}
-                    >
-                      <Circle className={`h-2 w-2 fill-current ${status.text}`} />
-                      {status.label}
-                      {showProblemTooltip && problemDetails.length > 0 && (
-                        <span className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/status:block">
-                          <span className="mb-1 block font-medium uppercase tracking-[0.14em] text-white light:text-black">Co się stało</span>
-                          {problemDetails.map((detail) => (
-                            <span key={detail.text} className="block leading-relaxed">{detail.text}</span>
-                          ))}
-                        </span>
-                      )}
-                    </span>
-                    <span className="truncate text-[#555555] light:text-[#999999]">{statusTime}</span>
-                  </div>
-
-                  {sources.deploy && (
-                    <div className="flex items-center justify-between gap-2 text-[9px] uppercase tracking-[0.12em] text-[#555555] light:text-[#999999]">
-                      <span>Deploy</span>
-                      <span className={statusMeta[getDeployHealthStatus(infraData?.deploy.status)].text}>
-                        {infraData?.deploy.shortSha ?? 'brak nr'} / {formatStatusTime(infraData?.deploy.completedAt)}
+              <div className="mt-auto border-t border-white/[0.05] light:border-black/[0.06] pt-3 space-y-2">
+                <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.14em]">
+                  <span
+                    className={`group/status relative inline-flex items-center gap-2 ${status.text}`}
+                  >
+                    <Circle className={`h-2 w-2 fill-current ${status.text}`} />
+                    {status.label}
+                    {showProblemTooltip && problemDetails.length > 0 && (
+                      <span className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/status:block">
+                        <span className="mb-1 block font-medium uppercase tracking-[0.14em] text-white light:text-black">Co się stało</span>
+                        {problemDetails.map((detail) => (
+                          <span key={detail.text} className="block leading-relaxed">{detail.text}</span>
+                        ))}
                       </span>
-                    </div>
-                  )}
+                    )}
+                  </span>
+                  <span className="truncate text-[#555555] light:text-[#999999]">{statusTime}</span>
                 </div>
-              )}
+
+                <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.14em] text-[#555555] light:text-[#999999]">
+                  <span>Deploy</span>
+                  <span className={statusMeta[deployHealthStatus].text}>
+                    {deployText}
+                  </span>
+                </div>
+              </div>
 
               {editMode && isHidden && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -255,9 +257,9 @@ export function DashboardModules({
           )
 
           return (
-            <div key={mod.name}>
+            <div key={mod.name} className="h-full">
               {!editMode && mod.href ? (
-                <Link href={mod.href} className="block">
+                <Link href={mod.href} className="block h-full">
                   {cardContent}
                 </Link>
               ) : (
