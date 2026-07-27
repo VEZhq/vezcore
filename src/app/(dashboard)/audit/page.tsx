@@ -12,5 +12,10 @@ export default async function AuditPage() {
     redirect('/dashboard')
   }
 
-  return <AuditPageClient canAccessSettings={permissions.canAccessSettings} />
+  return (
+    <AuditPageClient
+      canAccessKonta={permissions.canAccessKonta}
+      canAccessSettings={permissions.canAccessSettings}
+    />
+  )
 }
