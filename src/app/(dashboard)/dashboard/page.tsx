@@ -7,6 +7,7 @@ import { SystemHealth } from '@/components/SystemHealth'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { DashboardModules } from './DashboardModules'
 import { DashboardCommandCenter } from './DashboardCommandCenter'
+import { DashboardHeaderStatus } from './DashboardHeaderStatus'
 import { getUserPermissions } from '@/lib/permissions'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 
@@ -62,6 +63,7 @@ export default async function DashboardPage() {
                 className="h-auto w-[190px] max-w-[60vw] opacity-0 light:opacity-85 dark:hidden transition-opacity duration-300"
                 priority
               />
+              {permissions.canAccessInfrastructure && <DashboardHeaderStatus />}
             </div>
 
             <nav className="flex flex-wrap items-center gap-2">

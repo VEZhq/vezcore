@@ -94,6 +94,27 @@ function getProblemDetails(infraData: InfraData | null, sources: { checks: strin
   return details.filter((detail) => detail.status === 'warning' || detail.status === 'error')
 }
 
+function getStatusSummary(infraData: InfraData | null, sources: { checks: string[]; deploy?: boolean }) {
+  if (sources.checks.length === 0 && !sources.deploy) return 'Nie skonfigurowano'
+  if (!infraData) return 'Ładowanie'
+
+  const checks = sources.checks
+    .map((key) => infraData.checks[key])
+    .filter((check): check is InfraData['checks'][string] => Boolean(check))
+
+  if (checks.length === 1) {
+    const check = checks[0]
+    return check.latencyMs ? `${check.label} ${check.latencyMs}ms` : `${check.label} ${check.detail}`
+  }
+
+  if (checks.length > 1) {
+    const healthyCount = checks.filter((check) => check.status === 'healthy').length
+    return `${healthyCount}/${checks.length} usługi`
+  }
+
+  return sources.deploy ? 'Deploy aktywny' : 'Brak danych'
+}
+
 export function DashboardModules({
   canAccessVezVision,
   canAccessInfrastructure,
@@ -174,9 +195,7 @@ export function DashboardModules({
 
           const moduleStatus = hasStatus ? getWorstStatus(statuses) : 'unknown'
           const status = statusMeta[moduleStatus]
-          const statusTime = hasStatus
-            ? infraData ? `Sprawdzono ${formatStatusTime(infraData.checkedAt)}` : 'Sprawdzam status'
-            : 'Brak danych'
+          const statusSummary = getStatusSummary(infraData, sources)
           const deployHealthStatus = sources.deploy ? getDeployHealthStatus(infraData?.deploy.status) : 'unknown'
           const deployText = sources.deploy
             ? `${infraData?.deploy.shortSha ?? 'brak nr'} / ${formatStatusTime(infraData?.deploy.completedAt)}`
@@ -235,7 +254,7 @@ export function DashboardModules({
                       </span>
                     )}
                   </span>
-                  <span className="truncate text-[#555555] light:text-[#999999]">{statusTime}</span>
+                  <span className="truncate text-[#555555] light:text-[#999999]">{statusSummary}</span>
                 </div>
 
                 <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.14em] text-[#555555] light:text-[#999999]">

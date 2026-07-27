@@ -175,6 +175,7 @@ export function DashboardCommandCenter({
   const [recentPages, setRecentPages] = useState<RecentDashboardPage[]>([])
   const [note, setNote] = useState('')
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<'clean' | 'operational' | 'full'>('operational')
 
   const actions = useMemo(() => buildActions(access), [access])
   const localMatches = useMemo(
@@ -250,6 +251,11 @@ export function DashboardCommandCenter({
           setNote(parsed.body ?? '')
           setLastUpdated(parsed.updatedAt ?? null)
         }
+
+        const storedMode = window.localStorage.getItem(`vezcore-dashboard-mode:${user.id}`)
+        if (storedMode === 'clean' || storedMode === 'operational' || storedMode === 'full') {
+          setViewMode(storedMode)
+        }
       } catch {
         setRecentPages([])
       }
@@ -265,6 +271,20 @@ export function DashboardCommandCenter({
     .filter((page) => canShowRecent(page.href, access))
     .filter((page, index, pages) => pages.findIndex((item) => item.href === page.href) === index)
     .slice(0, 4)
+  const hasNote = note.trim().length > 0
+  const showDetails = viewMode !== 'clean'
+  const showRecent = showDetails && (viewMode === 'full' || allowedRecentPages.length > 0)
+  const showNote = showDetails && access.canAccessSettings && (viewMode === 'full' || hasNote)
+  const showSession = showDetails
+
+  const changeMode = (nextMode: 'clean' | 'operational' | 'full') => {
+    setViewMode(nextMode)
+    try {
+      window.localStorage.setItem(`vezcore-dashboard-mode:${user.id}`, nextMode)
+    } catch {
+      // localStorage can be unavailable in restricted browser contexts.
+    }
+  }
 
   const openItem = (href: string) => {
     setOpen(false)
@@ -292,33 +312,56 @@ export function DashboardCommandCenter({
     <section className="mb-6 space-y-3">
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="relative border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/80 light:bg-white/90 p-3 backdrop-blur-xl">
-          <div className="flex min-w-0 items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-black/25 light:bg-black/[0.02] px-3">
-            <Search className="h-4 w-4 shrink-0 text-[#555555] light:text-[#999999]" />
-            <input
-              ref={searchInputRef}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onFocus={() => setOpen(true)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && commandItems[0]) {
-                  event.preventDefault()
-                  openItem(commandItems[0].href)
-                }
-              }}
-              placeholder="Szukaj w VEZcore"
-              className="h-10 min-w-0 flex-1 bg-transparent text-sm text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(true)
-                window.setTimeout(() => searchInputRef.current?.focus(), 0)
-              }}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#777777] light:text-[#777777] hover:text-white light:hover:text-black"
-              aria-label="Otwórz command palette"
-            >
-              <Command className="h-4 w-4" />
-            </button>
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div className="flex min-w-0 items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-black/25 light:bg-black/[0.02] px-3">
+              <Search className="h-4 w-4 shrink-0 text-[#555555] light:text-[#999999]" />
+              <input
+                ref={searchInputRef}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onFocus={() => setOpen(true)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && commandItems[0]) {
+                    event.preventDefault()
+                    openItem(commandItems[0].href)
+                  }
+                }}
+                placeholder="Szukaj w VEZcore"
+                className="h-10 min-w-0 flex-1 bg-transparent text-sm text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(true)
+                  window.setTimeout(() => searchInputRef.current?.focus(), 0)
+                }}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#777777] light:text-[#777777] hover:text-white light:hover:text-black"
+                aria-label="Otwórz command palette"
+              >
+                <Command className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-1 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-black/20 light:bg-black/[0.02] p-1">
+              {[
+                { id: 'clean', label: 'Czysty' },
+                { id: 'operational', label: 'Operacyjny' },
+                { id: 'full', label: 'Pełny' },
+              ].map((mode) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  onClick={() => changeMode(mode.id as 'clean' | 'operational' | 'full')}
+                  className={`h-8 rounded px-3 text-[10px] uppercase tracking-[0.14em] transition-colors ${
+                    viewMode === mode.id
+                      ? 'bg-white/[0.08] text-white light:bg-black/[0.06] light:text-black'
+                      : 'text-[#666666] light:text-[#999999] hover:text-white light:hover:text-black'
+                  }`}
+                >
+                  {mode.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {open && (
@@ -363,7 +406,9 @@ export function DashboardCommandCenter({
         )}
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
+      {showDetails && (
+      <div className={`grid gap-3 ${showRecent ? 'lg:grid-cols-[minmax(0,1fr)_320px]' : ''}`}>
+        {showSession && (
         <div className="grid grid-cols-2 gap-2 border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-3 backdrop-blur-xl sm:grid-cols-4">
           {[
             { label: 'Dzisiaj', value: formatToday(), icon: CalendarDays },
@@ -383,7 +428,9 @@ export function DashboardCommandCenter({
             )
           })}
         </div>
+        )}
 
+        {showRecent && (
         <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-3 backdrop-blur-xl">
           <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">
             <History className="h-3.5 w-3.5" />
@@ -407,8 +454,11 @@ export function DashboardCommandCenter({
             )}
           </div>
         </div>
+        )}
       </div>
+      )}
 
+      {showNote && (
       <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-3 backdrop-blur-xl">
         <div className="flex items-center justify-between gap-3">
           <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">
@@ -420,19 +470,16 @@ export function DashboardCommandCenter({
           </span>
         </div>
 
-        {access.canAccessSettings ? (
-          <textarea
-            value={note}
-            onChange={(event) => saveNote(event.target.value)}
-            maxLength={noteLimit}
-            rows={1}
-            placeholder="Krótki kontekst na teraz"
-            className="mt-2 h-9 w-full resize-none rounded-md border border-white/[0.06] light:border-black/[0.08] bg-black/20 light:bg-black/[0.02] px-3 py-2 text-sm leading-relaxed text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
-          />
-        ) : (
-          <p className="mt-2 text-sm text-[#666666] light:text-[#999999]">Brak dostępu do notatki operacyjnej.</p>
-        )}
+        <textarea
+          value={note}
+          onChange={(event) => saveNote(event.target.value)}
+          maxLength={noteLimit}
+          rows={1}
+          placeholder="Krótki kontekst na teraz"
+          className="mt-2 h-9 w-full resize-none rounded-md border border-white/[0.06] light:border-black/[0.08] bg-black/20 light:bg-black/[0.02] px-3 py-2 text-sm leading-relaxed text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
+        />
       </div>
+      )}
     </section>
   )
 }
