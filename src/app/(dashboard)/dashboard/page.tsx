@@ -2,7 +2,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { Clock3, User, ClipboardList, Settings, UserCog } from 'lucide-react'
-import { NeuralBackground } from '@/components/NeuralBackground'
 import { SystemHealth } from '@/components/SystemHealth'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { DashboardModules } from './DashboardModules'
@@ -44,51 +43,36 @@ export default async function DashboardPage() {
 
   const quickLinks = [
     {
-      name: 'Profil',
-      eyebrow: 'Twoje konto',
-      description: 'Dane konta, hasło, 2FA i sesja.',
-      meta: `Login: ${formatCardDate(user.last_sign_in_at)}`,
-      action: user.email_confirmed_at ? 'Otwórz' : 'Email',
+      label: 'Profil',
+      meta: formatCardDate(user.last_sign_in_at),
       tone: profileTone,
       href: '/profile',
       icon: User,
     },
     ...(permissions.canAccessKonta ? [{
-      name: 'Konta',
-      eyebrow: 'Użytkownicy',
-      description: 'Role, dostępy i pozwolenia w VEZcore.',
-      meta: `${dashboardStats?.total_users ?? 0} kont · ${dashboardStats?.active_sessions ?? 0} sesji`,
-      action: permissions.canManagePermissions ? 'Zarządzaj' : 'Podgląd',
+      label: 'Konta',
+      meta: `${dashboardStats?.total_users ?? 0} kont`,
       tone: 'neutral' as QuickCardTone,
       href: '/konta',
       icon: UserCog,
     }] : []),
     ...(permissions.canAccessAudit ? [{
-      name: 'Audit Log',
-      eyebrow: 'Bezpieczeństwo',
-      description: errors24h > 0 ? 'Są zdarzenia, które warto sprawdzić.' : 'Logowania i zdarzenia systemowe.',
+      label: 'Audit Log',
       meta: errors24h === 1 ? '1 błąd / 24h' : `${errors24h} błędów / 24h`,
-      action: errors24h > 0 ? 'Sprawdź' : 'Czysto',
       tone: auditTone,
       href: '/audit',
       icon: ClipboardList,
     }] : []),
     ...(permissions.canAccessAudit ? [{
-      name: 'Ostatnia aktywność',
-      eyebrow: 'Historia',
-      description: 'Ostatnie wejścia i działania w panelu.',
+      label: 'Aktywność',
       meta: `${dashboardStats?.recent_logins ?? 0} logowań / 24h`,
-      action: 'Zobacz',
       tone: 'neutral' as QuickCardTone,
       href: '/audit',
       icon: Clock3,
     }] : []),
     ...(permissions.canAccessSettings ? [{
-      name: 'Ustawienia',
-      eyebrow: 'Konfiguracja',
-      description: permissions.canAccessInfrastructure ? 'Core, infrastruktura i integracje.' : 'Podstawowe ustawienia VEZcore.',
+      label: 'Ustawienia',
       meta: permissions.canAccessInfrastructure ? 'Core + Infra' : 'Core',
-      action: 'Otwórz',
       tone: 'neutral' as QuickCardTone,
       href: '/settings',
       icon: Settings,
@@ -96,10 +80,10 @@ export default async function DashboardPage() {
   ]
 
   const toneClass = {
-    ok: 'text-emerald-400 light:text-emerald-600 bg-emerald-400/10 light:bg-emerald-600/10',
-    warning: 'text-amber-300 light:text-amber-600 bg-amber-400/10 light:bg-amber-500/10',
-    danger: 'text-red-300 light:text-red-600 bg-red-400/10 light:bg-red-500/10',
-    neutral: 'text-[#9a9a9a] light:text-[#666666] bg-white/[0.04] light:bg-black/[0.04]',
+    ok: 'text-emerald-400 light:text-emerald-600',
+    warning: 'text-amber-300 light:text-amber-600',
+    danger: 'text-red-300 light:text-red-600',
+    neutral: 'text-[#8a8a8a] light:text-[#666666]',
   } as const
   const dotClass = {
     ok: 'bg-emerald-400 light:bg-emerald-600',
@@ -109,21 +93,10 @@ export default async function DashboardPage() {
   } as const
 
   return (
-    <div className="relative min-h-screen bg-[#0a0a0a] light:bg-[#f5f5f5] transition-colors duration-300">
-      <NeuralBackground />
-
-      <div
-        className="fixed inset-0 pointer-events-none opacity-20 light:opacity-10 transition-opacity duration-300"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-          backgroundSize: '24px 24px',
-          color: 'rgba(100, 100, 100, 0.3)',
-        }}
-      />
-
+    <div className="relative min-h-screen bg-[#080808] light:bg-[#f6f6f6] transition-colors duration-300">
       <div className="relative z-10 min-h-screen px-4 py-8 sm:py-10">
         <div className="mx-auto w-full max-w-6xl">
-          <header className="mb-5 space-y-4">
+          <header className="mb-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <Image
@@ -146,37 +119,18 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            <nav className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(205px,1fr))]">
+            <nav className="mt-5 flex flex-wrap items-center gap-1 border-y border-white/[0.07] light:border-black/[0.08] bg-[#0d0d0d]/80 light:bg-white/80 px-1 py-1 backdrop-blur-xl">
               {quickLinks.map((link) => (
                 <Link
-                  key={`${link.href}-${link.name}`}
+                  key={`${link.href}-${link.label}`}
                   href={link.href}
-                  className="group min-h-[118px] rounded-lg border border-white/[0.07] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-4 backdrop-blur-xl transition-colors duration-300 hover:border-emerald-400/30 light:hover:border-emerald-600/25"
+                  className="group flex h-11 min-w-0 items-center gap-2 rounded-md px-3 text-[#b5b5b5] light:text-[#444444] transition-colors duration-200 hover:bg-white/[0.05] hover:text-white light:hover:bg-black/[0.04] light:hover:text-black"
                 >
-                  <span className="flex h-full flex-col justify-between gap-3">
-                    <span className="space-y-3">
-                      <span className="flex items-start justify-between gap-3">
-                        <span className="flex min-w-0 items-center gap-3">
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/[0.07] light:border-black/[0.08] bg-white/[0.03] light:bg-black/[0.025] text-[#9a9a9a] light:text-[#777777] transition-colors duration-300 group-hover:text-emerald-400 light:group-hover:text-emerald-600">
-                            <link.icon className="h-4 w-4" />
-                          </span>
-                          <span className="min-w-0">
-                            <span className="block text-[9px] uppercase tracking-[0.18em] text-[#666666] light:text-[#999999]">{link.eyebrow}</span>
-                            <span className="mt-0.5 block truncate text-sm font-semibold text-white light:text-black">{link.name}</span>
-                          </span>
-                        </span>
-                        <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${dotClass[link.tone as keyof typeof dotClass]}`} />
-                      </span>
-                      <span className="block text-sm leading-relaxed text-[#a9a9a9] light:text-[#555555]">
-                        {link.description}
-                      </span>
-                    </span>
-                    <span className="flex items-center justify-between gap-2 border-t border-white/[0.05] light:border-black/[0.06] pt-2">
-                      <span className="truncate text-[11px] text-[#666666] light:text-[#888888]">{link.meta}</span>
-                      <span className={`shrink-0 rounded px-2 py-1 text-[10px] font-medium ${toneClass[link.tone as keyof typeof toneClass]}`}>
-                        {link.action}
-                      </span>
-                    </span>
+                  <link.icon className="h-4 w-4 shrink-0 text-[#777777] light:text-[#777777] transition-colors duration-200 group-hover:text-emerald-400 light:group-hover:text-emerald-600" />
+                  <span className="text-sm font-medium">{link.label}</span>
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotClass[link.tone as keyof typeof dotClass]}`} />
+                  <span className={`hidden max-w-[150px] truncate text-[11px] sm:inline ${toneClass[link.tone as keyof typeof toneClass]}`}>
+                    {link.meta}
                   </span>
                 </Link>
               ))}
