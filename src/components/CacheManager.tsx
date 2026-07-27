@@ -10,7 +10,6 @@ const paths = [
   { path: '/dashboard', label: 'Dashboard' },
   { path: '/profile', label: 'Profil' },
   { path: '/konta', label: 'Konta' },
-  { path: '/audit', label: 'Audit Log' },
   { path: '/settings', label: 'Ustawienia' },
   { path: '/security', label: 'Bezpieczeństwo' },
 ]

@@ -1,14 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { Bot, Home, Settings, User } from 'lucide-react'
+import { Bot, Home, Settings, User, Users } from 'lucide-react'
 import { DiscordMaintenanceManager } from '@/components/DiscordMaintenanceManager'
 import { MobileNav } from '@/components/MobileNav'
 
-export default function DiscordSettingsClient({ canAccessAudit }: { canAccessAudit: boolean }) {
+export default function DiscordSettingsClient({ canAccessKonta }: { canAccessKonta: boolean }) {
   return (
     <div className="min-h-screen bg-[#0a0a0a] light:bg-[#f5f5f5] transition-colors duration-300">
-      <MobileNav currentPath="/settings" showAudit={canAccessAudit} showSettings={true} />
+      <MobileNav currentPath="/settings" showKonta={canAccessKonta} showSettings={true} />
 
       <div className="hidden lg:flex fixed top-6 left-6 right-6 z-50 items-center justify-between">
         <div className="flex items-center gap-6">
@@ -26,12 +26,13 @@ export default function DiscordSettingsClient({ canAccessAudit }: { canAccessAud
             <User className="h-3 w-3" />
             Profil
           </Link>
-          {canAccessAudit && (
+          {canAccessKonta && (
             <Link
-              href="/audit"
+              href="/konta"
               className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
             >
-              Audit Log
+              <Users className="h-3 w-3" />
+              Konta
             </Link>
           )}
           <Link

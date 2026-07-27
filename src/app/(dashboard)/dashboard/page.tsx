@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { Clock3, User, ClipboardList, Settings, UserCog } from 'lucide-react'
+import { Clock3, User, Settings, UserCog } from 'lucide-react'
 import { SystemHealth } from '@/components/SystemHealth'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { DashboardModules } from './DashboardModules'
@@ -57,16 +57,11 @@ export default async function DashboardPage() {
       icon: UserCog,
     }] : []),
     ...(permissions.canAccessAudit ? [{
-      label: 'Audit Log',
-      meta: errors24h === 1 ? '1 błąd / 24h' : `${errors24h} błędów / 24h`,
-      tone: auditTone,
-      href: '/audit',
-      icon: ClipboardList,
-    }] : []),
-    ...(permissions.canAccessAudit ? [{
       label: 'Aktywność',
-      meta: `${dashboardStats?.recent_logins ?? 0} logowań / 24h`,
-      tone: 'neutral' as QuickCardTone,
+      meta: errors24h > 0
+        ? errors24h === 1 ? '1 błąd / 24h' : `${errors24h} błędów / 24h`
+        : `${dashboardStats?.recent_logins ?? 0} logowań / 24h`,
+      tone: auditTone,
       href: '/audit',
       icon: Clock3,
     }] : []),

@@ -13,5 +13,5 @@ export default async function DiscordSettingsPage() {
     redirect('/dashboard')
   }
 
-  return <DiscordSettingsClient canAccessAudit={permissions.canAccessAudit} />
+  return <DiscordSettingsClient canAccessKonta={permissions.canAccessKonta} />
 }

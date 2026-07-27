@@ -13,5 +13,11 @@ export default async function SettingsPage() {
     redirect('/dashboard')
   }
 
-  return <SettingsClient canAccessAudit={permissions.canAccessAudit} canManageDiscordMaintenance={isAdminRole(permissions.role)} canManageCache={permissions.role === 'super_admin'} />
+  return (
+    <SettingsClient
+      canAccessKonta={permissions.canAccessKonta}
+      canManageDiscordMaintenance={isAdminRole(permissions.role)}
+      canManageCache={permissions.role === 'super_admin'}
+    />
+  )
 }
