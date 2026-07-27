@@ -292,70 +292,93 @@ export function DashboardCommandCenter({
   }
 
   return (
-    <div className="w-full max-w-6xl mb-7 space-y-3">
-      <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="relative border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl">
-          <div className="flex items-center gap-2 px-3 py-2.5">
-            <Search className="h-4 w-4 shrink-0 text-[#555555] light:text-[#999999]" />
-            <input
-              ref={searchInputRef}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onFocus={() => setOpen(true)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && commandItems[0]) {
-                  event.preventDefault()
-                  openItem(commandItems[0].href)
-                }
-              }}
-              placeholder="Szukaj w VEZcore"
-              className="h-8 min-w-0 flex-1 bg-transparent text-sm text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(true)
-                window.setTimeout(() => searchInputRef.current?.focus(), 0)
-              }}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.08] text-[#777777] light:text-[#777777] hover:text-white light:hover:text-black"
-              aria-label="Otwórz command palette"
-            >
-              <Command className="h-4 w-4" />
-            </button>
-          </div>
-
-          {open && (
-            <div className="absolute left-0 right-0 top-full z-30 mt-2 border border-white/[0.08] light:border-black/[0.08] bg-[#070707] light:bg-white p-1.5 shadow-2xl">
-              <div className="max-h-80 overflow-y-auto">
-                {commandItems.length === 0 ? (
-                  <p className="px-2 py-3 text-xs text-[#666666] light:text-[#999999]">Brak wyników</p>
-                ) : (
-                  commandItems.map((item) => {
-                    const Icon = item.icon
-                    return (
-                      <button
-                        key={`${item.href}-${item.id}`}
-                        type="button"
-                        onClick={() => openItem(item.href)}
-                        className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-white/[0.05] light:hover:bg-black/[0.04]"
-                      >
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.08] bg-white/[0.02] light:bg-black/[0.02]">
-                          <Icon className="h-4 w-4 text-emerald-400 light:text-emerald-600" />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm text-white light:text-black">{item.title}</span>
-                          <span className="block truncate text-[11px] text-[#666666] light:text-[#999999]">{item.subtitle}</span>
-                        </span>
-                      </button>
-                    )
-                  })
-                )}
-              </div>
-            </div>
-          )}
+    <aside className="w-full space-y-3 xl:sticky xl:top-8">
+      <section className="relative border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/80 light:bg-white/90 p-4 backdrop-blur-xl">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#777777] light:text-[#777777]">Operacje</p>
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(true)
+              window.setTimeout(() => searchInputRef.current?.focus(), 0)
+            }}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.08] text-[#777777] light:text-[#777777] hover:text-white light:hover:text-black"
+            aria-label="Otwórz command palette"
+          >
+            <Command className="h-4 w-4" />
+          </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
+        <div className="flex items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-black/25 light:bg-black/[0.02] px-3">
+          <Search className="h-4 w-4 shrink-0 text-[#555555] light:text-[#999999]" />
+          <input
+            ref={searchInputRef}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onFocus={() => setOpen(true)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && commandItems[0]) {
+                event.preventDefault()
+                openItem(commandItems[0].href)
+              }
+            }}
+            placeholder="Szukaj"
+            className="h-10 min-w-0 flex-1 bg-transparent text-sm text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
+          />
+        </div>
+
+        {open && (
+          <div className="absolute left-0 right-0 top-[116px] z-30 mx-4 border border-white/[0.08] light:border-black/[0.08] bg-[#070707] light:bg-white p-1.5 shadow-2xl">
+            <div className="max-h-80 overflow-y-auto">
+              {commandItems.length === 0 ? (
+                <p className="px-2 py-3 text-xs text-[#666666] light:text-[#999999]">Brak wyników</p>
+              ) : (
+                commandItems.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <button
+                      key={`${item.href}-${item.id}`}
+                      type="button"
+                      onClick={() => openItem(item.href)}
+                      className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-white/[0.05] light:hover:bg-black/[0.04]"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.08] bg-white/[0.02] light:bg-black/[0.02]">
+                        <Icon className="h-4 w-4 text-emerald-400 light:text-emerald-600" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm text-white light:text-black">{item.title}</span>
+                        <span className="block truncate text-[11px] text-[#666666] light:text-[#999999]">{item.subtitle}</span>
+                      </span>
+                    </button>
+                  )
+                })
+              )}
+            </div>
+          </div>
+        )}
+
+        {primaryActions.length > 0 && (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {primaryActions.map((action) => {
+              const Icon = action.icon
+              return (
+                <Link
+                  key={action.id}
+                  href={action.href}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-white/[0.02] light:bg-black/[0.02] px-3 text-xs text-[#b5b5b5] light:text-[#444444] hover:border-emerald-400/25 light:hover:border-emerald-600/25 hover:text-white light:hover:text-black transition-colors"
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-emerald-400 light:text-emerald-600" />
+                  <span className="truncate">{action.title}</span>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </section>
+
+      <section className="border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-4 backdrop-blur-xl">
+        <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#777777] light:text-[#777777]">Sesja</p>
+        <div className="grid grid-cols-2 gap-2">
           {[
             { label: 'Dzisiaj', value: formatToday(), icon: CalendarDays },
             { label: 'Login', value: formatShortDate(user.lastSignInAt), icon: LogIn },
@@ -364,8 +387,8 @@ export function DashboardCommandCenter({
           ].map((item) => {
             const Icon = item.icon
             return (
-              <div key={item.label} className="min-w-0 border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 px-3 py-2 backdrop-blur-xl">
-                <p className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.16em] text-[#555555] light:text-[#999999]">
+              <div key={item.label} className="min-w-0 rounded-md bg-white/[0.025] light:bg-black/[0.025] px-3 py-2">
+                <p className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.14em] text-[#555555] light:text-[#999999]">
                   <Icon className="h-3 w-3" />
                   {item.label}
                 </p>
@@ -374,76 +397,56 @@ export function DashboardCommandCenter({
             )
           })}
         </div>
-      </div>
+      </section>
 
-      {primaryActions.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {primaryActions.map((action) => {
-            const Icon = action.icon
-            return (
-              <Link
-                key={action.id}
-                href={action.href}
-                className="inline-flex min-h-8 max-w-full items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-white/[0.02] light:bg-black/[0.02] px-3 py-1.5 text-[11px] text-[#b5b5b5] light:text-[#444444] hover:border-emerald-400/25 light:hover:border-emerald-600/25 hover:text-white light:hover:text-black transition-colors"
-              >
-                <Icon className="h-3.5 w-3.5 shrink-0 text-emerald-400 light:text-emerald-600" />
-                <span className="truncate">{action.title}</span>
-              </Link>
-            )
-          })}
+      <section className="border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-4 backdrop-blur-xl">
+        <div className="flex items-center justify-between gap-3">
+          <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#777777] light:text-[#777777]">
+            <StickyNote className="h-3.5 w-3.5" />
+            Notatka
+          </p>
+          <span className="shrink-0 text-[10px] text-[#555555] light:text-[#999999]">
+            {lastUpdated && access.canAccessSettings ? formatShortDate(lastUpdated) : `${note.length}/${noteLimit}`}
+          </span>
         </div>
-      )}
 
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl px-3 py-2.5">
-          <div className="flex items-center justify-between gap-3">
-            <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#555555] light:text-[#999999]">
-              <StickyNote className="h-3.5 w-3.5" />
-              Notatka
-            </p>
-            <span className="shrink-0 text-[10px] text-[#555555] light:text-[#999999]">
-              {lastUpdated && access.canAccessSettings ? `Zapisano ${formatShortDate(lastUpdated)}` : `${note.length}/${noteLimit}`}
-            </span>
-          </div>
+        {access.canAccessSettings ? (
+          <textarea
+            value={note}
+            onChange={(event) => saveNote(event.target.value)}
+            maxLength={noteLimit}
+            rows={3}
+            placeholder="Krótki kontekst na teraz"
+            className="mt-3 min-h-[92px] w-full resize-none rounded-md border border-white/[0.06] light:border-black/[0.08] bg-black/20 light:bg-black/[0.02] px-3 py-2 text-sm leading-relaxed text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
+          />
+        ) : (
+          <p className="mt-3 text-sm text-[#666666] light:text-[#999999]">Brak dostępu do notatki operacyjnej.</p>
+        )}
+      </section>
 
-          {access.canAccessSettings ? (
-            <textarea
-              value={note}
-              onChange={(event) => saveNote(event.target.value)}
-              maxLength={noteLimit}
-              rows={1}
-              placeholder="Krótki kontekst na teraz"
-              className="mt-2 h-9 w-full resize-none bg-transparent text-sm leading-relaxed text-white light:text-black placeholder:text-[#555555] light:placeholder:text-[#999999] focus:outline-none"
-            />
+      <section className="border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-4 backdrop-blur-xl">
+        <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#777777] light:text-[#777777]">
+          <History className="h-3.5 w-3.5" />
+          Ostatnio
+        </p>
+
+        <div className="mt-3 grid gap-1.5">
+          {allowedRecentPages.length === 0 ? (
+            <p className="text-sm text-[#666666] light:text-[#999999]">Brak historii</p>
           ) : (
-            <p className="mt-2 text-sm text-[#666666] light:text-[#999999]">Brak dostępu do notatki operacyjnej.</p>
+            allowedRecentPages.map((page) => (
+              <Link
+                key={`${page.href}-${page.visitedAt}`}
+                href={page.href}
+                className="flex min-h-8 items-center justify-between gap-3 rounded-md px-2 text-xs hover:bg-white/[0.04] light:hover:bg-black/[0.04]"
+              >
+                <span className="truncate text-white light:text-black">{getRecentLabel(page.href)}</span>
+                <span className="shrink-0 text-[10px] text-[#555555] light:text-[#999999]">{formatShortDate(page.visitedAt)}</span>
+              </Link>
+            ))
           )}
         </div>
-
-        <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl px-3 py-2.5">
-          <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#555555] light:text-[#999999]">
-            <History className="h-3.5 w-3.5" />
-            Ostatnio
-          </p>
-
-          <div className="mt-2 grid gap-1.5">
-            {allowedRecentPages.length === 0 ? (
-              <p className="text-sm text-[#666666] light:text-[#999999]">Brak historii</p>
-            ) : (
-              allowedRecentPages.map((page) => (
-                <Link
-                  key={`${page.href}-${page.visitedAt}`}
-                  href={page.href}
-                  className="flex min-h-7 items-center justify-between gap-3 rounded-md px-2 text-xs hover:bg-white/[0.04] light:hover:bg-black/[0.04]"
-                >
-                  <span className="truncate text-white light:text-black">{getRecentLabel(page.href)}</span>
-                  <span className="shrink-0 text-[10px] text-[#555555] light:text-[#999999]">{formatShortDate(page.visitedAt)}</span>
-                </Link>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+      </section>
+    </aside>
   )
 }

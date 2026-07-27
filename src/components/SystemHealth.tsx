@@ -284,15 +284,24 @@ export function SystemHealth() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-1 border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/60 light:bg-white/80 p-1">
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[#777777] light:text-[#777777]">
+            Infrastruktura
+          </p>
+          <p className="mt-1 text-sm text-[#666666] light:text-[#999999]">
+            Hetzner, Labs, Monitor
+          </p>
+        </div>
+
+        <div className="flex items-center gap-1 rounded-md border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/60 light:bg-white/80 p-1">
           {filters.map((filter) => (
             <button
               key={filter.id}
               type="button"
               onClick={() => setActiveFilter(filter.id)}
-              className={`px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] transition-colors ${
+              className={`rounded px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] transition-colors ${
                 activeFilter === filter.id
                   ? 'bg-white/[0.08] text-white light:bg-black/[0.06] light:text-black'
                   : 'text-[#555555] light:text-[#999999] hover:text-white light:hover:text-black'
@@ -302,13 +311,9 @@ export function SystemHealth() {
             </button>
           ))}
         </div>
-
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#999999]">
-          Infrastruktura
-        </p>
       </div>
 
-      <div className={`grid grid-cols-1 gap-4 ${visibleGroups.length === 1 || openGroup ? '' : 'lg:grid-cols-3'}`}>
+      <div className={`grid grid-cols-1 gap-3 ${visibleGroups.length === 1 || openGroup ? '' : 'lg:grid-cols-3'}`}>
         {visibleGroups.map((group) => {
           const isOpen = openGroup === group.name
           const Icon = group.icon
@@ -322,12 +327,12 @@ export function SystemHealth() {
               <button
                 type="button"
                 onClick={() => setOpenGroup(isOpen ? null : group.name)}
-                className="flex w-full items-center justify-between gap-4 p-4 text-left"
+                className="flex w-full items-center justify-between gap-4 p-3 text-left"
                 aria-expanded={isOpen}
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.06] bg-white/[0.03] light:bg-black/[0.03]">
-                    <Icon className={`h-5 w-5 ${colors.text}`} />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.06] bg-white/[0.03] light:bg-black/[0.03]">
+                    <Icon className={`h-4 w-4 ${colors.text}`} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-white light:text-black">{group.name}</p>
@@ -450,6 +455,6 @@ export function SystemHealth() {
           )
         })}
       </div>
-    </div>
+    </section>
   )
 }

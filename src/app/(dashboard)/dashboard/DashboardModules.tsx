@@ -136,8 +136,16 @@ export function DashboardModules({
     : permissionFilteredModules.filter((m) => !preferences.hiddenModules.includes(m.name))
 
   return (
-    <div className="w-full max-w-6xl mb-7">
-      <div className="flex justify-end mb-2">
+    <section className="w-full mb-5">
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[#777777] light:text-[#777777]">
+            Ekosystem
+          </p>
+          <h1 className="mt-1 text-lg font-medium text-white light:text-black">
+            VEZcore dashboard
+          </h1>
+        </div>
         <button
           onClick={() => setEditMode((v) => !v)}
           className={`flex items-center gap-1.5 text-[10px] uppercase tracking-[0.25em] transition-colors duration-200 ${
@@ -151,7 +159,7 @@ export function DashboardModules({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {visibleModules.map((mod) => {
           const isHidden = preferences.hiddenModules.includes(mod.name)
           const sources = moduleStatusSources[mod.name]
@@ -172,7 +180,7 @@ export function DashboardModules({
 
           const cardContent = (
             <div
-              className={`relative tile-${mod.color} tile-hover group min-h-[168px] bg-[#111111]/80 light:bg-white/90 backdrop-blur-xl border border-white/[0.06] light:border-black/[0.08] p-4 transition-all duration-300 ${
+              className={`relative tile-${mod.color} tile-hover group min-h-[154px] bg-[#111111]/80 light:bg-white/90 backdrop-blur-xl border border-white/[0.06] light:border-black/[0.08] p-4 transition-all duration-300 ${
                 editMode ? 'cursor-default' : mod.href ? 'cursor-pointer' : 'cursor-default'
               } ${isHidden ? 'opacity-40' : ''}`}
             >
@@ -201,7 +209,7 @@ export function DashboardModules({
               <h3 className="text-sm font-medium text-white light:text-black mb-1 transition-colors duration-300">
                 {mod.label}
               </h3>
-              <p className="line-clamp-2 text-[11px] leading-relaxed text-[#666666] light:text-[#999999] transition-colors duration-300">
+              <p className="line-clamp-2 min-h-[34px] text-[11px] leading-relaxed text-[#666666] light:text-[#999999] transition-colors duration-300">
                 {mod.description}
               </p>
 
@@ -273,6 +281,6 @@ export function DashboardModules({
           </div>
         )}
       </div>
-    </div>
+    </section>
   )
 }

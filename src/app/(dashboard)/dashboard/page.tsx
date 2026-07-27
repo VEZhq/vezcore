@@ -44,74 +44,81 @@ export default async function DashboardPage() {
         }}
       />
 
-      <div className="relative z-10 flex min-h-screen flex-col items-center px-4 pb-12 pt-16 sm:pt-20">
-        <div className="mb-8">
-          <Image
-            src="/logo/vezcore_logo_white_full.svg"
-            alt="vezCore"
-            width={220}
-            height={78}
-            className="h-auto w-[220px] max-w-[64vw] opacity-80 light:opacity-0 light:hidden transition-opacity duration-300"
-            priority
-          />
-          <Image
-            src="/logo/vezcore_logo_black_full.svg"
-            alt="vezCore"
-            width={220}
-            height={78}
-            className="h-auto w-[220px] max-w-[64vw] opacity-0 light:opacity-80 dark:hidden transition-opacity duration-300"
-            priority
-          />
-        </div>
+      <div className="relative z-10 min-h-screen px-4 py-8 sm:py-10">
+        <div className="mx-auto w-full max-w-7xl">
+          <header className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <Image
+                src="/logo/vezcore_logo_white_full.svg"
+                alt="vezCore"
+                width={210}
+                height={58}
+                className="h-auto w-[210px] max-w-[64vw] opacity-85 light:opacity-0 light:hidden transition-opacity duration-300"
+                priority
+              />
+              <Image
+                src="/logo/vezcore_logo_black_full.svg"
+                alt="vezCore"
+                width={210}
+                height={58}
+                className="h-auto w-[210px] max-w-[64vw] opacity-0 light:opacity-85 dark:hidden transition-opacity duration-300"
+                priority
+              />
+            </div>
 
-        <DashboardCommandCenter
-          access={{
-            canAccessKonta: permissions.canAccessKonta,
-            canAccessAudit: permissions.canAccessAudit,
-            canAccessSettings: permissions.canAccessSettings,
-            canAccessInfrastructure: permissions.canAccessInfrastructure,
-            canAccessVezVision: permissions.canAccessVezVision,
-            canViewVezVisionBlog: permissions.canViewVezVisionBlog,
-            canViewVezVisionPortfolio: permissions.canViewVezVisionPortfolio,
-            canViewVezVisionServices: permissions.canViewVezVisionServices,
-            canViewVezVisionFaq: permissions.canViewVezVisionFaq,
-            canViewVezVisionNewsletter: permissions.canViewVezVisionNewsletter,
-            canViewVezVisionFiles: permissions.canViewVezVisionFiles,
-            canViewVezVisionSettings: permissions.canViewVezVisionSettings,
-            canViewVezVisionCalendar: permissions.canViewVezVisionCalendar,
-            role: permissions.role,
-          }}
-          user={{
-            id: user.id,
-            email: user.email,
-            lastSignInAt: user.last_sign_in_at,
-          }}
-        />
+            <nav className="flex flex-wrap items-center gap-2">
+              {quickLinks.map((link) => (
+                <Link
+                  key={`${link.href}-${link.name}`}
+                  href={link.href}
+                  className="inline-flex h-9 items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-[#0a0a0a]/50 light:bg-white/80 px-3 text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777] hover:border-emerald-400/25 light:hover:border-emerald-600/25 hover:text-emerald-400 light:hover:text-emerald-600 transition-colors duration-300"
+                >
+                  <link.icon className="h-3.5 w-3.5" />
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
+          </header>
 
-        {permissions.canAccessInfrastructure && (
-          <div id="infrastructure" className="w-full max-w-6xl mb-7 scroll-mt-8">
-            <SystemHealth />
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
+            <main className="min-w-0">
+              <DashboardModules
+                canAccessVezVision={permissions.canAccessVezVision}
+                canAccessInfrastructure={permissions.canAccessInfrastructure}
+              />
+
+              {permissions.canAccessInfrastructure && (
+                <div id="infrastructure" className="w-full scroll-mt-8">
+                  <SystemHealth />
+                </div>
+              )}
+            </main>
+
+            <DashboardCommandCenter
+              access={{
+                canAccessKonta: permissions.canAccessKonta,
+                canAccessAudit: permissions.canAccessAudit,
+                canAccessSettings: permissions.canAccessSettings,
+                canAccessInfrastructure: permissions.canAccessInfrastructure,
+                canAccessVezVision: permissions.canAccessVezVision,
+                canViewVezVisionBlog: permissions.canViewVezVisionBlog,
+                canViewVezVisionPortfolio: permissions.canViewVezVisionPortfolio,
+                canViewVezVisionServices: permissions.canViewVezVisionServices,
+                canViewVezVisionFaq: permissions.canViewVezVisionFaq,
+                canViewVezVisionNewsletter: permissions.canViewVezVisionNewsletter,
+                canViewVezVisionFiles: permissions.canViewVezVisionFiles,
+                canViewVezVisionSettings: permissions.canViewVezVisionSettings,
+                canViewVezVisionCalendar: permissions.canViewVezVisionCalendar,
+                role: permissions.role,
+              }}
+              user={{
+                id: user.id,
+                email: user.email,
+                lastSignInAt: user.last_sign_in_at,
+              }}
+            />
           </div>
-        )}
-
-        <DashboardModules
-          canAccessVezVision={permissions.canAccessVezVision}
-          canAccessInfrastructure={permissions.canAccessInfrastructure}
-        />
-
-        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
-          {quickLinks.map((link) => (
-            <Link
-              key={`${link.href}-${link.name}`}
-              href={link.href}
-              className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] hover:text-emerald-500 light:hover:text-emerald-600 transition-colors duration-300"
-            >
-              <link.icon className="h-3 w-3" />
-              {link.name}
-            </Link>
-          ))}
         </div>
-
       </div>
     </div>
   )
