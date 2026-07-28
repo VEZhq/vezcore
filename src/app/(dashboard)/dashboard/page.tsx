@@ -79,9 +79,9 @@ export default async function DashboardPage() {
   } as const
 
   return (
-    <div className="min-h-screen bg-[#c8d0cf] px-4 py-6 text-[#202020] transition-colors duration-300 sm:px-6 lg:px-10">
-      <div className="mx-auto min-h-[calc(100vh-48px)] w-full max-w-[1780px] overflow-hidden rounded-[24px] bg-[#eef4f3] shadow-[0_30px_90px_rgba(75,85,85,0.22)]">
-        <div className="relative min-h-[calc(100vh-48px)] px-7 py-7 sm:px-10 lg:px-12">
+    <div className="min-h-screen bg-[#c8d0cf] px-4 py-5 text-[#202020] transition-colors duration-300 sm:px-6 lg:px-8">
+      <div className="mx-auto min-h-[calc(100vh-40px)] w-full max-w-[1710px] overflow-hidden rounded-[22px] bg-[#eef4f3] shadow-[0_30px_90px_rgba(75,85,85,0.22)]">
+        <div className="relative min-h-[calc(100vh-40px)] px-6 py-6 sm:px-9 lg:px-10">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_32%_12%,rgba(255,255,255,0.75),transparent_28%),radial-gradient(circle_at_72%_78%,rgba(218,228,226,0.9),transparent_34%)]" />
           <div className="relative z-10">
             <header className="flex items-start justify-between gap-6">
@@ -89,19 +89,19 @@ export default async function DashboardPage() {
                 <Image
                   src="/logo/vezcore_logo_black_full.svg"
                   alt="vezCore"
-                  width={156}
+                  width={144}
                   height={48}
-                  className="h-auto w-[156px]"
+                  className="h-auto w-[144px]"
                   priority
                 />
               </div>
 
-              <nav className="hidden items-center gap-2 rounded-[14px] bg-white/35 p-1.5 shadow-[0_12px_30px_rgba(105,116,116,0.08)] backdrop-blur-xl lg:flex">
+              <nav className="hidden items-center gap-1.5 rounded-[14px] bg-white/35 p-1.5 shadow-[0_12px_30px_rgba(105,116,116,0.08)] backdrop-blur-xl lg:flex">
                 {quickLinks.map((link, index) => (
                   <Link
                     key={`${link.href}-${link.label}`}
                     href={link.href}
-                    className={`group flex h-11 items-center gap-2 rounded-[12px] px-5 text-sm font-medium transition-all duration-200 ${
+                    className={`group flex h-10 items-center gap-2 rounded-[12px] px-4 text-sm font-medium transition-all duration-200 ${
                       index === 0
                         ? 'bg-white text-[#202020] shadow-[0_10px_24px_rgba(105,116,116,0.12)]'
                         : 'bg-[#e6eceb]/70 text-[#5e6664] hover:bg-white hover:text-[#202020]'
@@ -114,35 +114,35 @@ export default async function DashboardPage() {
               </nav>
 
               <div className="flex items-center gap-3">
-                <button className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Szukaj">
+                <button className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Szukaj">
                   <Search className="h-5 w-5" />
                 </button>
-                <button className="relative flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Powiadomienia">
+                <button className="relative flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Powiadomienia">
                   <Bell className="h-5 w-5" />
                   {errors24h > 0 && <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[#ff4d4d]" />}
                 </button>
-                <Link href="/profile" className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Profil">
+                <Link href="/profile" className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Profil">
                   <User className="h-5 w-5" />
                 </Link>
               </div>
             </header>
 
-            <div className="mt-16 grid gap-8 lg:grid-cols-[440px_minmax(0,1fr)_320px] lg:items-start">
-              <div className="flex items-start gap-5">
-                <Link href="/dashboard" className="mt-1 flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]">
+            <div className="mt-12 grid gap-7 lg:grid-cols-[390px_minmax(0,1fr)_300px] lg:items-start">
+              <div className="flex items-start gap-4">
+                <Link href="/dashboard" className="mt-1 flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]">
                   <span className="text-xl leading-none">←</span>
                 </Link>
                 <div>
-                  <h1 className="text-[42px] font-medium leading-none tracking-[-0.03em] text-[#202020]">
+                  <h1 className="text-[38px] font-medium leading-none tracking-[-0.03em] text-[#202020]">
                     VEZcore
                   </h1>
-                  <p className="mt-3 text-sm text-[#707a78]">
+                  <p className="mt-2 text-sm text-[#707a78]">
                     {user.email}
                   </p>
                 </div>
               </div>
 
-              <div className="grid gap-6 sm:grid-cols-3">
+              <div className="grid gap-5 sm:grid-cols-3">
                 {[
                   { value: dashboardStats?.total_users ?? 0, label: 'Konta', tone: 'ok' as QuickCardTone },
                   { value: dashboardStats?.recent_logins ?? 0, label: 'Logowania', tone: 'ok' as QuickCardTone },
@@ -151,12 +151,12 @@ export default async function DashboardPage() {
                   <div key={metric.label} className="flex items-end gap-4">
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-[38px] font-medium leading-none tracking-[-0.03em] text-[#202020]">{metric.value}</p>
+                        <p className="text-[34px] font-medium leading-none tracking-[-0.03em] text-[#202020]">{metric.value}</p>
                         <span className={`mt-1 flex h-4 w-4 items-center justify-center rounded-[5px] text-[10px] text-white ${dotClass[metric.tone as keyof typeof dotClass]}`}>↗</span>
                       </div>
                       <p className="mt-2 text-sm text-[#707a78]">{metric.label}</p>
                     </div>
-                    <div className="mb-1 hidden h-12 w-24 items-end gap-1 md:flex">
+                    <div className="mb-1 hidden h-11 w-20 items-end gap-1 md:flex">
                       {Array.from({ length: 18 }).map((_, index) => (
                         <span
                           key={index}
@@ -174,11 +174,11 @@ export default async function DashboardPage() {
                   Core <span className="mx-2 text-[#a0aaa8]">↔</span> Produkcja
                 </div>
                 {permissions.canAccessSettings && (
-                  <Link href="/settings" className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Ustawienia">
+                  <Link href="/settings" className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Ustawienia">
                     <Settings className="h-5 w-5" />
                   </Link>
                 )}
-                <Link href="/audit" className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-white text-[#5e6664] transition-colors hover:text-[#202020]" aria-label="Aktywność">
+                <Link href="/audit" className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-white text-[#5e6664] transition-colors hover:text-[#202020]" aria-label="Aktywność">
                   <Bookmark className="h-5 w-5" />
                 </Link>
               </div>

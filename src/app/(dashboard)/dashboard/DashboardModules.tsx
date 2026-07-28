@@ -205,11 +205,11 @@ export function DashboardModules({
   const warningModules = moduleViewModels.filter((item) => item.moduleStatus === 'warning' || item.moduleStatus === 'error')
 
   return (
-    <section className="relative mt-10 w-full">
+    <section className="relative mt-8 w-full">
       <div className="absolute right-0 top-0 z-30 flex items-center gap-3">
         <button
           onClick={() => setEditMode((v) => !v)}
-          className={`flex h-12 items-center gap-2 rounded-[14px] px-4 text-sm font-medium transition-all duration-200 ${
+          className={`flex h-11 items-center gap-2 rounded-[14px] px-4 text-sm font-medium transition-all duration-200 ${
             editMode
               ? 'bg-white text-[#202020] shadow-[0_14px_30px_rgba(105,116,116,0.12)]'
               : 'bg-[#e3e9e8] text-[#5e6664] hover:bg-white hover:text-[#202020]'
@@ -220,9 +220,9 @@ export function DashboardModules({
         </button>
       </div>
 
-      <div className="ecosystem-board-warehouse relative min-h-[790px] overflow-hidden">
+      <div className="ecosystem-board-warehouse relative min-h-[700px] overflow-hidden">
         <div className="absolute inset-0 warehouse-floor-lines" />
-        <div className="absolute left-[260px] right-[-70px] top-[64px] h-[520px]">
+        <div className="absolute left-[238px] right-[-58px] top-[42px] h-[470px]">
           <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1180 520" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0 170 H290 C330 170 330 105 370 105 H515 C555 105 555 170 595 170 H1180" className="warehouse-route-ok" />
             <path d="M0 315 H430 C475 315 475 245 520 245 H690 C735 245 735 315 780 315 H1180" className="warehouse-route-ok" />
@@ -232,17 +232,17 @@ export function DashboardModules({
           </svg>
 
           {[
-            { left: '2%', top: '16%', width: '190px', height: '138px', color: '#4d91f3' },
-            { left: '34%', top: '14%', width: '210px', height: '132px', color: '#4d91f3' },
-            { left: '68%', top: '14%', width: '220px', height: '134px', color: '#4d91f3' },
-            { left: '98%', top: '14%', width: '190px', height: '132px', color: '#4d91f3' },
-            { left: '5%', top: '63%', width: '170px', height: '76px', color: '#7bcf89' },
-            { left: '24%', top: '78%', width: '100px', height: '94px', color: '#32ad58' },
-            { left: '34%', top: '78%', width: '100px', height: '94px', color: '#32ad58' },
-            { left: '44%', top: '78%', width: '100px', height: '94px', color: '#32ad58' },
-            { left: '63%', top: '78%', width: '100px', height: '94px', color: '#32ad58' },
-            { left: '78%', top: '84%', width: '140px', height: '92px', color: '#cfd5ca' },
-            { left: '94%', top: '79%', width: '100px', height: '94px', color: '#32ad58' },
+            { left: '2%', top: '16%', width: '172px', height: '122px', color: '#4d91f3' },
+            { left: '34%', top: '14%', width: '190px', height: '118px', color: '#4d91f3' },
+            { left: '68%', top: '14%', width: '198px', height: '120px', color: '#4d91f3' },
+            { left: '98%', top: '14%', width: '172px', height: '118px', color: '#4d91f3' },
+            { left: '5%', top: '63%', width: '154px', height: '68px', color: '#7bcf89' },
+            { left: '24%', top: '78%', width: '88px', height: '82px', color: '#32ad58' },
+            { left: '34%', top: '78%', width: '88px', height: '82px', color: '#32ad58' },
+            { left: '44%', top: '78%', width: '88px', height: '82px', color: '#32ad58' },
+            { left: '63%', top: '78%', width: '88px', height: '82px', color: '#32ad58' },
+            { left: '78%', top: '84%', width: '126px', height: '80px', color: '#cfd5ca' },
+            { left: '94%', top: '79%', width: '88px', height: '82px', color: '#32ad58' },
           ].map((block, index) => (
             <div
               key={index}
@@ -274,7 +274,7 @@ export function DashboardModules({
 
             const moduleNode = (
               <div
-                className={`warehouse-module-node group absolute z-20 w-[156px] rounded-[18px] bg-white/75 p-4 shadow-[0_18px_42px_rgba(95,113,112,0.16)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-1 hover:bg-white ${isHidden ? 'opacity-45' : ''}`}
+                className={`warehouse-module-node group absolute z-20 w-[142px] rounded-[16px] bg-white/75 p-3.5 shadow-[0_18px_42px_rgba(95,113,112,0.16)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-1 hover:bg-white ${isHidden ? 'opacity-45' : ''}`}
                 style={{ left: position.left, top: position.top }}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -320,7 +320,7 @@ export function DashboardModules({
             )
           })}
 
-          <div className="absolute left-[58%] top-[35%] z-30 w-[220px] rounded-[18px] bg-white/72 p-4 shadow-[0_20px_50px_rgba(95,113,112,0.18)] backdrop-blur-xl">
+          <div className="absolute left-[58%] top-[35%] z-30 w-[200px] rounded-[16px] bg-white/72 p-3.5 shadow-[0_20px_50px_rgba(95,113,112,0.18)] backdrop-blur-xl">
             <p className="text-sm font-medium text-[#202020]">VEZvision API</p>
             <div className="mt-1 flex items-center gap-1.5 text-xs text-[#23b657]">
               <span className="h-2 w-2 rounded-full bg-[#23b657]" />
@@ -329,31 +329,31 @@ export function DashboardModules({
           </div>
         </div>
 
-        <aside className="absolute left-0 top-12 z-40 w-[420px] rounded-[22px] bg-white/54 p-6 shadow-[0_26px_70px_rgba(95,113,112,0.20)] backdrop-blur-2xl">
+        <aside className="absolute left-0 top-9 z-40 w-[382px] rounded-[21px] bg-white/54 p-5 shadow-[0_26px_70px_rgba(95,113,112,0.20)] backdrop-blur-2xl">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium text-[#202020]">Report operations</h2>
+            <h2 className="text-base font-medium text-[#202020]">Report operations</h2>
             <div className="flex gap-2">
-              <button className="flex h-11 w-11 items-center justify-center rounded-[13px] bg-white/55 text-[#6d7775]" aria-label="Szukaj modułów">
+              <button className="flex h-10 w-10 items-center justify-center rounded-[13px] bg-white/55 text-[#6d7775]" aria-label="Szukaj modułów">
                 <span className="text-lg">⌕</span>
               </button>
-              <button className="flex h-11 w-11 items-center justify-center rounded-[13px] bg-white/55 text-[#6d7775]" aria-label="Lokalizacja">
+              <button className="flex h-10 w-10 items-center justify-center rounded-[13px] bg-white/55 text-[#6d7775]" aria-label="Lokalizacja">
                 <span className="text-lg">⌾</span>
               </button>
             </div>
           </div>
 
-          <div className="mt-6 h-px bg-white/70" />
-          <div className="mt-5 flex gap-2">
-            <span className="rounded-[12px] bg-white px-4 py-3 text-sm text-[#202020]">All</span>
-            <span className="rounded-[12px] bg-white/65 px-4 py-3 text-sm text-[#202020]"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#23b657]" />Available</span>
-            <span className="rounded-[12px] bg-white/65 px-4 py-3 text-sm text-[#202020]"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#ff4d4d]" />Alert</span>
+          <div className="mt-5 h-px bg-white/70" />
+          <div className="mt-4 flex gap-2">
+            <span className="rounded-[12px] bg-white px-3.5 py-2.5 text-sm text-[#202020]">All</span>
+            <span className="rounded-[12px] bg-white/65 px-3.5 py-2.5 text-sm text-[#202020]"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#23b657]" />Available</span>
+            <span className="rounded-[12px] bg-white/65 px-3.5 py-2.5 text-sm text-[#202020]"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#ff4d4d]" />Alert</span>
           </div>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-5 space-y-3">
             {moduleViewModels.slice(0, 4).map(({ mod, isHidden, moduleStatus, statusSummary, deployText }) => {
               const status = statusMeta[moduleStatus]
               return (
-                <div key={mod.name} className={`rounded-[18px] bg-white/62 p-4 shadow-[0_12px_30px_rgba(95,113,112,0.08)] ${isHidden ? 'opacity-45' : ''}`}>
+                <div key={mod.name} className={`rounded-[16px] bg-white/62 p-3.5 shadow-[0_12px_30px_rgba(95,113,112,0.08)] ${isHidden ? 'opacity-45' : ''}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
@@ -364,7 +364,7 @@ export function DashboardModules({
                     </div>
                     <span className="rounded-[12px] bg-[#edf3f2] px-3 py-2 text-xs text-[#6d7775]">{statusSummary}</span>
                   </div>
-                  <div className="mt-4">
+                  <div className="mt-3">
                     <div className="flex justify-between text-xs text-[#6d7775]">
                       <span>Deploy</span>
                       <span>{deployText}</span>
@@ -379,22 +379,22 @@ export function DashboardModules({
           </div>
         </aside>
 
-        <div className="absolute bottom-0 left-[470px] right-[42px] z-30 grid gap-6 lg:grid-cols-2">
+        <div className="absolute bottom-0 left-[420px] right-[34px] z-30 grid gap-5 lg:grid-cols-2">
           {[
             { title: 'VEZcore workload', value: `${healthyModules}.${monitoredModules.length || 0}`, label: '/ modules' },
             { title: 'Daily core events', value: `${warningModules.length ? warningModules.length : 125}.${moduleViewModels.length}21`, label: '/ events' },
           ].map((card, cardIndex) => (
-            <div key={card.title} className="min-h-[220px] rounded-[22px] bg-white/50 p-6 shadow-[0_22px_60px_rgba(95,113,112,0.16)] backdrop-blur-xl">
+            <div key={card.title} className="min-h-[190px] rounded-[21px] bg-white/50 p-5 shadow-[0_22px_60px_rgba(95,113,112,0.16)] backdrop-blur-xl">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-[#202020]">{card.title}</h3>
+                <h3 className="text-base font-medium text-[#202020]">{card.title}</h3>
                 <div className="flex gap-2">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-white/60 text-[#6d7775]">≡</span>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-white/60 text-[#6d7775]">↗</span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-white/60 text-[#6d7775]">≡</span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-white/60 text-[#6d7775]">↗</span>
                 </div>
               </div>
-              <div className="mt-8 flex items-end justify-between gap-6">
+              <div className="mt-6 flex items-end justify-between gap-5">
                 <div>
-                  <p className="text-[34px] font-medium leading-none tracking-[-0.03em] text-[#202020]">
+                  <p className="text-[30px] font-medium leading-none tracking-[-0.03em] text-[#202020]">
                     <span className="mr-2 inline-flex h-4 w-4 items-center justify-center rounded-[5px] bg-[#23b657] text-[10px] text-white">↗</span>
                     {card.value}
                     <span className="ml-1 text-sm font-normal text-[#7a8583]">{card.label}</span>
@@ -405,7 +405,7 @@ export function DashboardModules({
                   <div className="mt-2 h-1.5 rounded-full bg-[#dfe8e6]"><div className="h-full w-[72%] rounded-full bg-[#23b657]" /></div>
                 </div>
               </div>
-              <div className="mt-8 flex h-20 items-end gap-2 overflow-hidden">
+              <div className="mt-6 flex h-16 items-end gap-2 overflow-hidden">
                 {Array.from({ length: 34 }).map((_, index) => (
                   <span
                     key={index}
