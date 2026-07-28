@@ -87,7 +87,7 @@ export function ActivityFeed({ entries, showViewAll = true, canViewAll = false }
   }
 
   return (
-    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl transition-colors duration-300">
+    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
       <div className="p-4 border-b border-white/[0.06] light:border-black/[0.06]">
         <div className="flex items-center justify-between">
           <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">

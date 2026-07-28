@@ -3,6 +3,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { AutoLogoutProvider } from '@/components/AutoLogoutProvider'
 import { SecurityAlertsProvider } from '@/components/SecurityAlertsProvider'
 import { DashboardVisitTracker } from '@/components/DashboardVisitTracker'
+import { NeuralBackground } from '@/components/NeuralBackground'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 import { isAdminRole } from '@/lib/roles'
 import { enforceRequiredMfaLevel } from '@/lib/queries/auth'
@@ -25,9 +26,12 @@ export default async function DashboardLayout({
 		<ErrorBoundary>
 			<SecurityAlertsProvider isAdmin={isAdmin}>
 				<AutoLogoutProvider>
-					<div className="min-h-screen bg-[#0a0a0a]">
+					<div className="relative min-h-screen overflow-hidden bg-[#08080b] light:bg-[#f6f7fb]">
+						<NeuralBackground />
 						<DashboardVisitTracker userId={authState.userId} />
-						{children}
+						<div className="relative z-10 min-h-screen">
+							{children}
+						</div>
 					</div>
 				</AutoLogoutProvider>
 			</SecurityAlertsProvider>

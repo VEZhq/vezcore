@@ -7,7 +7,7 @@ import { MobileNav } from '@/components/MobileNav'
 
 export default function DiscordSettingsClient({ canAccessKonta }: { canAccessKonta: boolean }) {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] light:bg-[#f5f5f5] transition-colors duration-300">
+    <div className="min-h-screen bg-transparent transition-colors duration-300">
       <MobileNav currentPath="/settings" showKonta={canAccessKonta} showSettings={true} />
 
       <div className="hidden lg:flex fixed top-6 left-6 right-6 z-50 items-center justify-between">

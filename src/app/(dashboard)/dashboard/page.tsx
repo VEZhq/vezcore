@@ -88,7 +88,7 @@ export default async function DashboardPage() {
   } as const
 
   return (
-    <div className="relative min-h-screen bg-[#080808] light:bg-[#f6f6f6] transition-colors duration-300">
+    <div className="relative min-h-screen bg-transparent transition-colors duration-300">
       <div className="relative z-10 min-h-screen px-4 py-8 sm:py-10">
         <div className="mx-auto w-full max-w-6xl">
           <header className="mb-5">
@@ -114,14 +114,14 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            <nav className="mt-5 flex flex-wrap items-center gap-1 border-y border-white/[0.07] light:border-black/[0.08] bg-[#0d0d0d]/80 light:bg-white/80 px-1 py-1 backdrop-blur-xl">
+            <nav className="mt-5 flex flex-wrap items-center gap-1 border-y border-white/[0.07] light:border-black/[0.08] bg-[#0d0d0d]/80 light:bg-white/80 px-1 py-1 backdrop-blur-md">
               {quickLinks.map((link) => (
                 <Link
                   key={`${link.href}-${link.label}`}
                   href={link.href}
                   className="group flex h-11 min-w-0 items-center gap-2 rounded-md px-3 text-[#b5b5b5] light:text-[#444444] transition-colors duration-200 hover:bg-white/[0.05] hover:text-white light:hover:bg-black/[0.04] light:hover:text-black"
                 >
-                  <link.icon className="h-4 w-4 shrink-0 text-[#777777] light:text-[#777777] transition-colors duration-200 group-hover:text-emerald-400 light:group-hover:text-emerald-600" />
+                  <link.icon className="h-4 w-4 shrink-0 text-[#777777] light:text-[#777777] transition-colors duration-200 group-hover:text-sky-300 light:group-hover:text-sky-700" />
                   <span className="text-sm font-medium">{link.label}</span>
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotClass[link.tone as keyof typeof dotClass]}`} />
                   <span className={`hidden max-w-[150px] truncate text-[11px] sm:inline ${toneClass[link.tone as keyof typeof toneClass]}`}>

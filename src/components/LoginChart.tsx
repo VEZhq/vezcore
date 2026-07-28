@@ -30,7 +30,7 @@ export function LoginChart({ days = 7 }: LoginChartProps) {
 
   if (loading) {
     return (
-      <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 p-6">
+      <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] p-6">
         <div className="flex items-center gap-2 mb-4">
           <Activity className="h-4 w-4 text-[#444444] light:text-[#888888]" />
           <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
@@ -45,7 +45,7 @@ export function LoginChart({ days = 7 }: LoginChartProps) {
   }
 
   return (
-    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 p-6">
+    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Activity className="h-4 w-4 text-[#444444] light:text-[#888888]" />

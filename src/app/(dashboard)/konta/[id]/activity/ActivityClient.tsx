@@ -134,7 +134,7 @@ export default function ActivityClient({ user, auditLog, sessions, canAccessAudi
 		.sort((a, b) => new Date(b.last_seen).getTime() - new Date(a.last_seen).getTime())
 
 	return (
-		<div className="min-h-screen bg-[#0a0a0a] light:bg-[#f5f5f5] transition-colors duration-300">
+		<div className="min-h-screen bg-transparent transition-colors duration-300">
 			<MobileNav currentPath="/konta" showKonta={true} showAudit={canAccessAudit} showSettings={canAccessSettings} />
 
 			<div className="hidden lg:flex fixed top-6 left-6 right-6 z-50 items-center justify-between">
@@ -198,7 +198,7 @@ export default function ActivityClient({ user, auditLog, sessions, canAccessAudi
 						</div>
 					</div>
 
-					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl transition-colors duration-300">
+					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
 						<div className="p-6">
 							<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-4">
 								Dziennik aktywności
@@ -250,7 +250,7 @@ export default function ActivityClient({ user, auditLog, sessions, canAccessAudi
 						</div>
 					</div>
 
-					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl transition-colors duration-300">
+					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
 						<div className="p-6 border-b border-white/[0.06] light:border-black/[0.06]">
 							<div className="flex items-center gap-2">
 								<Shield className="h-4 w-4 text-[#444444] light:text-[#888888]" />
@@ -318,7 +318,7 @@ export default function ActivityClient({ user, auditLog, sessions, canAccessAudi
 						)}
 					</div>
 
-					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl transition-colors duration-300">
+					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
 						<div className="p-6">
 							<div className="flex items-center gap-2 mb-4">
 								<Globe className="h-4 w-4 text-[#444444] light:text-[#888888]" />

@@ -289,7 +289,7 @@ export function SystemHealth() {
           return (
             <div
               key={group.name}
-              className={`border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 backdrop-blur-xl transition-all duration-300 ${colors.border} ${colors.bg}`}
+              className={`border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-all duration-300 ${colors.border} ${colors.bg}`}
             >
               <button
                 type="button"

@@ -171,7 +171,7 @@ export function DashboardModules({
           onClick={() => setEditMode((v) => !v)}
           className={`flex items-center gap-1.5 text-[10px] uppercase tracking-[0.25em] transition-colors duration-200 ${
             editMode
-              ? 'text-emerald-400 light:text-emerald-600'
+              ? 'text-sky-300 light:text-sky-700'
               : 'text-[#444444] light:text-[#888888] hover:text-[#888888] light:hover:text-[#555555]'
           }`}
         >
@@ -205,7 +205,7 @@ export function DashboardModules({
 
           const cardContent = (
             <div
-              className={`relative tile-${mod.color} tile-hover group flex min-h-[198px] h-full flex-col bg-[#111111]/80 light:bg-white/90 backdrop-blur-xl border border-white/[0.06] light:border-black/[0.08] p-5 transition-all duration-300 ${
+              className={`relative tile-${mod.color} tile-hover group flex min-h-[198px] h-full flex-col bg-[#111111]/80 light:bg-white/[0.82] backdrop-blur-md border border-white/[0.06] light:border-black/[0.08] p-5 transition-all duration-300 ${
                 editMode ? 'cursor-default' : mod.href ? 'cursor-pointer' : 'cursor-default'
               } ${isHidden ? 'opacity-40' : ''}`}
             >
@@ -295,7 +295,7 @@ export function DashboardModules({
             </p>
             <button
               onClick={() => setEditMode(true)}
-              className="text-[10px] uppercase tracking-[0.25em] text-emerald-500 hover:text-emerald-400 transition-colors duration-200"
+              className="text-[10px] uppercase tracking-[0.25em] text-sky-400 hover:text-sky-300 transition-colors duration-200"
             >
               Przywróć widżety
             </button>

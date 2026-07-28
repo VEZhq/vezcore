@@ -84,7 +84,7 @@ export function DiscordMaintenanceManager() {
   }
 
   return (
-    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 transition-colors duration-300">
+    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] transition-colors duration-300">
       <div className="p-6 border-b border-white/[0.06] light:border-black/[0.06]">
         <div className="flex items-center gap-2 mb-2">
           <Bot className="h-4 w-4 text-[#444444] light:text-[#888888]" />

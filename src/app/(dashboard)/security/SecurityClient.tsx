@@ -180,7 +180,7 @@ export default function SecurityClient({ stats, ipLists, canAccessKonta }: Secur
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] light:bg-[#f5f5f5] transition-colors duration-300">
+    <div className="min-h-screen bg-transparent transition-colors duration-300">
       <MobileNav currentPath="/security" showKonta={canAccessKonta} />
       
       <div className="hidden lg:flex fixed top-6 left-6 right-6 z-50 items-center justify-between">
@@ -209,7 +209,7 @@ export default function SecurityClient({ stats, ipLists, canAccessKonta }: Secur
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 p-6">
+            <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] p-6">
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="h-4 w-4 text-emerald-400" />
                 <p className="text-[9px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888]">Wynik bezpieczeństwa</p>
@@ -217,7 +217,7 @@ export default function SecurityClient({ stats, ipLists, canAccessKonta }: Secur
               <p className="text-3xl font-light text-emerald-400">{securityScore}%</p>
             </div>
 
-            <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 p-6">
+            <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] p-6">
               <div className="flex items-center gap-2 mb-2">
                 <Lock className="h-4 w-4 text-blue-400" />
                 <p className="text-[9px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888]">2FA włączone</p>
@@ -225,7 +225,7 @@ export default function SecurityClient({ stats, ipLists, canAccessKonta }: Secur
               <p className="text-3xl font-light text-blue-400">{stats.usersWith2FA}/{stats.totalUsers}</p>
             </div>
 
-            <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 p-6">
+            <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] p-6">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="h-4 w-4 text-yellow-400" />
                 <p className="text-[9px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888]">Nieudane logowania (24h)</p>
@@ -233,7 +233,7 @@ export default function SecurityClient({ stats, ipLists, canAccessKonta }: Secur
               <p className="text-3xl font-light text-yellow-400">{stats.failedLogins24h}</p>
             </div>
 
-            <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90 p-6">
+            <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] p-6">
               <div className="flex items-center gap-2 mb-2">
                 <Activity className="h-4 w-4 text-red-400" />
                 <p className="text-[9px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888]">Zablokowane IP</p>
@@ -244,7 +244,7 @@ export default function SecurityClient({ stats, ipLists, canAccessKonta }: Secur
 
           <LoginChart />
 
-          <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90">
+          <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82]">
             <div className="p-6">
               <div className="flex items-center gap-2 mb-4">
                 <AlertTriangle className="h-4 w-4 text-[#444444] light:text-[#888888]" />
@@ -272,7 +272,7 @@ export default function SecurityClient({ stats, ipLists, canAccessKonta }: Secur
             </div>
           </div>
 
-          <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/90">
+          <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82]">
             <div className="p-6 border-b border-white/[0.06] light:border-black/[0.06]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

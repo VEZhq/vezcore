@@ -311,7 +311,7 @@ export function DashboardCommandCenter({
   return (
     <section className="mb-6 space-y-3">
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="relative border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/80 light:bg-white/90 p-3 backdrop-blur-xl">
+        <div className="relative border border-white/[0.06] light:border-black/[0.08] bg-[#111118]/[0.72] light:bg-white/[0.82] p-3 backdrop-blur-md">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="flex min-w-0 items-center gap-2 rounded-md border border-white/[0.06] light:border-black/[0.08] bg-black/25 light:bg-black/[0.02] px-3">
               <Search className="h-4 w-4 shrink-0 text-[#555555] light:text-[#999999]" />
@@ -380,7 +380,7 @@ export function DashboardCommandCenter({
                         className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-white/[0.05] light:hover:bg-black/[0.04]"
                       >
                         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.08] bg-white/[0.02] light:bg-black/[0.02]">
-                          <Icon className="h-4 w-4 text-emerald-400 light:text-emerald-600" />
+                          <Icon className="h-4 w-4 text-sky-300 light:text-sky-700" />
                         </span>
                         <span className="min-w-0">
                           <span className="block truncate text-sm text-white light:text-black">{item.title}</span>
@@ -398,7 +398,7 @@ export function DashboardCommandCenter({
         {access.canAccessInfrastructure ? (
           <VezCoreStatusBadge />
         ) : (
-          <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-3 backdrop-blur-xl">
+          <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#111118]/[0.68] light:bg-white/[0.82] p-3 backdrop-blur-md">
             <p className="text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">Sesja</p>
             <p className="mt-2 truncate text-sm text-white light:text-black">{user.email ?? 'konto'}</p>
             <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#555555] light:text-[#999999]">{access.role ?? 'user'}</p>
@@ -409,7 +409,7 @@ export function DashboardCommandCenter({
       {showDetails && (
       <div className={`grid gap-3 ${showRecent ? 'lg:grid-cols-[minmax(0,1fr)_320px]' : ''}`}>
         {showSession && (
-        <div className="grid grid-cols-2 gap-2 border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-3 backdrop-blur-xl sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 border border-white/[0.06] light:border-black/[0.08] bg-[#111118]/[0.68] light:bg-white/[0.82] p-3 backdrop-blur-md sm:grid-cols-4">
           {[
             { label: 'Dzisiaj', value: formatToday(), icon: CalendarDays },
             { label: 'Login', value: formatShortDate(user.lastSignInAt), icon: LogIn },
@@ -431,7 +431,7 @@ export function DashboardCommandCenter({
         )}
 
         {showRecent && (
-        <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-3 backdrop-blur-xl">
+        <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#111118]/[0.68] light:bg-white/[0.82] p-3 backdrop-blur-md">
           <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">
             <History className="h-3.5 w-3.5" />
             Ostatnio
@@ -459,7 +459,7 @@ export function DashboardCommandCenter({
       )}
 
       {showNote && (
-      <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#0b0b0b]/70 light:bg-white/90 p-3 backdrop-blur-xl">
+      <div className="border border-white/[0.06] light:border-black/[0.08] bg-[#111118]/[0.68] light:bg-white/[0.82] p-3 backdrop-blur-md">
         <div className="flex items-center justify-between gap-3">
           <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">
             <StickyNote className="h-3.5 w-3.5" />

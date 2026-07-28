@@ -40,8 +40,9 @@ export function NeuralBackground() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       const isDark = document.documentElement.classList.contains('dark')
-      const color = isDark ? 255 : 30
-      const lineAlpha = isDark ? 0.05 : 0.12
+      const lineColor = isDark ? '172, 194, 255' : '80, 96, 130'
+      const nodeColor = isDark ? '186, 230, 255' : '54, 70, 102'
+      const lineAlpha = isDark ? 0.08 : 0.1
 
       nodes.forEach((node) => {
         node.x += node.vx
@@ -61,7 +62,7 @@ export function NeuralBackground() {
           if (dist < 250) {
             const alpha = (1 - dist / 250) * lineAlpha
             ctx.beginPath()
-            ctx.strokeStyle = `rgba(${color}, ${color}, ${color}, ${alpha})`
+            ctx.strokeStyle = `rgba(${lineColor}, ${alpha})`
             ctx.lineWidth = isDark ? 0.5 : 0.8
             ctx.moveTo(nodes[i].x, nodes[i].y)
             ctx.lineTo(nodes[j].x, nodes[j].y)
@@ -76,7 +77,7 @@ export function NeuralBackground() {
 
         ctx.beginPath()
         ctx.arc(node.x, node.y, pulseSize, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${color}, ${color}, ${color}, ${alpha})`
+        ctx.fillStyle = `rgba(${nodeColor}, ${alpha})`
         ctx.fill()
       })
 
@@ -96,7 +97,7 @@ export function NeuralBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none"
+      className="fixed inset-0 pointer-events-none opacity-80 light:opacity-60"
       style={{ zIndex: 0 }}
     />
   )
