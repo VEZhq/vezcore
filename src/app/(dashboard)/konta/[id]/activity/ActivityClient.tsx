@@ -83,16 +83,16 @@ interface ActionMeta {
 const ACTION_META: Record<string, ActionMeta> = {
 	login: { label: 'Logowanie', Icon: LogIn, iconClassName: 'text-emerald-500' },
 	logout: { label: 'Wylogowanie', Icon: LogOut, iconClassName: 'text-red-500' },
-	profile_update: { label: 'Aktualizacja profilu', Icon: UserCog, iconClassName: 'text-blue-400' },
+	profile_update: { label: 'Aktualizacja profilu', Icon: UserCog, iconClassName: 'text-[#d7bfd8]' },
 	password_change: { label: 'Zmiana hasła', Icon: KeyRound, iconClassName: 'text-yellow-400' },
-	'2fa_verify': { label: 'Weryfikacja 2FA', Icon: ShieldCheck, iconClassName: 'text-violet-400' },
-	'2fa_enable': { label: 'Włączenie 2FA', Icon: ShieldPlus, iconClassName: 'text-violet-400' },
+	'2fa_verify': { label: 'Weryfikacja 2FA', Icon: ShieldCheck, iconClassName: 'text-[#d7bfd8]' },
+	'2fa_enable': { label: 'Włączenie 2FA', Icon: ShieldPlus, iconClassName: 'text-[#d7bfd8]' },
 	'2fa_disable': { label: 'Wyłączenie 2FA', Icon: ShieldOff, iconClassName: 'text-orange-400' },
 	session_revoke: { label: 'Odwołanie sesji', Icon: RotateCcw, iconClassName: 'text-red-500' },
 	all_sessions_revoked: { label: 'Odwołanie wszystkich sesji', Icon: RotateCcw, iconClassName: 'text-red-500' },
 	admin_sessions_view: { label: 'Podgląd sesji (admin)', Icon: Eye, iconClassName: 'text-[#888888] light:text-[#666666]' },
 	admin_session_revoke: { label: 'Odwołanie sesji (admin)', Icon: RotateCcw, iconClassName: 'text-red-500' },
-	user_update: { label: 'Aktualizacja użytkownika', Icon: UserCog, iconClassName: 'text-blue-400' },
+	user_update: { label: 'Aktualizacja użytkownika', Icon: UserCog, iconClassName: 'text-[#d7bfd8]' },
 	user_delete: { label: 'Usunięcie użytkownika', Icon: UserX, iconClassName: 'text-red-500' },
 	user_create: { label: 'Utworzenie użytkownika', Icon: UserPlus, iconClassName: 'text-emerald-500' },
 	role_change: { label: 'Zmiana roli', Icon: Shield, iconClassName: 'text-yellow-400' },
@@ -198,7 +198,7 @@ export default function ActivityClient({ user, auditLog, sessions, canAccessAudi
 						</div>
 					</div>
 
-					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
+					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
 						<div className="p-6">
 							<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-4">
 								Dziennik aktywności
@@ -250,7 +250,7 @@ export default function ActivityClient({ user, auditLog, sessions, canAccessAudi
 						</div>
 					</div>
 
-					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
+					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
 						<div className="p-6 border-b border-white/[0.06] light:border-black/[0.06]">
 							<div className="flex items-center gap-2">
 								<Shield className="h-4 w-4 text-[#444444] light:text-[#888888]" />
@@ -290,7 +290,7 @@ export default function ActivityClient({ user, auditLog, sessions, canAccessAudi
 															</span>
 														)}
 														{isAal2 && (
-															<span className="text-[9px] uppercase tracking-[0.2em] text-blue-400 border border-blue-400/30 px-1.5 py-0.5">
+															<span className="text-[9px] uppercase tracking-[0.2em] text-[#d7bfd8] border border-[#d7bfd8]/30 px-1.5 py-0.5">
 																2FA
 															</span>
 														)}
@@ -318,7 +318,7 @@ export default function ActivityClient({ user, auditLog, sessions, canAccessAudi
 						)}
 					</div>
 
-					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
+					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
 						<div className="p-6">
 							<div className="flex items-center gap-2 mb-4">
 								<Globe className="h-4 w-4 text-[#444444] light:text-[#888888]" />

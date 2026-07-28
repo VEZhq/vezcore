@@ -64,8 +64,8 @@ function roleLabel(role: string | null) {
 }
 
 function roleTone(role: string | null) {
-  if (role === 'super_admin') return 'border-violet-400/25 bg-violet-400/10 text-violet-200 light:text-violet-700'
-  if (role === 'admin') return 'border-blue-500/25 bg-blue-500/10 text-blue-300 light:text-blue-700'
+  if (role === 'super_admin') return 'border-[#d7bfd8]/25 bg-[#d7bfd8]/10 text-[#ead8e9] light:text-[#735671]'
+  if (role === 'admin') return 'border-[#d7bfd8]/25 bg-[#d7bfd8]/10 text-[#d7bfd8] light:text-[#735671]'
   return 'border-white/[0.07] bg-white/[0.03] text-[#999999] light:border-black/[0.08] light:bg-black/[0.03] light:text-[#666666]'
 }
 
@@ -107,14 +107,14 @@ function MetricCard({
   icon: LucideIcon
 }) {
   return (
-    <div className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-4 light:border-black/[0.08] light:bg-white/[0.82]">
+    <div className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-4 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#888888]">{label}</p>
           <p className="mt-2 text-2xl font-semibold text-white light:text-black">{value}</p>
         </div>
         <div className="flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] bg-white/[0.03] light:border-black/[0.08] light:bg-black/[0.03]">
-          <Icon className="h-4 w-4 text-sky-300 light:text-sky-700" />
+          <Icon className="h-4 w-4 text-[#e6c7a7] light:text-[#7d5a38]" />
         </div>
       </div>
       <p className="mt-3 text-xs text-[#777777] light:text-[#777777]">{helper}</p>
@@ -134,10 +134,10 @@ function PermissionPill({
       <span className="text-xs text-[#888888] light:text-[#666666]">{label}</span>
       <span
         className={`inline-flex items-center gap-2 text-xs ${
-          enabled ? 'text-sky-300 light:text-sky-700' : 'text-[#666666] light:text-[#999999]'
+          enabled ? 'text-[#e6c7a7] light:text-[#7d5a38]' : 'text-[#666666] light:text-[#999999]'
         }`}
       >
-        <span className={`h-2 w-2 rounded-full ${enabled ? 'bg-sky-300 light:bg-sky-600' : 'bg-[#444444] light:bg-[#b5b5b5]'}`} />
+        <span className={`h-2 w-2 rounded-full ${enabled ? 'bg-[#e6c7a7] light:bg-[#7d5a38]' : 'bg-[#444444] light:bg-[#b5b5b5]'}`} />
         {enabled ? 'aktywny' : 'brak'}
       </span>
     </div>
@@ -439,7 +439,7 @@ export default function KontaClient({
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
           <main className="space-y-5">
-            <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] light:border-black/[0.08] light:bg-white/[0.82]">
+            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
               <div className="border-b border-white/[0.06] p-4 light:border-black/[0.06]">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
@@ -456,7 +456,7 @@ export default function KontaClient({
                         value={search}
                         onChange={(e) => handleSearchChange(e.target.value)}
                         placeholder="Szukaj po email lub nazwie"
-                        className="h-10 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-sky-400/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                        className="h-10 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
                       />
                     </div>
                     <button
@@ -469,7 +469,7 @@ export default function KontaClient({
                     {canAddUsers && (
                       <button
                         onClick={() => setShowAddModal(true)}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-sky-400/25 bg-sky-400/10 px-3 text-xs text-sky-200 transition-colors hover:bg-sky-400/15 light:text-sky-700"
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#e6c7a7]/25 bg-[#e6c7a7]/10 px-3 text-xs text-[#f0d9be] transition-colors hover:bg-[#e6c7a7]/15 light:text-[#7d5a38]"
                       >
                         <Plus className="h-4 w-4" />
                         Dodaj
@@ -515,7 +515,7 @@ export default function KontaClient({
                           <button
                             onClick={handleBulkRoleChange}
                             disabled={bulkActionLoading}
-                            className="inline-flex h-9 items-center rounded-md border border-sky-400/25 bg-sky-400/10 px-3 text-xs text-sky-200 transition-colors hover:bg-sky-400/15 disabled:cursor-not-allowed disabled:opacity-50 light:text-sky-700"
+                            className="inline-flex h-9 items-center rounded-md border border-[#e6c7a7]/25 bg-[#e6c7a7]/10 px-3 text-xs text-[#f0d9be] transition-colors hover:bg-[#e6c7a7]/15 disabled:cursor-not-allowed disabled:opacity-50 light:text-[#7d5a38]"
                           >
                             Zatwierdź
                           </button>
@@ -637,7 +637,7 @@ export default function KontaClient({
             </section>
 
             {totalPages > 1 && (
-              <div className="flex flex-col gap-3 rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-3 light:border-black/[0.08] light:bg-white/[0.82] sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-3 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84] sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-[#777777] light:text-[#777777]">
                   Wyświetlane {((page - 1) * limit) + 1}-{Math.min(page * limit, total)} z {total} kont
                 </p>
@@ -695,7 +695,7 @@ export default function KontaClient({
           </main>
 
           <aside className="space-y-5">
-            <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-5 light:border-black/[0.08] light:bg-white/[0.82]">
+            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
               <p className="text-sm font-medium text-white light:text-black">Zakres dostępu</p>
               <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
                 Twoja rola: <span className="text-white light:text-black">{roleLabel(userRole)}</span>
@@ -709,7 +709,7 @@ export default function KontaClient({
               </div>
             </section>
 
-            <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-5 light:border-black/[0.08] light:bg-white/[0.82]">
+            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
               <p className="text-sm font-medium text-white light:text-black">Szybkie akcje</p>
               <div className="mt-4 space-y-2">
                 {canAddUsers && (
@@ -718,7 +718,7 @@ export default function KontaClient({
                     className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
                   >
                     <span className="inline-flex items-center gap-2">
-                      <Plus className="h-4 w-4 text-sky-300 light:text-sky-700" />
+                      <Plus className="h-4 w-4 text-[#e6c7a7] light:text-[#7d5a38]" />
                       Nowe konto
                     </span>
                     <span className="text-xs text-[#777777]">formularz</span>
@@ -729,7 +729,7 @@ export default function KontaClient({
                   className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <Download className="h-4 w-4 text-blue-400 light:text-blue-600" />
+                    <Download className="h-4 w-4 text-[#d7bfd8] light:text-[#735671]" />
                     Eksport CSV
                   </span>
                   <span className="text-xs text-[#777777]">pełna lista</span>
@@ -749,7 +749,7 @@ export default function KontaClient({
               </div>
             </section>
 
-            <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-5 light:border-black/[0.08] light:bg-white/[0.82]">
+            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
               <p className="text-sm font-medium text-white light:text-black">Widoczna strona</p>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <div className="rounded-md bg-white/[0.03] p-3 light:bg-black/[0.03]">
@@ -808,7 +808,7 @@ export default function KontaClient({
                       type="email"
                       value={addEmail}
                       onChange={(e) => setAddEmail(e.target.value)}
-                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-sky-400/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
                       placeholder="user@example.com"
                     />
                   </div>
@@ -824,7 +824,7 @@ export default function KontaClient({
                       type="password"
                       value={addPassword}
                       onChange={(e) => setAddPassword(e.target.value)}
-                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-sky-400/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
                       placeholder="Minimum bezpiecznego hasła"
                     />
                   </div>
@@ -840,7 +840,7 @@ export default function KontaClient({
                       type="text"
                       value={addName}
                       onChange={(e) => setAddName(e.target.value)}
-                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-sky-400/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
                       placeholder="Jan Kowalski"
                     />
                   </div>
@@ -858,7 +858,7 @@ export default function KontaClient({
               <button
                 onClick={handleAddUser}
                 disabled={addLoading || !addEmail || !addPassword}
-                className="inline-flex h-10 items-center rounded-md border border-sky-400/25 bg-sky-400/10 px-4 text-xs text-sky-200 transition-colors hover:bg-sky-400/15 disabled:cursor-not-allowed disabled:opacity-50 light:text-sky-700"
+                className="inline-flex h-10 items-center rounded-md border border-[#e6c7a7]/25 bg-[#e6c7a7]/10 px-4 text-xs text-[#f0d9be] transition-colors hover:bg-[#e6c7a7]/15 disabled:cursor-not-allowed disabled:opacity-50 light:text-[#7d5a38]"
               >
                 {addLoading ? 'Dodawanie...' : 'Dodaj konto'}
               </button>

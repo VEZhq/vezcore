@@ -21,17 +21,16 @@ export function NeuralBackground() {
     resize()
     window.addEventListener('resize', resize)
 
-    const nodes: { x: number; y: number; vx: number; vy: number; size: number; pulse: number }[] = []
+    const nodes: { x: number; y: number; vx: number; vy: number; pulse: number }[] = []
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const nodeCount = prefersReducedMotion ? 0 : window.innerWidth < 768 ? 45 : 75
+    const nodeCount = prefersReducedMotion ? 0 : window.innerWidth < 768 ? 24 : 42
 
     for (let i = 0; i < nodeCount; i++) {
       nodes.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.15,
-        vy: (Math.random() - 0.5) * 0.15,
-        size: Math.random() * 1.5 + 0.5,
+        vx: (Math.random() - 0.5) * 0.08,
+        vy: (Math.random() - 0.5) * 0.08,
         pulse: Math.random() * Math.PI * 2,
       })
     }
@@ -40,9 +39,9 @@ export function NeuralBackground() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       const isDark = document.documentElement.classList.contains('dark')
-      const lineColor = isDark ? '172, 194, 255' : '80, 96, 130'
-      const nodeColor = isDark ? '186, 230, 255' : '54, 70, 102'
-      const lineAlpha = isDark ? 0.08 : 0.1
+      const lineColor = isDark ? '224, 218, 208' : '68, 64, 58'
+      const pulseColor = isDark ? '238, 202, 168' : '122, 82, 45'
+      const lineAlpha = isDark ? 0.052 : 0.065
 
       nodes.forEach((node) => {
         node.x += node.vx
@@ -59,27 +58,31 @@ export function NeuralBackground() {
           const dy = nodes[i].y - nodes[j].y
           const dist = Math.sqrt(dx * dx + dy * dy)
 
-          if (dist < 250) {
-            const alpha = (1 - dist / 250) * lineAlpha
+          if (dist < 230) {
+            const alpha = (1 - dist / 230) * lineAlpha
             ctx.beginPath()
             ctx.strokeStyle = `rgba(${lineColor}, ${alpha})`
-            ctx.lineWidth = isDark ? 0.5 : 0.8
+            ctx.lineWidth = isDark ? 0.65 : 0.75
             ctx.moveTo(nodes[i].x, nodes[i].y)
             ctx.lineTo(nodes[j].x, nodes[j].y)
             ctx.stroke()
+
+            if ((i + j) % 9 === 0) {
+              const progress = (Math.sin(nodes[i].pulse + j) + 1) / 2
+              const sx = nodes[i].x + dx * -progress
+              const sy = nodes[i].y + dy * -progress
+              const ex = nodes[i].x + dx * -(Math.min(progress + 0.08, 1))
+              const ey = nodes[i].y + dy * -(Math.min(progress + 0.08, 1))
+              ctx.beginPath()
+              ctx.strokeStyle = `rgba(${pulseColor}, ${alpha * 1.45})`
+              ctx.lineWidth = isDark ? 0.9 : 1
+              ctx.moveTo(sx, sy)
+              ctx.lineTo(ex, ey)
+              ctx.stroke()
+            }
           }
         }
       }
-
-      nodes.forEach((node) => {
-        const pulseSize = node.size + Math.sin(node.pulse) * 0.3
-        const alpha = 0.2 + Math.sin(node.pulse) * 0.1
-
-        ctx.beginPath()
-        ctx.arc(node.x, node.y, pulseSize, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${nodeColor}, ${alpha})`
-        ctx.fill()
-      })
 
       if (!prefersReducedMotion) {
         animationId = requestAnimationFrame(animate)
@@ -97,7 +100,7 @@ export function NeuralBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none opacity-80 light:opacity-60"
+      className="fixed inset-0 pointer-events-none opacity-70 light:opacity-50"
       style={{ zIndex: 0 }}
     />
   )

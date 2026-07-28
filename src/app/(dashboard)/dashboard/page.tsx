@@ -121,7 +121,7 @@ export default async function DashboardPage() {
                   href={link.href}
                   className="group flex h-11 min-w-0 items-center gap-2 rounded-md px-3 text-[#b5b5b5] light:text-[#444444] transition-colors duration-200 hover:bg-white/[0.05] hover:text-white light:hover:bg-black/[0.04] light:hover:text-black"
                 >
-                  <link.icon className="h-4 w-4 shrink-0 text-[#777777] light:text-[#777777] transition-colors duration-200 group-hover:text-sky-300 light:group-hover:text-sky-700" />
+                  <link.icon className="h-4 w-4 shrink-0 text-[#777777] light:text-[#777777] transition-colors duration-200 group-hover:text-[#e6c7a7] light:group-hover:text-[#7d5a38]" />
                   <span className="text-sm font-medium">{link.label}</span>
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotClass[link.tone as keyof typeof dotClass]}`} />
                   <span className={`hidden max-w-[150px] truncate text-[11px] sm:inline ${toneClass[link.tone as keyof typeof toneClass]}`}>

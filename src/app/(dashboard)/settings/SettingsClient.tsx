@@ -86,10 +86,10 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] light:border-black/[0.08] light:bg-white/[0.82]">
+    <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
       <div className="flex items-start gap-3 border-b border-white/[0.06] px-5 py-4 light:border-black/[0.06]">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/[0.07] bg-white/[0.03] light:border-black/[0.08] light:bg-black/[0.03]">
-          <Icon className="h-4 w-4 text-sky-400 light:text-sky-700" />
+          <Icon className="h-4 w-4 text-[#e6c7a7] light:text-[#7d5a38]" />
         </div>
         <div>
           <p className="text-sm font-medium text-white light:text-black">{title}</p>
@@ -140,7 +140,7 @@ function ChoiceButton({
       onClick={onClick}
       className={`min-h-20 rounded-md border p-4 text-left transition-colors ${
         selected
-          ? 'border-sky-300/35 bg-sky-300/10'
+          ? 'border-[#e6c7a7]/35 bg-[#e6c7a7]/10'
           : 'border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] light:border-black/[0.08] light:bg-black/[0.02] light:hover:bg-black/[0.04]'
       }`}
     >
@@ -149,9 +149,9 @@ function ChoiceButton({
           <p className="truncate text-sm font-medium text-white light:text-black">{title}</p>
           {helper && <p className="mt-1 truncate text-xs text-[#777777] light:text-[#777777]">{helper}</p>}
         </div>
-        {Icon && <Icon className={`h-4 w-4 shrink-0 ${selected ? 'text-sky-400 light:text-sky-700' : 'text-[#777777]'}`} />}
+        {Icon && <Icon className={`h-4 w-4 shrink-0 ${selected ? 'text-[#e6c7a7] light:text-[#7d5a38]' : 'text-[#777777]'}`} />}
       </div>
-      {selected && <span className="mt-3 block h-1 w-8 rounded-full bg-sky-400 light:bg-sky-700" />}
+      {selected && <span className="mt-3 block h-1 w-8 rounded-full bg-[#e6c7a7] light:bg-[#7d5a38]" />}
     </button>
   )
 }
@@ -221,7 +221,7 @@ export default function SettingsClient({
                   onClick={() => theme === 'light' && toggleTheme()}
                   className={`rounded-md border p-4 text-left transition-colors ${
                     theme === 'dark'
-                      ? 'border-sky-300/35 bg-sky-300/10'
+                      ? 'border-[#e6c7a7]/35 bg-[#e6c7a7]/10'
                       : 'border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] light:border-black/[0.08] light:bg-black/[0.02] light:hover:bg-black/[0.04]'
                   }`}
                 >
@@ -237,7 +237,7 @@ export default function SettingsClient({
                   onClick={() => theme === 'dark' && toggleTheme()}
                   className={`rounded-md border p-4 text-left transition-colors ${
                     theme === 'light'
-                      ? 'border-sky-300/35 bg-sky-300/10'
+                      ? 'border-[#e6c7a7]/35 bg-[#e6c7a7]/10'
                       : 'border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] light:border-black/[0.08] light:bg-black/[0.02] light:hover:bg-black/[0.04]'
                   }`}
                 >
@@ -263,7 +263,7 @@ export default function SettingsClient({
                   <select
                     value={preferences.timezone}
                     onChange={(event) => updatePreferences({ timezone: event.target.value })}
-                    className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] px-3 text-sm text-white outline-none transition-colors focus:border-sky-300/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black"
+                    className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] px-3 text-sm text-white outline-none transition-colors focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black"
                   >
                     {timezones.map((timezone) => (
                       <option key={timezone.value} value={timezone.value}>
@@ -331,7 +331,7 @@ export default function SettingsClient({
                   </div>
                   <span
                     className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-                      preferences.autoLogoutOnIpChange ? 'bg-sky-300' : 'bg-[#333333] light:bg-[#cccccc]'
+                      preferences.autoLogoutOnIpChange ? 'bg-[#e6c7a7]' : 'bg-[#333333] light:bg-[#cccccc]'
                     }`}
                   >
                     <span
@@ -358,7 +358,7 @@ export default function SettingsClient({
                   </p>
                   <Link
                     href="/settings/discord"
-                    className="inline-flex h-10 items-center justify-center rounded-md border border-sky-300/25 bg-sky-300/10 px-4 text-xs text-sky-300 transition-colors hover:bg-sky-300/15 light:text-sky-700"
+                    className="inline-flex h-10 items-center justify-center rounded-md border border-[#e6c7a7]/25 bg-[#e6c7a7]/10 px-4 text-xs text-[#e6c7a7] transition-colors hover:bg-[#e6c7a7]/15 light:text-[#7d5a38]"
                   >
                     Otwórz panel
                   </Link>
@@ -368,7 +368,7 @@ export default function SettingsClient({
           </main>
 
           <aside className="space-y-5">
-            <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-5 light:border-black/[0.08] light:bg-white/[0.82]">
+            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
               <p className="text-sm font-medium text-white light:text-black">Podsumowanie</p>
               <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
                 Aktualna konfiguracja widoku.
@@ -382,12 +382,12 @@ export default function SettingsClient({
               </div>
             </section>
 
-            <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-5 light:border-black/[0.08] light:bg-white/[0.82]">
+            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
               <p className="text-sm font-medium text-white light:text-black">Widoczne sekcje</p>
               <div className="mt-4 space-y-2">
                 <div className="flex items-center justify-between rounded-md bg-white/[0.03] px-3 py-3 light:bg-black/[0.03]">
                   <span className="inline-flex items-center gap-2 text-sm text-white light:text-black">
-                    <Monitor className="h-4 w-4 text-sky-400 light:text-sky-700" />
+                    <Monitor className="h-4 w-4 text-[#e6c7a7] light:text-[#7d5a38]" />
                     Preferencje
                   </span>
                   <span className="text-xs text-[#777777]">aktywne</span>
@@ -395,7 +395,7 @@ export default function SettingsClient({
                 {canManageCache && (
                   <div className="flex items-center justify-between rounded-md bg-white/[0.03] px-3 py-3 light:bg-black/[0.03]">
                     <span className="inline-flex items-center gap-2 text-sm text-white light:text-black">
-                      <Database className="h-4 w-4 text-blue-300 light:text-blue-700" />
+                      <Database className="h-4 w-4 text-[#d7bfd8] light:text-[#735671]" />
                       Cache
                     </span>
                     <span className="text-xs text-[#777777]">admin</span>

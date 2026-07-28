@@ -30,11 +30,11 @@ export function getAvatarColor(name: string | null, email: string): string {
   }
   const colors = [
     'bg-emerald-500/20 text-emerald-400 light:text-emerald-600',
-    'bg-blue-500/20 text-blue-400 light:text-blue-600',
-    'bg-purple-500/20 text-purple-400 light:text-purple-600',
+    'bg-[#d8c6ad]/16 text-[#d8c6ad] light:text-[#7d5a38]',
+    'bg-[#d7bfd8]/16 text-[#d7bfd8] light:text-[#735671]',
     'bg-orange-500/20 text-orange-400 light:text-orange-600',
     'bg-pink-500/20 text-pink-400 light:text-pink-600',
-    'bg-cyan-500/20 text-cyan-400 light:text-cyan-600',
+    'bg-[#c9d8c5]/16 text-[#c9d8c5] light:text-[#5f7358]',
   ]
   return colors[Math.abs(hash) % colors.length]
 }

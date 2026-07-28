@@ -117,7 +117,7 @@ export function GlobalSessionsManager() {
 
 	if (loading) {
 		return (
-			<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] p-6">
+			<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] p-6">
 				<div className="flex items-center gap-2 mb-4">
 					<Users className="h-4 w-4 text-[#444444] light:text-[#888888]" />
 					<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
@@ -141,7 +141,7 @@ export function GlobalSessionsManager() {
 	}, {})
 
 	return (
-		<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] transition-colors duration-300">
+		<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] transition-colors duration-300">
 			<div className="p-6 border-b border-white/[0.06] light:border-black/[0.06]">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
@@ -205,7 +205,7 @@ export function GlobalSessionsManager() {
 															{deviceLabel}
 														</p>
 														{isAal2 && (
-															<span className="text-[9px] uppercase tracking-[0.2em] text-blue-400 border border-blue-400/30 px-1.5 py-0.5">
+															<span className="text-[9px] uppercase tracking-[0.2em] text-[#d7bfd8] border border-[#d7bfd8]/30 px-1.5 py-0.5">
 																2FA
 															</span>
 														)}

@@ -84,7 +84,7 @@ export function DiscordMaintenanceManager() {
   }
 
   return (
-    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] transition-colors duration-300">
+    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] transition-colors duration-300">
       <div className="p-6 border-b border-white/[0.06] light:border-black/[0.06]">
         <div className="flex items-center gap-2 mb-2">
           <Bot className="h-4 w-4 text-[#444444] light:text-[#888888]" />
@@ -117,7 +117,7 @@ export function DiscordMaintenanceManager() {
           <button
             onClick={handleSweep}
             disabled={loading !== null}
-            className="flex items-center gap-2 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-blue-400 border border-blue-500/30 hover:bg-blue-500/10 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#d7bfd8] border border-[#d7bfd8]/30 hover:bg-[#d7bfd8]/10 disabled:opacity-50 transition-colors"
           >
             {loading === 'sweep' ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />}
             Run Sweep
@@ -216,7 +216,7 @@ function Stat({ label, value, accent }: { label: string; value: number; accent: 
   const colorMap = {
     default: 'text-white light:text-black',
     emerald: 'text-emerald-400',
-    blue: 'text-blue-400',
+    blue: 'text-[#d7bfd8]',
     amber: 'text-amber-400',
     red: 'text-red-400',
   } as const
@@ -239,7 +239,7 @@ function StatusBadge({ status }: { status: DiscordBackfillEntry['status'] }) {
 
   const colorMap: Record<DiscordBackfillEntry['status'], string> = {
     mapped: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10',
-    already_mapped: 'text-blue-400 border-blue-500/20 bg-blue-500/10',
+    already_mapped: 'text-[#d7bfd8] border-[#d7bfd8]/20 bg-[#d7bfd8]/10',
     skipped: 'text-amber-400 border-amber-500/20 bg-amber-500/10',
     failed: 'text-red-400 border-red-500/20 bg-red-500/10',
   }

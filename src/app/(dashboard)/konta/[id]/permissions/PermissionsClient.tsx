@@ -299,7 +299,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                 </div>
               )}
 
-              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md p-5 lg:p-6 transition-colors duration-300">
+              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md p-5 lg:p-6 transition-colors duration-300">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
@@ -343,7 +343,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                   return (
                     <div
                       key={group.id}
-                      className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300"
+                      className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300"
                     >
                       <div className="flex items-center justify-between gap-4 p-5 hover:bg-white/[0.02] light:hover:bg-black/[0.02] transition-colors duration-200">
                         <button
@@ -464,7 +464,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
             </div>
 
             <aside className="xl:sticky xl:top-24">
-              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
+              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
                 <div className="p-6">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-4">
                     Informacje o koncie
@@ -490,7 +490,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                 </div>
               </div>
 
-              <div className="mt-6 border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
+              <div className="mt-6 border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
                 <div className="p-6">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-2">
                     Ekosystem / projekt

@@ -36,11 +36,11 @@ function getActivityMeta(action: string) {
     case 'logout':
       return { label: 'Wylogowanie', icon: LogOut, iconClassName: 'text-zinc-400 light:text-zinc-600' }
     case 'profile_update':
-      return { label: 'Aktualizacja profilu', icon: PencilLine, iconClassName: 'text-blue-400 light:text-blue-600' }
+      return { label: 'Aktualizacja profilu', icon: PencilLine, iconClassName: 'text-[#d7bfd8] light:text-[#735671]' }
     case 'password_change':
       return { label: 'Zmiana hasła', icon: KeyRound, iconClassName: 'text-amber-400 light:text-amber-600' }
     case '2fa_verify':
-      return { label: 'Weryfikacja 2FA', icon: BadgeCheck, iconClassName: 'text-violet-400 light:text-violet-600' }
+      return { label: 'Weryfikacja 2FA', icon: BadgeCheck, iconClassName: 'text-[#d7bfd8] light:text-[#735671]' }
     case '2fa_enable':
       return { label: 'Włączenie 2FA', icon: ShieldCheck, iconClassName: 'text-emerald-400 light:text-emerald-600' }
     case '2fa_disable':
@@ -145,11 +145,11 @@ export default function KontaDetailClient({
     }
     const colors = [
       'bg-emerald-500/20 text-emerald-400 light:text-emerald-600',
-      'bg-blue-500/20 text-blue-400 light:text-blue-600',
-      'bg-purple-500/20 text-purple-400 light:text-purple-600',
+      'bg-[#d7bfd8]/16 text-[#d7bfd8] light:text-[#735671]',
+      'bg-[#d7bfd8]/16 text-[#d7bfd8] light:text-[#735671]',
       'bg-orange-500/20 text-orange-400 light:text-orange-600',
       'bg-pink-500/20 text-pink-400 light:text-pink-600',
-      'bg-cyan-500/20 text-cyan-400 light:text-cyan-600',
+      'bg-[#c9d8c5]/16 text-[#c9d8c5] light:text-[#5f7358]',
     ]
     return colors[Math.abs(hash) % colors.length]
   }
@@ -301,7 +301,7 @@ export default function KontaDetailClient({
 
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.95fr)] xl:items-start">
             <div className="space-y-6">
-              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
+              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
                 <div className="p-6 lg:p-8">
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
                     <div className={`w-16 h-16 rounded-lg ${getAvatarColor(user.full_name, user.email)} flex items-center justify-center text-xl font-medium`}>
@@ -371,7 +371,7 @@ export default function KontaDetailClient({
                   <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 light:border-black/[0.06] light:bg-black/[0.02]">
                       <div className="w-10 h-10 rounded-md bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] flex items-center justify-center">
-                        <Shield className="h-5 w-5 text-purple-400 light:text-purple-600" />
+                        <Shield className="h-5 w-5 text-[#d7bfd8] light:text-[#735671]" />
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-[#666666] light:text-[#999999]">Rola</p>
@@ -409,7 +409,7 @@ export default function KontaDetailClient({
               </div>
 
               {recentActivity.length > 0 && (
-                <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
+                <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
                   <div className="p-6 lg:p-8">
                     <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-4">
                       Ostatnia aktywność
@@ -449,7 +449,7 @@ export default function KontaDetailClient({
             </div>
 
             <div className="space-y-6 xl:sticky xl:top-24">
-              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
+              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
                 <div className="p-6">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-4">
                     Akcje
@@ -462,12 +462,12 @@ export default function KontaDetailClient({
 								icon={Mail}
 								title="Zmień email"
                       description="Podmień adres logowania i kontaktowy przypisany do konta."
-                      accentClassName="text-blue-400 light:text-blue-600"
+                      accentClassName="text-[#d7bfd8] light:text-[#735671]"
                       action={
                         <button
                           onClick={() => setShowEmailModal(true)}
                           disabled={loading}
-                          className="inline-flex items-center gap-2 rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-blue-400 transition-colors hover:bg-blue-500/20 disabled:opacity-50 light:text-blue-600"
+                          className="inline-flex items-center gap-2 rounded-lg border border-[#d7bfd8]/20 bg-[#d7bfd8]/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-[#d7bfd8] transition-colors hover:bg-[#d7bfd8]/16 disabled:opacity-50 light:text-[#735671]"
                         >
                           Edytuj
                         </button>
@@ -484,11 +484,11 @@ export default function KontaDetailClient({
                         icon={Lock}
                         title="Pozwolenia"
                         description="Zarządzaj zakresem uprawnień i dostępem użytkownika."
-                        accentClassName="text-cyan-400 light:text-cyan-600"
+                        accentClassName="text-[#c9d8c5] light:text-[#5f7358]"
                         action={
                           <Link
                             href={`/konta/${user.id}/permissions`}
-                            className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-cyan-400 transition-colors hover:bg-cyan-500/20 light:text-cyan-600"
+                            className="inline-flex items-center gap-1 rounded-lg border border-[#c9d8c5]/20 bg-[#c9d8c5]/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-[#c9d8c5] transition-colors hover:bg-[#c9d8c5]/16 light:text-[#5f7358]"
                           >
                             Otwórz
                             <ChevronRight className="h-3.5 w-3.5" />
@@ -501,11 +501,11 @@ export default function KontaDetailClient({
                       icon={Activity}
                       title="Aktywność"
                       description="Podejrzyj pełną historię zdarzeń powiązanych z tym kontem."
-                      accentClassName="text-cyan-400 light:text-cyan-600"
+                      accentClassName="text-[#c9d8c5] light:text-[#5f7358]"
                       action={
                         <Link
                           href={`/konta/${user.id}/activity`}
-                          className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-cyan-400 transition-colors hover:bg-cyan-500/20 light:text-cyan-600"
+                          className="inline-flex items-center gap-1 rounded-lg border border-[#c9d8c5]/20 bg-[#c9d8c5]/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-[#c9d8c5] transition-colors hover:bg-[#c9d8c5]/16 light:text-[#5f7358]"
                         >
                           Otwórz
                           <ChevronRight className="h-3.5 w-3.5" />
@@ -597,7 +597,7 @@ export default function KontaDetailClient({
               <button
                 onClick={handleChangeEmail}
                 disabled={loading || !newEmail}
-                className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-blue-400 light:text-blue-600 bg-blue-500/20 border border-blue-500/30 hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/16 border border-[#d7bfd8]/30 hover:bg-[#d7bfd8]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Zmieniam...' : 'Zmień'}
               </button>

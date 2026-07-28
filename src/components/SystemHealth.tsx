@@ -181,22 +181,22 @@ const colorClasses: Record<AccessGroup['color'], { text: string; border: string;
     bg: 'hover:bg-emerald-500/[0.04]',
   },
   blue: {
-    text: 'text-blue-400 light:text-blue-600',
-    border: 'hover:border-blue-400/30 light:hover:border-blue-600/25',
-    bg: 'hover:bg-blue-500/[0.04]',
+    text: 'text-[#d7bfd8] light:text-[#735671]',
+    border: 'hover:border-[#d7bfd8]/30 light:hover:border-[#735671]/25',
+    bg: 'hover:bg-[#d7bfd8]/[0.04]',
   },
   cyan: {
-    text: 'text-cyan-400 light:text-cyan-600',
-    border: 'hover:border-cyan-400/30 light:hover:border-cyan-600/25',
-    bg: 'hover:bg-cyan-500/[0.04]',
+    text: 'text-[#c9d8c5] light:text-[#5f7358]',
+    border: 'hover:border-[#c9d8c5]/30 light:hover:border-[#5f7358]/25',
+    bg: 'hover:bg-[#c9d8c5]/[0.04]',
   },
 }
 
 const aliasTypeClasses: Record<AccessGroup['items'][number]['aliasType'], string> = {
   prod: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400 light:text-emerald-700',
-  lab: 'border-blue-500/20 bg-blue-500/10 text-blue-400 light:text-blue-700',
-  tunnel: 'border-purple-500/20 bg-purple-500/10 text-purple-400 light:text-purple-700',
-  router: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-400 light:text-cyan-700',
+  lab: 'border-[#d7bfd8]/20 bg-[#d7bfd8]/10 text-[#d7bfd8] light:text-[#735671]',
+  tunnel: 'border-[#d7bfd8]/20 bg-[#d7bfd8]/10 text-[#d7bfd8] light:text-[#735671]',
+  router: 'border-[#c9d8c5]/20 bg-[#c9d8c5]/10 text-[#c9d8c5] light:text-[#5f7358]',
 }
 
 const aliasTypeLabels: Record<AccessGroup['items'][number]['aliasType'], string> = {
@@ -289,7 +289,7 @@ export function SystemHealth() {
           return (
             <div
               key={group.name}
-              className={`border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-all duration-300 ${colors.border} ${colors.bg}`}
+              className={`border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-all duration-300 ${colors.border} ${colors.bg}`}
             >
               <button
                 type="button"

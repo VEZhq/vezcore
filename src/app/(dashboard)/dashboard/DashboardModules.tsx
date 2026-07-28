@@ -171,7 +171,7 @@ export function DashboardModules({
           onClick={() => setEditMode((v) => !v)}
           className={`flex items-center gap-1.5 text-[10px] uppercase tracking-[0.25em] transition-colors duration-200 ${
             editMode
-              ? 'text-sky-300 light:text-sky-700'
+              ? 'text-[#e6c7a7] light:text-[#7d5a38]'
               : 'text-[#444444] light:text-[#888888] hover:text-[#888888] light:hover:text-[#555555]'
           }`}
         >
@@ -205,14 +205,14 @@ export function DashboardModules({
 
           const cardContent = (
             <div
-              className={`relative tile-${mod.color} tile-hover group flex min-h-[198px] h-full flex-col bg-[#111111]/80 light:bg-white/[0.82] backdrop-blur-md border border-white/[0.06] light:border-black/[0.08] p-5 transition-all duration-300 ${
+              className={`relative tile-${mod.color} tile-hover group flex min-h-[198px] h-full flex-col bg-[#141310]/[0.72] light:bg-[#fffdfa]/[0.84] backdrop-blur-md border border-white/[0.06] light:border-black/[0.08] p-5 transition-all duration-300 ${
                 editMode ? 'cursor-default' : mod.href ? 'cursor-pointer' : 'cursor-default'
               } ${isHidden ? 'opacity-40' : ''}`}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="w-11 h-11 rounded-md bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] flex items-center justify-center transition-colors duration-300">
                   <mod.icon
-                    className={`h-5 w-5 ${DASHBOARD_MODULE_ICON_COLORS[mod.color].dark} light:${DASHBOARD_MODULE_ICON_COLORS[mod.color].light} transition-colors duration-300`}
+                    className={`h-5 w-5 ${DASHBOARD_MODULE_ICON_COLORS[mod.color].dark} ${DASHBOARD_MODULE_ICON_COLORS[mod.color].light} transition-colors duration-300`}
                   />
                 </div>
 
@@ -295,7 +295,7 @@ export function DashboardModules({
             </p>
             <button
               onClick={() => setEditMode(true)}
-              className="text-[10px] uppercase tracking-[0.25em] text-sky-400 hover:text-sky-300 transition-colors duration-200"
+              className="text-[10px] uppercase tracking-[0.25em] text-[#e6c7a7] hover:text-[#e6c7a7] transition-colors duration-200"
             >
               Przywróć widżety
             </button>

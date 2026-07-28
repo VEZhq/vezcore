@@ -64,7 +64,7 @@ export function CacheManager() {
   }
 
   return (
-    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-white/[0.82] transition-colors duration-300">
+    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-[#fffdfa]/[0.84] transition-colors duration-300">
       <div className="p-6 border-b border-white/[0.06] light:border-black/[0.06]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

@@ -40,15 +40,15 @@ const actionMeta: Record<string, { label: string; tone: string; icon: LucideIcon
   ip_blocked: { label: 'Blokada IP', tone: 'text-red-300 light:text-red-700 bg-red-500/10 border-red-500/25', icon: AlertTriangle, severity: 'critical' },
   password_change: { label: 'Zmiana hasła', tone: 'text-amber-300 light:text-amber-700 bg-amber-500/10 border-amber-500/25', icon: KeyRound, severity: 'warn' },
   email_change: { label: 'Zmiana emaila', tone: 'text-amber-300 light:text-amber-700 bg-amber-500/10 border-amber-500/25', icon: User, severity: 'warn' },
-  profile_update: { label: 'Aktualizacja profilu', tone: 'text-blue-300 light:text-blue-700 bg-blue-500/10 border-blue-500/25', icon: User, severity: 'info' },
-  avatar_upload: { label: 'Avatar dodany', tone: 'text-blue-300 light:text-blue-700 bg-blue-500/10 border-blue-500/25', icon: User, severity: 'info' },
-  avatar_remove: { label: 'Avatar usunięty', tone: 'text-blue-300 light:text-blue-700 bg-blue-500/10 border-blue-500/25', icon: User, severity: 'info' },
+  profile_update: { label: 'Aktualizacja profilu', tone: 'text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/10 border-[#d7bfd8]/25', icon: User, severity: 'info' },
+  avatar_upload: { label: 'Avatar dodany', tone: 'text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/10 border-[#d7bfd8]/25', icon: User, severity: 'info' },
+  avatar_remove: { label: 'Avatar usunięty', tone: 'text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/10 border-[#d7bfd8]/25', icon: User, severity: 'info' },
   '2fa_enable': { label: '2FA włączone', tone: 'text-emerald-400 light:text-emerald-600 bg-emerald-500/10 border-emerald-500/20', icon: ShieldCheck, severity: 'ok' },
   '2fa_disable': { label: '2FA wyłączone', tone: 'text-orange-300 light:text-orange-700 bg-orange-500/10 border-orange-500/25', icon: AlertTriangle, severity: 'warn' },
-  '2fa_verify': { label: '2FA potwierdzone', tone: 'text-blue-300 light:text-blue-700 bg-blue-500/10 border-blue-500/25', icon: Shield, severity: 'ok' },
+  '2fa_verify': { label: '2FA potwierdzone', tone: 'text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/10 border-[#d7bfd8]/25', icon: Shield, severity: 'ok' },
   '2fa_failed': { label: 'Błąd 2FA', tone: 'text-red-300 light:text-red-700 bg-red-500/10 border-red-500/25', icon: AlertTriangle, severity: 'critical' },
   user_create: { label: 'Konto utworzone', tone: 'text-emerald-400 light:text-emerald-600 bg-emerald-500/10 border-emerald-500/20', icon: Users, severity: 'ok' },
-  user_update: { label: 'Konto zmienione', tone: 'text-blue-300 light:text-blue-700 bg-blue-500/10 border-blue-500/25', icon: Users, severity: 'info' },
+  user_update: { label: 'Konto zmienione', tone: 'text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/10 border-[#d7bfd8]/25', icon: Users, severity: 'info' },
   user_delete: { label: 'Konto usunięte', tone: 'text-red-300 light:text-red-700 bg-red-500/10 border-red-500/25', icon: Users, severity: 'critical' },
   user_deactivate: { label: 'Konto wyłączone', tone: 'text-orange-300 light:text-orange-700 bg-orange-500/10 border-orange-500/25', icon: Users, severity: 'warn' },
   user_activate: { label: 'Konto aktywowane', tone: 'text-emerald-400 light:text-emerald-600 bg-emerald-500/10 border-emerald-500/20', icon: Users, severity: 'ok' },
@@ -112,7 +112,7 @@ function MetricCard({
   value,
   helper,
   icon: Icon,
-  tone = 'text-sky-300 light:text-sky-700',
+  tone = 'text-[#e6c7a7] light:text-[#7d5a38]',
 }: {
   label: string
   value: string | number
@@ -121,7 +121,7 @@ function MetricCard({
   tone?: string
 }) {
   return (
-    <div className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-4 light:border-black/[0.08] light:bg-white/[0.82]">
+    <div className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-4 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#888888]">{label}</p>
@@ -333,13 +333,13 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
         <div className="mb-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard label="Zdarzenia" value={total} helper="Wynik dla aktualnych filtrów" icon={ShieldCheck} />
           <MetricCard label="Na stronie" value={logs.length} helper={`Strona ${page}${totalPages > 0 ? ` z ${totalPages}` : ''}`} icon={Clock} />
-          <MetricCard label="Użytkownicy" value={uniqueUsers} helper="Unikalni autorzy na tej stronie" icon={Users} tone="text-blue-300 light:text-blue-700" />
+          <MetricCard label="Użytkownicy" value={uniqueUsers} helper="Unikalni autorzy na tej stronie" icon={Users} tone="text-[#d7bfd8] light:text-[#735671]" />
           <MetricCard label="Uwaga" value={criticalCount + warningCount} helper={`${criticalCount} krytyczne, ${warningCount} ostrzegawcze`} icon={AlertTriangle} tone={criticalCount > 0 ? 'text-red-300 light:text-red-700' : 'text-amber-300 light:text-amber-700'} />
         </div>
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
           <main className="space-y-5">
-            <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] light:border-black/[0.08] light:bg-white/[0.82]">
+            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
               <div className="border-b border-white/[0.06] p-4 light:border-black/[0.06]">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
@@ -360,20 +360,20 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                           setPage(1)
                         }}
                         placeholder="Szukaj akcji lub obiektu"
-                        className="h-10 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-sky-400/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                        className="h-10 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
                       />
                     </div>
                     <button
                       onClick={() => setShowFilters(!showFilters)}
                       className={`inline-flex h-10 items-center justify-center gap-2 rounded-md border px-3 text-xs transition-colors ${
                         showFilters || hasFilters
-                          ? 'border-sky-400/25 bg-sky-400/10 text-sky-200 light:text-sky-700'
+                          ? 'border-[#e6c7a7]/25 bg-[#e6c7a7]/10 text-[#f0d9be] light:text-[#7d5a38]'
                           : 'border-white/[0.07] text-[#999999] hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black'
                       }`}
                     >
                       <Filter className="h-4 w-4" />
                       Filtry
-                      {hasFilters && <span className="h-2 w-2 rounded-full bg-sky-300 light:bg-sky-600" />}
+                      {hasFilters && <span className="h-2 w-2 rounded-full bg-[#e6c7a7] light:bg-[#7d5a38]" />}
                     </button>
                     <button
                       onClick={() => void fetchLogs()}
@@ -397,7 +397,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                           setActionFilter(event.target.value)
                           setPage(1)
                         }}
-                        className="h-10 w-full rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-sm text-white outline-none focus:border-sky-400/45 light:border-black/[0.08] light:bg-white light:text-black"
+                        className="h-10 w-full rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-sm text-white outline-none focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-white light:text-black"
                       >
                         <option value="">Wszystkie akcje</option>
                         {actions.map(action => (
@@ -415,7 +415,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                           setStartDate(event.target.value)
                           setPage(1)
                         }}
-                        className="h-10 w-full rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-sm text-white outline-none focus:border-sky-400/45 light:border-black/[0.08] light:bg-white light:text-black"
+                        className="h-10 w-full rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-sm text-white outline-none focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-white light:text-black"
                       />
                     </label>
 
@@ -428,7 +428,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                           setEndDate(event.target.value)
                           setPage(1)
                         }}
-                        className="h-10 w-full rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-sm text-white outline-none focus:border-sky-400/45 light:border-black/[0.08] light:bg-white light:text-black"
+                        className="h-10 w-full rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-sm text-white outline-none focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-white light:text-black"
                       />
                     </label>
 
@@ -531,7 +531,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
             </section>
 
             {totalPages > 1 && (
-              <div className="flex flex-col gap-3 rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-3 light:border-black/[0.08] light:bg-white/[0.82] sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-3 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84] sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-[#777777] light:text-[#777777]">
                   Wyświetlane {((page - 1) * limit) + 1}-{Math.min(page * limit, total)} z {total} logów
                 </p>
@@ -589,7 +589,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
           </main>
 
           <aside className="space-y-5">
-            <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-5 light:border-black/[0.08] light:bg-white/[0.82]">
+            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium text-white light:text-black">Filtry aktywne</p>
@@ -597,7 +597,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                     Zakres widoku logów
                   </p>
                 </div>
-                <span className={`h-2.5 w-2.5 rounded-full ${hasFilters ? 'bg-sky-300 light:bg-sky-600' : 'bg-[#444444] light:bg-[#b5b5b5]'}`} />
+                <span className={`h-2.5 w-2.5 rounded-full ${hasFilters ? 'bg-[#e6c7a7] light:bg-[#7d5a38]' : 'bg-[#444444] light:bg-[#b5b5b5]'}`} />
               </div>
               <div className="mt-4 space-y-2">
                 <div className="rounded-md bg-white/[0.03] p-3 light:bg-black/[0.03]">
@@ -619,7 +619,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
               </div>
             </section>
 
-            <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-5 light:border-black/[0.08] light:bg-white/[0.82]">
+            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
               <p className="text-sm font-medium text-white light:text-black">Szybkie akcje</p>
               <div className="mt-4 space-y-2">
                 <button
@@ -627,7 +627,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                   className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4 text-sky-300 light:text-sky-700" />
+                    <RefreshCw className="h-4 w-4 text-[#e6c7a7] light:text-[#7d5a38]" />
                     Odśwież logi
                   </span>
                   <span className="text-xs text-[#777777]">⌘R</span>
@@ -637,7 +637,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                   className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <Keyboard className="h-4 w-4 text-blue-300 light:text-blue-700" />
+                    <Keyboard className="h-4 w-4 text-[#d7bfd8] light:text-[#735671]" />
                     Skróty
                   </span>
                   <span className="text-xs text-[#777777]">{showShortcuts ? 'ukryj' : 'pokaż'}</span>
@@ -646,7 +646,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
             </section>
 
             {showShortcuts && (
-              <section className="rounded-md border border-white/[0.07] bg-[#111118]/[0.72] p-5 light:border-black/[0.08] light:bg-white/[0.82]">
+              <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
                 <p className="text-sm font-medium text-white light:text-black">Skróty klawiszowe</p>
                 <div className="mt-4 space-y-2">
                   <ShortcutCard label="Szukaj" keys="⌘K" />

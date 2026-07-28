@@ -59,10 +59,10 @@ export default function SystemHealthClient({ data, canAccessKonta }: SystemHealt
 
             <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] p-6">
               <div className="flex items-center gap-2 mb-2">
-                <Users className="h-4 w-4 text-blue-400" />
+                <Users className="h-4 w-4 text-[#d7bfd8]" />
                 <p className="text-[9px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888]">Użytkownicy</p>
               </div>
-              <p className="text-2xl font-light text-blue-400">{data.users.total}</p>
+              <p className="text-2xl font-light text-[#d7bfd8]">{data.users.total}</p>
               <p className="text-[10px] text-[#666666] light:text-[#999999]">{data.users.active_24h} aktywnych 24h</p>
             </div>
 

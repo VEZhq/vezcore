@@ -51,7 +51,7 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="border border-white/[0.07] light:border-black/[0.08] bg-[#111118]/[0.72] light:bg-white/[0.82]">
+    <section className="border border-white/[0.07] light:border-black/[0.08] bg-[#141310]/[0.74] light:bg-[#fffdfa]/[0.84]">
       <div className="border-b border-white/[0.06] light:border-black/[0.06] px-5 py-4">
         <p className="text-sm font-medium text-white light:text-black">{title}</p>
         {subtitle && <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">{subtitle}</p>}
@@ -110,7 +110,7 @@ export default async function ProfilePage() {
 
         <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
           <aside className="space-y-5">
-            <section className="border border-white/[0.07] light:border-black/[0.08] bg-[#111118]/[0.72] light:bg-white/[0.82] p-5">
+            <section className="border border-white/[0.07] light:border-black/[0.08] bg-[#141310]/[0.74] light:bg-[#fffdfa]/[0.84] p-5">
               <div className="flex items-start gap-4">
                 <AvatarUpload currentAvatarUrl={profile?.avatar_url ?? null} userId={user.id} />
               </div>
@@ -131,7 +131,7 @@ export default async function ProfilePage() {
               </div>
             </section>
 
-            <section className="border border-white/[0.07] light:border-black/[0.08] bg-[#111118]/[0.72] light:bg-white/[0.82] p-5">
+            <section className="border border-white/[0.07] light:border-black/[0.08] bg-[#141310]/[0.74] light:bg-[#fffdfa]/[0.84] p-5">
               <p className="mb-2 text-sm font-medium text-white light:text-black">Stan konta</p>
               <div className="space-y-1">
                 <div className="flex items-center justify-between gap-3 py-2">

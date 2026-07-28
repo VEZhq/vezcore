@@ -52,15 +52,15 @@ const actionLabels: Record<string, string> = {
 const actionColors: Record<string, string> = {
   login: 'bg-emerald-500/20 text-emerald-400',
   logout: 'bg-red-500/20 text-red-400',
-  profile_update: 'bg-blue-500/20 text-blue-400',
+  profile_update: 'bg-[#d7bfd8]/16 text-[#d7bfd8]',
   password_change: 'bg-yellow-500/20 text-yellow-400',
-  '2fa_verify': 'bg-purple-500/20 text-purple-400',
-  '2fa_enable': 'bg-purple-500/20 text-purple-400',
+  '2fa_verify': 'bg-[#d7bfd8]/16 text-[#d7bfd8]',
+  '2fa_enable': 'bg-[#d7bfd8]/16 text-[#d7bfd8]',
   '2fa_disable': 'bg-orange-500/20 text-orange-400',
   user_create: 'bg-emerald-500/20 text-emerald-400',
-  user_update: 'bg-blue-500/20 text-blue-400',
+  user_update: 'bg-[#d7bfd8]/16 text-[#d7bfd8]',
   user_delete: 'bg-red-500/20 text-red-400',
-  email_change: 'bg-cyan-500/20 text-cyan-400',
+  email_change: 'bg-[#c9d8c5]/16 text-[#c9d8c5]',
   permission_grant: 'bg-emerald-500/20 text-emerald-400',
   permission_revoke: 'bg-red-500/20 text-red-400',
 }
@@ -87,7 +87,7 @@ export function ActivityFeed({ entries, showViewAll = true, canViewAll = false }
   }
 
   return (
-    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#111118]/[0.68] light:bg-white/[0.82] backdrop-blur-md transition-colors duration-300">
+    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
       <div className="p-4 border-b border-white/[0.06] light:border-black/[0.06]">
         <div className="flex items-center justify-between">
           <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">

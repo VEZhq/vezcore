@@ -22,10 +22,10 @@ export const DASHBOARD_MODULES: DashboardModuleDefinition[] = [
 ] as const
 
 export const DASHBOARD_MODULE_ICON_COLORS: Record<DashboardModuleDefinition['color'], { dark: string; light: string }> = {
-  emerald: { dark: 'text-emerald-400', light: 'text-emerald-600' },
-  blue: { dark: 'text-blue-400', light: 'text-blue-600' },
-  purple: { dark: 'text-purple-400', light: 'text-purple-600' },
-  orange: { dark: 'text-orange-400', light: 'text-orange-600' },
-  pink: { dark: 'text-pink-400', light: 'text-pink-600' },
-  cyan: { dark: 'text-cyan-400', light: 'text-cyan-600' },
+  emerald: { dark: 'text-[#bdd9c6]', light: 'light:text-[#52705b]' },
+  blue: { dark: 'text-[#d8c6ad]', light: 'light:text-[#7d5a38]' },
+  purple: { dark: 'text-[#d7bfd8]', light: 'light:text-[#735671]' },
+  orange: { dark: 'text-[#ecc8a6]', light: 'light:text-[#8a5a32]' },
+  pink: { dark: 'text-[#e8bfd0]', light: 'light:text-[#84576a]' },
+  cyan: { dark: 'text-[#c9d8c5]', light: 'light:text-[#5f7358]' },
 }
