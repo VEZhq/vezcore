@@ -79,12 +79,12 @@ export default async function DashboardPage() {
   } as const
 
   return (
-    <div className="min-h-screen bg-[#c8d0cf] px-4 py-5 text-[#202020] transition-colors duration-300 sm:px-6 lg:px-8">
-      <div className="mx-auto min-h-[calc(100vh-40px)] w-full max-w-[1710px] overflow-hidden rounded-[22px] bg-[#eef4f3] shadow-[0_30px_90px_rgba(75,85,85,0.22)]">
-        <div className="relative min-h-[calc(100vh-40px)] px-6 py-6 sm:px-9 lg:px-10">
+    <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020] transition-colors duration-300">
+      <div className="relative h-full w-full overflow-hidden bg-[#eef4f3]">
+        <div className="relative flex h-full flex-col px-6 py-5 sm:px-8 lg:px-10">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_32%_12%,rgba(255,255,255,0.75),transparent_28%),radial-gradient(circle_at_72%_78%,rgba(218,228,226,0.9),transparent_34%)]" />
-          <div className="relative z-10">
-            <header className="flex items-start justify-between gap-6">
+          <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+            <header className="shrink-0 flex items-start justify-between gap-6">
               <div className="flex min-w-[170px] items-center gap-3">
                 <Image
                   src="/logo/vezcore_logo_black_full.svg"
@@ -127,7 +127,7 @@ export default async function DashboardPage() {
               </div>
             </header>
 
-            <div className="mt-12 grid gap-7 lg:grid-cols-[390px_minmax(0,1fr)_300px] lg:items-start">
+            <div className="mt-9 shrink-0 grid gap-7 lg:grid-cols-[390px_minmax(0,1fr)_300px] lg:items-start">
               <div className="flex items-start gap-4">
                 <Link href="/dashboard" className="mt-1 flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]">
                   <span className="text-xl leading-none">←</span>

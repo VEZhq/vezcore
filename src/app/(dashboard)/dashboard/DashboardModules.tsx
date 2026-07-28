@@ -1,6 +1,6 @@
 'use client'
 
-import { type CSSProperties, useEffect, useState } from 'react'
+import { type PointerEvent, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight, EyeOff, Eye, Settings2 } from 'lucide-react'
 import { useUserPreferences } from '@/components/providers/UserPreferencesProvider'
@@ -88,6 +88,14 @@ type ModuleViewModel = {
   problemDetails: StatusDetail[]
 }
 
+type DragState = {
+  pointerId: number
+  startX: number
+  startY: number
+  originX: number
+  originY: number
+}
+
 function getCheckDetail(infraData: InfraData | null, key: string): StatusDetail {
   const check = infraData?.checks[key]
   if (!check) return { status: 'unknown', text: `${key}: brak danych z monitoringu` }
@@ -140,6 +148,8 @@ export function DashboardModules({
   const { preferences, updatePreferences } = useUserPreferences()
   const [editMode, setEditMode] = useState(false)
   const [infraData, setInfraData] = useState<InfraData | null>(null)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const [dragState, setDragState] = useState<DragState | null>(null)
 
   useEffect(() => {
     if (!canAccessInfrastructure) return
@@ -203,10 +213,53 @@ export function DashboardModules({
   const monitoredModules = moduleViewModels.filter((item) => item.hasStatus)
   const healthyModules = monitoredModules.filter((item) => item.moduleStatus === 'healthy').length
   const warningModules = moduleViewModels.filter((item) => item.moduleStatus === 'warning' || item.moduleStatus === 'error')
+  const sectionLayout = [
+    { left: '4%', top: '12%', width: '230px', height: '146px' },
+    { left: '31%', top: '10%', width: '246px', height: '148px' },
+    { left: '60%', top: '12%', width: '238px', height: '142px' },
+    { left: '86%', top: '13%', width: '224px', height: '140px' },
+    { left: '17%', top: '58%', width: '210px', height: '134px' },
+    { left: '47%', top: '63%', width: '224px', height: '138px' },
+    { left: '73%', top: '59%', width: '222px', height: '136px' },
+  ]
+
+  const startMapDrag = (event: PointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest('a, button')) return
+
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setDragState({
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: pan.x,
+      originY: pan.y,
+    })
+  }
+
+  const moveMapDrag = (event: PointerEvent<HTMLDivElement>) => {
+    if (!dragState || dragState.pointerId !== event.pointerId) return
+
+    setPan({
+      x: dragState.originX + event.clientX - dragState.startX,
+      y: dragState.originY + event.clientY - dragState.startY,
+    })
+  }
+
+  const endMapDrag = (event: PointerEvent<HTMLDivElement>) => {
+    if (dragState?.pointerId === event.pointerId) {
+      setDragState(null)
+    }
+  }
 
   return (
-    <section className="relative mt-8 w-full">
-      <div className="absolute right-0 top-0 z-30 flex items-center gap-3">
+    <section className="relative mt-6 min-h-0 flex-1 w-full">
+      <div className="absolute right-0 top-0 z-50 flex items-center gap-3">
+        <button
+          onClick={() => setPan({ x: 0, y: 0 })}
+          className="flex h-11 items-center rounded-[14px] bg-white/70 px-4 text-sm font-medium text-[#5e6664] shadow-[0_14px_30px_rgba(105,116,116,0.08)] transition-all duration-200 hover:bg-white hover:text-[#202020]"
+        >
+          Wyśrodkuj
+        </button>
         <button
           onClick={() => setEditMode((v) => !v)}
           className={`flex h-11 items-center gap-2 rounded-[14px] px-4 text-sm font-medium transition-all duration-200 ${
@@ -220,111 +273,102 @@ export function DashboardModules({
         </button>
       </div>
 
-      <div className="ecosystem-board-warehouse relative min-h-[700px] overflow-hidden">
+      <div className="ecosystem-board-warehouse relative h-full min-h-[560px] overflow-hidden">
         <div className="absolute inset-0 warehouse-floor-lines" />
-        <div className="absolute left-[238px] right-[-58px] top-[42px] h-[470px]">
-          <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1180 520" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0 170 H290 C330 170 330 105 370 105 H515 C555 105 555 170 595 170 H1180" className="warehouse-route-ok" />
-            <path d="M0 315 H430 C475 315 475 245 520 245 H690 C735 245 735 315 780 315 H1180" className="warehouse-route-ok" />
-            <path d="M720 170 C780 170 780 105 840 105 H1010 C1060 105 1060 170 1110 170 H1180" className="warehouse-route-danger" />
-            <path d="M560 315 V420 H755 C800 420 800 350 845 350 H1180" className="warehouse-route-ok" />
-            <path d="M1000 105 V315 C1000 360 955 360 955 405 V520" className="warehouse-route-danger" />
-          </svg>
 
-          {[
-            { left: '2%', top: '16%', width: '172px', height: '122px', color: '#4d91f3' },
-            { left: '34%', top: '14%', width: '190px', height: '118px', color: '#4d91f3' },
-            { left: '68%', top: '14%', width: '198px', height: '120px', color: '#4d91f3' },
-            { left: '98%', top: '14%', width: '172px', height: '118px', color: '#4d91f3' },
-            { left: '5%', top: '63%', width: '154px', height: '68px', color: '#7bcf89' },
-            { left: '24%', top: '78%', width: '88px', height: '82px', color: '#32ad58' },
-            { left: '34%', top: '78%', width: '88px', height: '82px', color: '#32ad58' },
-            { left: '44%', top: '78%', width: '88px', height: '82px', color: '#32ad58' },
-            { left: '63%', top: '78%', width: '88px', height: '82px', color: '#32ad58' },
-            { left: '78%', top: '84%', width: '126px', height: '80px', color: '#cfd5ca' },
-            { left: '94%', top: '79%', width: '88px', height: '82px', color: '#32ad58' },
-          ].map((block, index) => (
-            <div
-              key={index}
-              className="warehouse-static-block absolute"
-              style={{
-                left: block.left,
-                top: block.top,
-                width: block.width,
-                height: block.height,
-                '--warehouse-block-color': block.color,
-              } as CSSProperties}
-            />
-          ))}
+        <div
+          className={`absolute inset-[18px] cursor-grab overflow-hidden rounded-[26px] ${dragState ? 'cursor-grabbing' : ''}`}
+          onPointerDown={startMapDrag}
+          onPointerMove={moveMapDrag}
+          onPointerUp={endMapDrag}
+          onPointerCancel={endMapDrag}
+        >
+          <div
+            className="absolute left-[320px] top-[10px] h-[620px] w-[1380px] transition-transform duration-75"
+            style={{ transform: `translate3d(${pan.x}px, ${pan.y}px, 0)` }}
+          >
+            <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1380 620" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 190 H315 C360 190 360 120 405 120 H600 C645 120 645 190 690 190 H1380" className="warehouse-route-ok" />
+              <path d="M0 370 H500 C548 370 548 295 596 295 H790 C840 295 840 370 890 370 H1380" className="warehouse-route-ok" />
+              <path d="M760 190 C820 190 820 120 880 120 H1125 C1185 120 1185 190 1245 190 H1380" className="warehouse-route-danger" />
+              <path d="M610 370 V505 H825 C875 505 875 430 925 430 H1380" className="warehouse-route-ok" />
+              <path d="M1110 120 V370 C1110 420 1055 420 1055 485 V620" className="warehouse-route-danger" />
+            </svg>
 
-          {moduleViewModels.map((item, index) => {
-            const { mod, isHidden, moduleStatus, deployText, problemDetails } = item
-            const status = statusMeta[moduleStatus]
-            const showProblemTooltip = moduleStatus === 'warning' || moduleStatus === 'error'
-            const positions = [
-              { left: '9%', top: '47%' },
-              { left: '44%', top: '47%' },
-              { left: '61%', top: '18%' },
-              { left: '22%', top: '62%' },
-              { left: '52%', top: '73%' },
-              { left: '83%', top: '69%' },
-              { left: '71%', top: '51%' },
-            ]
-            const position = positions[index] ?? positions[0]
+            {moduleViewModels.map((item, index) => {
+              const { mod, isHidden, moduleStatus, statusSummary, deployHealthStatus, deployText, problemDetails } = item
+              const status = statusMeta[moduleStatus]
+              const showProblemTooltip = moduleStatus === 'warning' || moduleStatus === 'error'
+              const layout = sectionLayout[index] ?? sectionLayout[0]
 
-            const moduleNode = (
-              <div
-                className={`warehouse-module-node group absolute z-20 w-[142px] rounded-[16px] bg-white/75 p-3.5 shadow-[0_18px_42px_rgba(95,113,112,0.16)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-1 hover:bg-white ${isHidden ? 'opacity-45' : ''}`}
-                style={{ left: position.left, top: position.top }}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className={`h-2 w-2 rounded-full ${status.dot}`} />
-                    <span className="text-xs font-medium text-[#202020]">{mod.label}</span>
+              const sectionTile = (
+                <div
+                  className={`warehouse-section-tile group absolute z-20 flex flex-col p-5 transition-all duration-200 hover:-translate-y-1 ${isHidden ? 'opacity-45' : ''}`}
+                  style={{
+                    left: layout.left,
+                    top: layout.top,
+                    width: layout.width,
+                    height: layout.height,
+                  }}
+                >
+                  <div className="warehouse-section-grid pointer-events-none absolute inset-3 rounded-[14px]" />
+                  <div className="relative z-10 flex items-start justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={`h-2.5 w-2.5 rounded-full ${status.dot}`} />
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-[#5d6866]">{status.label}</p>
+                      </div>
+                      <h3 className="mt-3 text-xl font-medium tracking-[-0.02em] text-[#202020]">{mod.label}</h3>
+                    </div>
+                    {editMode ? (
+                      <button
+                        onClick={() => toggleModule(mod.name)}
+                        className="relative z-20 rounded-xl bg-white/70 p-2 text-[#6d7775] transition-colors hover:bg-white hover:text-[#202020]"
+                        title={isHidden ? 'Pokaż moduł' : 'Ukryj moduł'}
+                      >
+                        {isHidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                      </button>
+                    ) : mod.href ? (
+                      <ArrowUpRight className="relative z-10 h-5 w-5 text-[#5d6866] transition-colors group-hover:text-[#202020]" />
+                    ) : null}
                   </div>
-                  {editMode ? (
-                    <button
-                      onClick={() => toggleModule(mod.name)}
-                      className="rounded-lg bg-[#eef4f3] p-1.5 text-[#6d7775] transition-colors hover:bg-[#e0e8e6] hover:text-[#202020]"
-                      title={isHidden ? 'Pokaż moduł' : 'Ukryj moduł'}
-                    >
-                      {isHidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                    </button>
-                  ) : mod.href ? (
-                    <ArrowUpRight className="h-4 w-4 text-[#6d7775] transition-colors group-hover:text-[#202020]" />
-                  ) : null}
+                  <div className="relative z-10 mt-auto">
+                    <div className="mb-2 flex items-center justify-between gap-3 text-xs text-[#5d6866]">
+                      <span className="truncate">{statusSummary}</span>
+                      <span className={statusMeta[deployHealthStatus].text}>{deployText}</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-white/55">
+                      <div className={`h-full rounded-full ${moduleStatus === 'error' ? 'bg-[#ff5a5a]' : moduleStatus === 'warning' ? 'bg-[#f2b84b]' : moduleStatus === 'unknown' ? 'bg-[#aeb8b6]' : 'bg-[#23b657]'}`} style={{ width: moduleStatus === 'unknown' ? '34%' : '76%' }} />
+                    </div>
+                  </div>
+                  {showProblemTooltip && problemDetails.length > 0 && (
+                    <span className="pointer-events-none absolute bottom-full left-0 z-40 mb-2 hidden w-72 rounded-2xl bg-white p-3 text-left text-xs text-[#5e6664] shadow-[0_18px_40px_rgba(90,105,104,0.18)] group-hover:block">
+                      <span className="mb-1 block font-medium text-[#202020]">Co się stało</span>
+                      {problemDetails.map((detail) => (
+                        <span key={detail.text} className="block leading-relaxed">{detail.text}</span>
+                      ))}
+                    </span>
+                  )}
                 </div>
-                <div className="mt-3 h-2 rounded-full bg-[#dfe8e6]">
-                  <div className={`h-full rounded-full ${moduleStatus === 'error' ? 'bg-[#ff5a5a]' : moduleStatus === 'warning' ? 'bg-[#f2b84b]' : moduleStatus === 'unknown' ? 'bg-[#aeb8b6]' : 'bg-[#23b657]'}`} style={{ width: moduleStatus === 'unknown' ? '38%' : '72%' }} />
+              )
+
+              return mod.href && !editMode ? (
+                <Link key={mod.name} href={mod.href} className="contents">
+                  {sectionTile}
+                </Link>
+              ) : (
+                <div key={mod.name} className="contents">
+                  {sectionTile}
                 </div>
-                <p className="mt-2 truncate text-xs text-[#6d7775]">{deployText}</p>
-                {showProblemTooltip && problemDetails.length > 0 && (
-                  <span className="pointer-events-none absolute bottom-full left-0 z-40 mb-2 hidden w-72 rounded-2xl bg-white p-3 text-left text-xs text-[#5e6664] shadow-[0_18px_40px_rgba(90,105,104,0.18)] group-hover:block">
-                    <span className="mb-1 block font-medium text-[#202020]">Co się stało</span>
-                    {problemDetails.map((detail) => (
-                      <span key={detail.text} className="block leading-relaxed">{detail.text}</span>
-                    ))}
-                  </span>
-                )}
-              </div>
-            )
+              )
+            })}
 
-            return mod.href && !editMode ? (
-              <Link key={mod.name} href={mod.href} className="contents">
-                {moduleNode}
-              </Link>
-            ) : (
-              <div key={mod.name} className="contents">
-                {moduleNode}
+            <div className="absolute left-[58%] top-[37%] z-30 w-[220px] rounded-[18px] bg-white/72 p-4 shadow-[0_20px_50px_rgba(95,113,112,0.18)] backdrop-blur-xl">
+              <p className="text-sm font-medium text-[#202020]">VEZvision API</p>
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-[#23b657]">
+                <span className="h-2 w-2 rounded-full bg-[#23b657]" />
+                {moduleViewModels.find((item) => item.mod.name === 'vezVision')?.statusSummary ?? 'Ładowanie'}
               </div>
-            )
-          })}
-
-          <div className="absolute left-[58%] top-[35%] z-30 w-[200px] rounded-[16px] bg-white/72 p-3.5 shadow-[0_20px_50px_rgba(95,113,112,0.18)] backdrop-blur-xl">
-            <p className="text-sm font-medium text-[#202020]">VEZvision API</p>
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-[#23b657]">
-              <span className="h-2 w-2 rounded-full bg-[#23b657]" />
-              {moduleViewModels.find((item) => item.mod.name === 'vezVision')?.statusSummary ?? 'Ładowanie'}
             </div>
           </div>
         </div>

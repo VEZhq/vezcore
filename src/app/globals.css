@@ -429,3 +429,49 @@
   background: rgba(92, 111, 109, 0.10);
   transform: skewX(-18deg);
 }
+
+.warehouse-section-tile {
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.74), rgba(223, 235, 232, 0.56) 48%, rgba(199, 218, 213, 0.58)),
+    rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 26px 46px rgba(75, 96, 95, 0.18),
+    0 8px 0 rgba(103, 128, 126, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  transform: perspective(900px) rotateX(10deg);
+  transform-origin: center bottom;
+}
+
+.warehouse-section-tile::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border-radius: 14px;
+  background:
+    linear-gradient(90deg, rgba(76, 145, 243, 0.16), transparent 42%),
+    radial-gradient(circle at 80% 22%, rgba(35, 182, 87, 0.13), transparent 34%);
+  opacity: 0.82;
+}
+
+.warehouse-section-tile::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: -12px;
+  height: 12px;
+  border-radius: 0 0 14px 14px;
+  background: rgba(85, 107, 105, 0.14);
+  transform: skewX(-18deg);
+}
+
+.warehouse-section-grid {
+  background-image:
+    linear-gradient(rgba(76, 145, 243, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76, 145, 243, 0.16) 1px, transparent 1px);
+  background-size: 20px 20px;
+  mask-image: linear-gradient(180deg, black, transparent 72%);
+  opacity: 0.68;
+}
