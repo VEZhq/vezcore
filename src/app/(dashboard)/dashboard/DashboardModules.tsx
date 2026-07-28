@@ -206,11 +206,10 @@ export function DashboardModules({
 
           const cardContent = (
             <div
-              className={`relative tile-${mod.color} tile-hover group flex min-h-[210px] h-full flex-col overflow-hidden bg-[#141310]/[0.72] light:bg-[#fffdfa]/[0.84] backdrop-blur-md border border-white/[0.06] light:border-black/[0.08] p-5 transition-all duration-300 ${
+              className={`relative tile-${mod.color} tile-hover group flex min-h-[210px] h-full flex-col bg-[#141310]/[0.72] light:bg-[#fffdfa]/[0.84] backdrop-blur-md border border-white/[0.06] light:border-black/[0.08] p-5 transition-all duration-300 ${
                 editMode ? 'cursor-default' : mod.href ? 'cursor-pointer' : 'cursor-default'
               } ${isHidden ? 'opacity-40' : ''}`}
             >
-              <span className={`absolute left-0 top-0 h-full w-[3px] opacity-70 ${moduleColors.accent}`} />
               <div className="flex items-center justify-between mb-4">
                 <div className={`w-11 h-11 rounded-md border flex items-center justify-center transition-colors duration-300 ${moduleColors.iconBox}`}>
                   <mod.icon
