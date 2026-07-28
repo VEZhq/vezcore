@@ -20,6 +20,106 @@ type DeployInfo = {
   url: string | null
 }
 
+type InfrastructureResource = {
+  module: 'vez' | 'vezVision' | 'vezLabs'
+  label: string
+  href: string
+  description: string
+  alias: string
+  aliasType: 'prod' | 'lab' | 'tunnel' | 'router'
+}
+
+const INFRASTRUCTURE_RESOURCES: InfrastructureResource[] = [
+  {
+    module: 'vez',
+    label: 'VEZcore',
+    href: 'https://vezcore.vezlabs.dev',
+    description: 'Dashboard produkcyjny',
+    alias: 'ssh vezlabs-coolify',
+    aliasType: 'lab',
+  },
+  {
+    module: 'vezVision',
+    label: 'Hetzner Cloud',
+    href: 'https://console.hetzner.cloud/projects',
+    description: 'Panel produkcyjnej chmury',
+    alias: 'ssh vez-prod',
+    aliasType: 'prod',
+  },
+  {
+    module: 'vezVision',
+    label: 'VEZvision',
+    href: 'https://vezvision.com',
+    description: 'Strona produkcyjna',
+    alias: 'ssh vez-prod',
+    aliasType: 'prod',
+  },
+  {
+    module: 'vezVision',
+    label: 'API health',
+    href: 'https://api.vezvision.com/healthz',
+    description: 'Status API produkcji',
+    alias: 'ssh vez-prod',
+    aliasType: 'prod',
+  },
+  {
+    module: 'vezVision',
+    label: 'DB tunnel',
+    href: 'https://api.vezvision.com/healthz',
+    description: 'Tunel do bazy PostgreSQL',
+    alias: 'ssh -N vezvision-db-tunnel',
+    aliasType: 'tunnel',
+  },
+  {
+    module: 'vezLabs',
+    label: 'VEZcore test',
+    href: 'https://vezcoretest.vezlabs.dev',
+    description: 'Środowisko testowe',
+    alias: 'ssh vezlabs-coolify',
+    aliasType: 'lab',
+  },
+  {
+    module: 'vezLabs',
+    label: 'Proxmox',
+    href: 'https://10.77.40.2:8006/',
+    description: 'Maszyny wirtualne',
+    alias: 'ssh vezlabs-pve',
+    aliasType: 'lab',
+  },
+  {
+    module: 'vezLabs',
+    label: 'Coolify',
+    href: 'https://10.77.30.35:8000/',
+    description: 'Deploy i aplikacje',
+    alias: 'ssh vezlabs-coolify',
+    aliasType: 'lab',
+  },
+  {
+    module: 'vezLabs',
+    label: 'Router',
+    href: 'https://192.168.2.1/',
+    description: 'Sieć i VLAN',
+    alias: 'ssh vezlabs-router',
+    aliasType: 'router',
+  },
+  {
+    module: 'vezLabs',
+    label: 'Monitor',
+    href: 'https://monitor.vezlabs.dev',
+    description: 'Panel monitoringu',
+    alias: 'ssh vezlabs-coolify',
+    aliasType: 'lab',
+  },
+  {
+    module: 'vezLabs',
+    label: 'Lab API health',
+    href: 'https://api.vezlabs.dev/healthz',
+    description: 'Status API labu',
+    alias: 'ssh vezlabs-coolify',
+    aliasType: 'lab',
+  },
+]
+
 const HEALTH_CHECKS = [
   { key: 'prodApi', label: 'Prod API', url: 'https://api.vezvision.com/healthz' },
   { key: 'labApi', label: 'Lab API', url: 'https://api.vezlabs.dev/healthz' },
@@ -168,6 +268,7 @@ export async function GET() {
       checks,
       deploy,
       incidents: buildIncidents(checks, deploy),
+      resources: INFRASTRUCTURE_RESOURCES,
     },
     { headers: { 'Cache-Control': 'no-store' } }
   )

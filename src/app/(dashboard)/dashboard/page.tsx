@@ -136,7 +136,7 @@ export default async function DashboardPage() {
                   <Server className="h-5 w-5" />
                 </span>
                 <div>
-                  <h1 className="text-[25px] font-semibold leading-none text-[#202020]">VEZcore</h1>
+                  <h1 className="text-[25px] font-semibold leading-none text-[#202020]">Ekosystem</h1>
                   <p className="mt-1.5 text-xs text-[#707a78]">Produkcja · {user.email}</p>
                 </div>
               </div>
@@ -179,6 +179,19 @@ export default async function DashboardPage() {
             <DashboardModules
               canAccessVezVision={permissions.canAccessVezVision}
               canAccessInfrastructure={permissions.canAccessInfrastructure}
+              navigationAccess={{
+                canAccessKonta: permissions.canAccessKonta,
+                canAccessAudit: permissions.canAccessAudit,
+                canAccessSettings: permissions.canAccessSettings,
+                canViewVezVisionBlog: permissions.canViewVezVisionBlog,
+                canViewVezVisionPortfolio: permissions.canViewVezVisionPortfolio,
+                canViewVezVisionServices: permissions.canViewVezVisionServices,
+                canViewVezVisionFaq: permissions.canViewVezVisionFaq,
+                canViewVezVisionNewsletter: permissions.canViewVezVisionNewsletter,
+                canViewVezVisionFiles: permissions.canViewVezVisionFiles,
+                canViewVezVisionSettings: permissions.canViewVezVisionSettings,
+                canViewVezVisionCalendar: permissions.canViewVezVisionCalendar,
+              }}
             />
           </div>
         </div>
