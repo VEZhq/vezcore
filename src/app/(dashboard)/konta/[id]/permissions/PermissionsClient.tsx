@@ -197,7 +197,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
       name: 'core' as const,
       label: 'Core',
       description: 'Konta, audit, ustawienia i infrastruktura',
-      color: 'emerald' as const,
+      color: 'sage' as const,
       icon: Shield,
     },
     ...DASHBOARD_MODULES.filter(module => availablePermissionEcosystems.has(module.name)),
@@ -511,13 +511,13 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                           onClick={() => setSelectedEcosystem(option.name)}
                           className={`w-full text-left border p-4 transition-all duration-200 ${
                             isActive
-                              ? 'border-emerald-500/30 bg-emerald-500/[0.05]'
+                              ? 'border-[#e8cfae]/30 bg-[#e8cfae]/[0.06] light:border-[#7d5a38]/[0.24] light:bg-[#7d5a38]/[0.06]'
                               : 'border-white/[0.06] light:border-black/[0.06] bg-white/[0.02] light:bg-black/[0.02] hover:bg-white/[0.04] light:hover:bg-black/[0.04]'
                           }`}
                         >
                           <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.06] bg-white/[0.03] light:bg-black/[0.03]">
-                              <Icon className={`h-5 w-5 ${DASHBOARD_MODULE_ICON_COLORS[option.color].dark} light:${DASHBOARD_MODULE_ICON_COLORS[option.color].light}`} />
+                              <Icon className={`h-5 w-5 ${DASHBOARD_MODULE_ICON_COLORS[option.color].dark} ${DASHBOARD_MODULE_ICON_COLORS[option.color].light}`} />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-3">
@@ -525,7 +525,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                                   {option.label}
                                 </p>
                                 {isActive && (
-                                  <span className="text-[9px] uppercase tracking-[0.2em] text-emerald-400">
+                                  <span className="text-[9px] uppercase tracking-[0.2em] text-[#e8cfae] light:text-[#7d5a38]">
                                     Aktywny
                                   </span>
                                 )}

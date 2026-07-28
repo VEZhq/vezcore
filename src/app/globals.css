@@ -211,32 +211,37 @@
   transform: translateY(-2px);
 }
 
-.tile-emerald:hover {
+.tile-sage:hover {
   border-color: rgba(189, 217, 198, 0.28);
   background: rgba(189, 217, 198, 0.035);
 }
 
-.tile-blue:hover {
-  border-color: rgba(216, 198, 173, 0.3);
-  background: rgba(216, 198, 173, 0.04);
+.tile-sand:hover {
+  border-color: rgba(234, 212, 183, 0.3);
+  background: rgba(234, 212, 183, 0.04);
 }
 
-.tile-purple:hover {
+.tile-mauve:hover {
   border-color: rgba(215, 191, 216, 0.28);
   background: rgba(215, 191, 216, 0.035);
 }
 
-.tile-orange:hover {
+.tile-peach:hover {
   border-color: rgba(236, 200, 166, 0.3);
   background: rgba(236, 200, 166, 0.04);
 }
 
-.tile-pink:hover {
+.tile-rose:hover {
   border-color: rgba(232, 191, 208, 0.28);
   background: rgba(232, 191, 208, 0.035);
 }
 
-.tile-cyan:hover {
+.tile-mint:hover {
   border-color: rgba(201, 216, 197, 0.28);
   background: rgba(201, 216, 197, 0.035);
+}
+
+.tile-linen:hover {
+  border-color: rgba(230, 220, 201, 0.28);
+  background: rgba(230, 220, 201, 0.035);
 }

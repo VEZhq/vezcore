@@ -48,6 +48,11 @@ const sessionTimeouts = [
 
 type DateFormat = 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD'
 
+const panelClass = 'rounded-md border border-white/[0.07] bg-[#14110e]/[0.62] shadow-[0_18px_70px_rgba(0,0,0,0.18)] backdrop-blur-md light:border-black/[0.08] light:bg-[#fffdf8]/[0.86] light:shadow-[0_18px_70px_rgba(88,73,53,0.08)]'
+const labelClass = 'text-[10px] uppercase tracking-[0.18em] text-[#bba992] light:text-[#7b6d5e]'
+const titleClass = 'text-sm font-medium text-[#f0ddc4] light:text-[#4f3f2d]'
+const helperClass = 'text-xs leading-relaxed text-[#a79a8a] light:text-[#71685f]'
+
 function NavLink({
   href,
   label,
@@ -64,8 +69,8 @@ function NavLink({
       href={href}
       className={`inline-flex h-10 items-center gap-2 rounded-md border px-3 text-xs transition-colors ${
         active
-          ? 'border-white/[0.12] bg-white/[0.06] text-white light:border-black/[0.12] light:bg-black/[0.05] light:text-black'
-          : 'border-white/[0.07] text-[#888888] hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black'
+          ? 'border-[#e8cfae]/30 bg-[#e8cfae]/10 text-[#f1dcc0] light:border-[#7d5a38]/[0.24] light:bg-[#7d5a38]/[0.08] light:text-[#5b3f25]'
+          : 'border-white/[0.07] text-[#9b9188] hover:border-[#e8cfae]/[0.22] hover:text-[#f1dcc0] light:border-black/[0.08] light:text-[#71685f] light:hover:border-[#7d5a38]/[0.22] light:hover:text-[#4f3f2d]'
       }`}
     >
       {Icon && <Icon className="h-4 w-4" />}
@@ -86,14 +91,14 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-      <div className="flex items-start gap-3 border-b border-white/[0.06] px-5 py-4 light:border-black/[0.06]">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/[0.07] bg-white/[0.03] light:border-black/[0.08] light:bg-black/[0.03]">
+    <section className={`${panelClass} overflow-hidden`}>
+      <div className="grid gap-4 border-b border-white/[0.055] px-5 py-4 light:border-black/[0.055] sm:grid-cols-[42px_minmax(0,1fr)]">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[#e8cfae]/[0.18] bg-[#e8cfae]/[0.07] light:border-[#7d5a38]/[0.16] light:bg-[#7d5a38]/[0.07]">
           <Icon className="h-4 w-4 text-[#e6c7a7] light:text-[#7d5a38]" />
         </div>
         <div>
-          <p className="text-sm font-medium text-white light:text-black">{title}</p>
-          <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">{subtitle}</p>
+          <p className={titleClass}>{title}</p>
+          <p className={`mt-1 ${helperClass}`}>{subtitle}</p>
         </div>
       </div>
       <div className="p-5">{children}</div>
@@ -111,12 +116,12 @@ function StatusRow({
   icon: LucideIcon
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-white/[0.05] py-3 last:border-b-0 light:border-black/[0.06]">
-      <span className="inline-flex items-center gap-2 text-xs text-[#888888] light:text-[#666666]">
-        <Icon className="h-4 w-4 text-[#666666] light:text-[#888888]" />
+    <div className="flex items-center justify-between gap-3 border-b border-white/[0.05] py-3 last:border-b-0 light:border-black/[0.055]">
+      <span className="inline-flex items-center gap-2 text-xs text-[#a79a8a] light:text-[#71685f]">
+        <Icon className="h-4 w-4 text-[#d6bea0] light:text-[#7d5a38]" />
         {label}
       </span>
-      <span className="truncate text-right text-xs text-white light:text-black">{value}</span>
+      <span className="truncate text-right text-xs text-[#eedcc7] light:text-[#4f3f2d]">{value}</span>
     </div>
   )
 }
@@ -140,16 +145,16 @@ function ChoiceButton({
       onClick={onClick}
       className={`min-h-20 rounded-md border p-4 text-left transition-colors ${
         selected
-          ? 'border-[#e6c7a7]/35 bg-[#e6c7a7]/10'
-          : 'border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] light:border-black/[0.08] light:bg-black/[0.02] light:hover:bg-black/[0.04]'
+          ? 'border-[#e8cfae]/35 bg-[#e8cfae]/10 light:border-[#7d5a38]/[0.24] light:bg-[#7d5a38]/[0.08]'
+          : 'border-white/[0.065] bg-white/[0.025] hover:border-[#e8cfae]/20 hover:bg-[#e8cfae]/[0.045] light:border-black/[0.075] light:bg-black/[0.02] light:hover:border-[#7d5a38]/[0.18] light:hover:bg-[#7d5a38]/[0.045]'
       }`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-white light:text-black">{title}</p>
-          {helper && <p className="mt-1 truncate text-xs text-[#777777] light:text-[#777777]">{helper}</p>}
+          <p className={`truncate ${selected ? 'text-sm font-medium text-[#f0ddc4] light:text-[#5b3f25]' : titleClass}`}>{title}</p>
+          {helper && <p className={`mt-1 truncate ${helperClass}`}>{helper}</p>}
         </div>
-        {Icon && <Icon className={`h-4 w-4 shrink-0 ${selected ? 'text-[#e6c7a7] light:text-[#7d5a38]' : 'text-[#777777]'}`} />}
+        {Icon && <Icon className={`h-4 w-4 shrink-0 ${selected ? 'text-[#e6c7a7] light:text-[#7d5a38]' : 'text-[#9b9188] light:text-[#7b6d5e]'}`} />}
       </div>
       {selected && <span className="mt-3 block h-1 w-8 rounded-full bg-[#e6c7a7] light:bg-[#7d5a38]" />}
     </button>
@@ -192,10 +197,10 @@ export default function SettingsClient({
               className="hidden h-auto w-[178px] max-w-[60vw] opacity-85 light:block"
               priority
             />
-            <p className="mt-4 text-[10px] uppercase tracking-[0.26em] text-[#666666] light:text-[#888888]">
+            <p className={`mt-4 ${labelClass}`}>
               System
             </p>
-            <h1 className="mt-1 text-2xl font-semibold text-white light:text-black">
+            <h1 className="mt-1 text-2xl font-semibold text-[#f0ddc4] light:text-[#4f3f2d]">
               Ustawienia
             </h1>
           </div>
@@ -222,14 +227,22 @@ export default function SettingsClient({
                   className={`rounded-md border p-4 text-left transition-colors ${
                     theme === 'dark'
                       ? 'border-[#e6c7a7]/35 bg-[#e6c7a7]/10'
-                      : 'border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] light:border-black/[0.08] light:bg-black/[0.02] light:hover:bg-black/[0.04]'
+                      : 'border-white/[0.07] bg-white/[0.02] hover:border-[#e8cfae]/20 hover:bg-[#e8cfae]/[0.045] light:border-black/[0.08] light:bg-black/[0.02] light:hover:border-[#7d5a38]/[0.18] light:hover:bg-[#7d5a38]/[0.045]'
                   }`}
                 >
-                  <div className="mb-4 flex h-24 items-center justify-center rounded-md border border-white/[0.07] bg-[#080808]">
-                    <Moon className="h-6 w-6 text-[#777777]" />
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-[#f0ddc4] light:text-[#4f3f2d]">Ciemny</p>
+                      <p className="mt-1 text-xs text-[#a79a8a]">Domyślny tryb operacyjny.</p>
+                    </div>
+                    <Moon className="h-5 w-5 shrink-0 text-[#e6c7a7] light:text-[#7d5a38]" />
                   </div>
-                  <p className="text-sm font-medium text-white light:text-black">Ciemny</p>
-                  <p className="mt-1 text-xs text-[#777777]">Domyślny tryb operacyjny.</p>
+                  <div className="mt-5 grid grid-cols-[1fr_38px] gap-2">
+                    <span className="h-1.5 rounded-full bg-[#e8cfae]/35" />
+                    <span className="h-1.5 rounded-full bg-white/[0.12]" />
+                    <span className="h-1.5 rounded-full bg-white/[0.08]" />
+                    <span className="h-1.5 rounded-full bg-[#d7bfd8]/25" />
+                  </div>
                 </button>
 
                 <button
@@ -238,14 +251,22 @@ export default function SettingsClient({
                   className={`rounded-md border p-4 text-left transition-colors ${
                     theme === 'light'
                       ? 'border-[#e6c7a7]/35 bg-[#e6c7a7]/10'
-                      : 'border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04] light:border-black/[0.08] light:bg-black/[0.02] light:hover:bg-black/[0.04]'
+                      : 'border-white/[0.07] bg-white/[0.02] hover:border-[#e8cfae]/20 hover:bg-[#e8cfae]/[0.045] light:border-black/[0.08] light:bg-black/[0.02] light:hover:border-[#7d5a38]/[0.18] light:hover:bg-[#7d5a38]/[0.045]'
                   }`}
                 >
-                  <div className="mb-4 flex h-24 items-center justify-center rounded-md border border-black/[0.08] bg-[#f6f6f6]">
-                    <Sun className="h-6 w-6 text-[#777777]" />
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-[#f0ddc4] light:text-[#4f3f2d]">Jasny</p>
+                      <p className="mt-1 text-xs text-[#a79a8a]">Lepszy do pracy w dzień.</p>
+                    </div>
+                    <Sun className="h-5 w-5 shrink-0 text-[#e6c7a7] light:text-[#7d5a38]" />
                   </div>
-                  <p className="text-sm font-medium text-white light:text-black">Jasny</p>
-                  <p className="mt-1 text-xs text-[#777777]">Lepszy do pracy w dzień.</p>
+                  <div className="mt-5 grid grid-cols-[1fr_38px] gap-2">
+                    <span className="h-1.5 rounded-full bg-[#7d5a38]/25" />
+                    <span className="h-1.5 rounded-full bg-black/[0.12]" />
+                    <span className="h-1.5 rounded-full bg-black/[0.08]" />
+                    <span className="h-1.5 rounded-full bg-[#735671]/[0.18]" />
+                  </div>
                 </button>
               </div>
             </Section>
@@ -257,13 +278,13 @@ export default function SettingsClient({
             >
               <div className="space-y-5">
                 <label className="block">
-                  <span className="mb-2 block text-[10px] uppercase tracking-[0.18em] text-[#777777]">
+                  <span className={`mb-2 block ${labelClass}`}>
                     Strefa czasowa
                   </span>
                   <select
                     value={preferences.timezone}
                     onChange={(event) => updatePreferences({ timezone: event.target.value })}
-                    className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] px-3 text-sm text-white outline-none transition-colors focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black"
+                    className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] px-3 text-sm text-[#f0ddc4] outline-none transition-colors focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-[#4f3f2d]"
                   >
                     {timezones.map((timezone) => (
                       <option key={timezone.value} value={timezone.value}>
@@ -274,7 +295,7 @@ export default function SettingsClient({
                 </label>
 
                 <div>
-                  <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#777777]">
+                  <p className={`mb-2 ${labelClass}`}>
                     Format daty
                   </p>
                   <div className="grid gap-2 sm:grid-cols-3">
@@ -299,7 +320,7 @@ export default function SettingsClient({
             >
               <div className="space-y-5">
                 <div>
-                  <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#777777]">
+                  <p className={`mb-2 ${labelClass}`}>
                     Timeout sesji
                   </p>
                   <div className="grid gap-2 sm:grid-cols-4">
@@ -313,7 +334,7 @@ export default function SettingsClient({
                       />
                     ))}
                   </div>
-                  <p className="mt-3 text-xs text-[#777777] light:text-[#777777]">
+                  <p className="mt-3 text-xs text-[#a79a8a] light:text-[#71685f]">
                     Automatyczne wylogowanie po {preferences.sessionTimeout} minutach bezczynności.
                   </p>
                 </div>
@@ -324,8 +345,8 @@ export default function SettingsClient({
                   className="flex w-full items-center justify-between gap-4 rounded-md border border-white/[0.07] bg-white/[0.02] p-4 text-left transition-colors hover:bg-white/[0.04] light:border-black/[0.08] light:bg-black/[0.02] light:hover:bg-black/[0.04]"
                 >
                   <div>
-                    <p className="text-sm font-medium text-white light:text-black">Wyloguj przy zmianie IP</p>
-                    <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
+                    <p className="text-sm font-medium text-[#f0ddc4] light:text-[#4f3f2d]">Wyloguj przy zmianie IP</p>
+                    <p className="mt-1 text-xs text-[#a79a8a] light:text-[#71685f]">
                       Dodatkowa ochrona przy zmianie adresu sieciowego.
                     </p>
                   </div>
@@ -353,7 +374,7 @@ export default function SettingsClient({
                 icon={Bot}
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="max-w-xl text-xs leading-relaxed text-[#777777] light:text-[#777777]">
+                  <p className="max-w-xl text-xs leading-relaxed text-[#a79a8a] light:text-[#71685f]">
                     Backfill i sweep wątków profili użytkowników są w osobnym panelu administracyjnym.
                   </p>
                   <Link
@@ -368,9 +389,9 @@ export default function SettingsClient({
           </main>
 
           <aside className="space-y-5">
-            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-              <p className="text-sm font-medium text-white light:text-black">Podsumowanie</p>
-              <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
+            <section className={`${panelClass} p-5`}>
+              <p className="text-sm font-medium text-[#f0ddc4] light:text-[#4f3f2d]">Podsumowanie</p>
+              <p className="mt-1 text-xs text-[#a79a8a] light:text-[#71685f]">
                 Aktualna konfiguracja widoku.
               </p>
               <div className="mt-4">
@@ -382,32 +403,32 @@ export default function SettingsClient({
               </div>
             </section>
 
-            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-              <p className="text-sm font-medium text-white light:text-black">Widoczne sekcje</p>
+            <section className={`${panelClass} p-5`}>
+              <p className="text-sm font-medium text-[#f0ddc4] light:text-[#4f3f2d]">Widoczne sekcje</p>
               <div className="mt-4 space-y-2">
                 <div className="flex items-center justify-between rounded-md bg-white/[0.03] px-3 py-3 light:bg-black/[0.03]">
-                  <span className="inline-flex items-center gap-2 text-sm text-white light:text-black">
+                  <span className="inline-flex items-center gap-2 text-sm text-[#f0ddc4] light:text-[#4f3f2d]">
                     <Monitor className="h-4 w-4 text-[#e6c7a7] light:text-[#7d5a38]" />
                     Preferencje
                   </span>
-                  <span className="text-xs text-[#777777]">aktywne</span>
+                  <span className="text-xs text-[#a79a8a]">aktywne</span>
                 </div>
                 {canManageCache && (
                   <div className="flex items-center justify-between rounded-md bg-white/[0.03] px-3 py-3 light:bg-black/[0.03]">
-                    <span className="inline-flex items-center gap-2 text-sm text-white light:text-black">
+                    <span className="inline-flex items-center gap-2 text-sm text-[#f0ddc4] light:text-[#4f3f2d]">
                       <Database className="h-4 w-4 text-[#d7bfd8] light:text-[#735671]" />
                       Cache
                     </span>
-                    <span className="text-xs text-[#777777]">admin</span>
+                    <span className="text-xs text-[#a79a8a]">admin</span>
                   </div>
                 )}
                 {canManageDiscordMaintenance && (
                   <div className="flex items-center justify-between rounded-md bg-white/[0.03] px-3 py-3 light:bg-black/[0.03]">
-                    <span className="inline-flex items-center gap-2 text-sm text-white light:text-black">
+                    <span className="inline-flex items-center gap-2 text-sm text-[#f0ddc4] light:text-[#4f3f2d]">
                       <Bot className="h-4 w-4 text-amber-300 light:text-amber-700" />
                       Discord
                     </span>
-                    <span className="text-xs text-[#777777]">admin</span>
+                    <span className="text-xs text-[#a79a8a]">admin</span>
                   </div>
                 )}
               </div>

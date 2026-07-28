@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Circle, EyeOff, Eye, Settings2 } from 'lucide-react'
 import { useUserPreferences } from '@/components/providers/UserPreferencesProvider'
-import { DASHBOARD_MODULES, DASHBOARD_MODULE_ICON_COLORS, type DashboardModuleName } from '@/lib/constants/modules'
+import { DASHBOARD_MODULES, DASHBOARD_MODULE_CARD_COLORS, DASHBOARD_MODULE_ICON_COLORS, type DashboardModuleName } from '@/lib/constants/modules'
 
 type HealthStatus = 'checking' | 'healthy' | 'warning' | 'error' | 'unknown'
 type DeployStatus = 'success' | 'failure' | 'pending' | 'unknown'
@@ -163,7 +163,7 @@ export function DashboardModules({
           <p className="text-[10px] uppercase tracking-[0.22em] text-[#777777] light:text-[#777777]">
             Ekosystem
           </p>
-          <h1 className="mt-1 text-lg font-medium text-white light:text-black">
+          <h1 className="mt-1 text-lg font-medium text-[#f0ddc4] light:text-[#4f3f2d]">
             Moduły
           </h1>
         </div>
@@ -202,15 +202,17 @@ export function DashboardModules({
             : 'Brak'
           const problemDetails = getProblemDetails(infraData, sources)
           const showProblemTooltip = moduleStatus === 'warning' || moduleStatus === 'error'
+          const moduleColors = DASHBOARD_MODULE_CARD_COLORS[mod.color]
 
           const cardContent = (
             <div
-              className={`relative tile-${mod.color} tile-hover group flex min-h-[198px] h-full flex-col bg-[#141310]/[0.72] light:bg-[#fffdfa]/[0.84] backdrop-blur-md border border-white/[0.06] light:border-black/[0.08] p-5 transition-all duration-300 ${
+              className={`relative tile-${mod.color} tile-hover group flex min-h-[210px] h-full flex-col overflow-hidden bg-[#141310]/[0.72] light:bg-[#fffdfa]/[0.84] backdrop-blur-md border border-white/[0.06] light:border-black/[0.08] p-5 transition-all duration-300 ${
                 editMode ? 'cursor-default' : mod.href ? 'cursor-pointer' : 'cursor-default'
               } ${isHidden ? 'opacity-40' : ''}`}
             >
+              <span className={`absolute left-0 top-0 h-full w-[3px] opacity-70 ${moduleColors.accent}`} />
               <div className="flex items-center justify-between mb-4">
-                <div className="w-11 h-11 rounded-md bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] flex items-center justify-center transition-colors duration-300">
+                <div className={`w-11 h-11 rounded-md border flex items-center justify-center transition-colors duration-300 ${moduleColors.iconBox}`}>
                   <mod.icon
                     className={`h-5 w-5 ${DASHBOARD_MODULE_ICON_COLORS[mod.color].dark} ${DASHBOARD_MODULE_ICON_COLORS[mod.color].light} transition-colors duration-300`}
                   />
@@ -221,7 +223,7 @@ export function DashboardModules({
                     onClick={() => toggleModule(mod.name)}
                     className={`p-1.5 rounded transition-colors duration-200 ${
                       isHidden
-                        ? 'text-[#666666] hover:text-white light:text-[#aaaaaa] light:hover:text-black'
+                        ? 'text-[#666666] hover:text-[#f1dcc0] light:text-[#aaaaaa] light:hover:text-[#4f3f2d]'
                         : 'text-[#444444] hover:text-red-400 light:text-[#888888] light:hover:text-red-500'
                     }`}
                     title={isHidden ? 'Pokaż kafelek' : 'Ukryj kafelek'}
@@ -231,10 +233,10 @@ export function DashboardModules({
                 )}
               </div>
 
-              <h3 className="text-base font-medium text-white light:text-black mb-1 transition-colors duration-300">
+              <h3 className={`text-base font-medium mb-1 transition-colors duration-300 ${moduleColors.title}`}>
                 {mod.label}
               </h3>
-              <p className="line-clamp-2 min-h-[38px] text-xs leading-relaxed text-[#666666] light:text-[#999999] transition-colors duration-300">
+              <p className={`line-clamp-2 min-h-[38px] text-xs leading-relaxed transition-colors duration-300 ${moduleColors.description}`}>
                 {mod.description}
               </p>
 
@@ -247,7 +249,7 @@ export function DashboardModules({
                     {status.label}
                     {showProblemTooltip && problemDetails.length > 0 && (
                       <span className="pointer-events-none absolute bottom-full left-0 z-30 mb-2 hidden w-72 max-w-[72vw] border border-white/[0.08] light:border-black/[0.08] bg-[#050505] light:bg-white p-3 text-left text-[10px] font-normal normal-case tracking-normal text-[#b5b5b5] light:text-[#555555] shadow-2xl group-hover/status:block">
-                        <span className="mb-1 block font-medium uppercase tracking-[0.14em] text-white light:text-black">Co się stało</span>
+                        <span className="mb-1 block font-medium uppercase tracking-[0.14em] text-[#f0ddc4] light:text-[#4f3f2d]">Co się stało</span>
                         {problemDetails.map((detail) => (
                           <span key={detail.text} className="block leading-relaxed">{detail.text}</span>
                         ))}
