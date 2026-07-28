@@ -352,3 +352,80 @@
     transform: translateY(-8px) translateZ(24px);
   }
 }
+
+.ecosystem-board-warehouse {
+  background:
+    radial-gradient(circle at 62% 28%, rgba(255, 255, 255, 0.65), transparent 34%),
+    linear-gradient(180deg, rgba(239, 246, 245, 0.15), rgba(225, 234, 232, 0.22));
+}
+
+.warehouse-floor-lines {
+  background-image:
+    linear-gradient(90deg, rgba(172, 188, 184, 0.20) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(172, 188, 184, 0.16) 1px, transparent 1px);
+  background-size: 118px 118px;
+  mask-image: radial-gradient(circle at 58% 45%, black, transparent 76%);
+}
+
+.warehouse-route-ok,
+.warehouse-route-danger {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 2px 4px rgba(38, 160, 82, 0.08));
+}
+
+.warehouse-route-ok {
+  stroke: rgba(35, 182, 87, 0.86);
+}
+
+.warehouse-route-danger {
+  stroke: rgba(255, 77, 77, 0.72);
+}
+
+.warehouse-static-block {
+  --warehouse-block-color: #4d91f3;
+  border-radius: 6px;
+  background:
+    linear-gradient(var(--warehouse-block-color), var(--warehouse-block-color)) padding-box,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(120, 138, 135, 0.28)) border-box;
+  border: 4px solid transparent;
+  box-shadow:
+    0 18px 28px rgba(80, 107, 111, 0.18),
+    0 3px 0 rgba(71, 92, 94, 0.16);
+  transform: perspective(900px) rotateX(12deg);
+}
+
+.warehouse-static-block::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 3px;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.82) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.82) 2px, transparent 2px);
+  background-size: 22px 22px;
+  opacity: 0.82;
+}
+
+.warehouse-static-block::after {
+  content: '';
+  position: absolute;
+  inset: auto 10px -10px 10px;
+  height: 10px;
+  border-radius: 0 0 8px 8px;
+  background: rgba(84, 102, 101, 0.14);
+  filter: blur(0.2px);
+}
+
+.warehouse-module-node::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: -12px;
+  height: 12px;
+  border-radius: 0 0 14px 14px;
+  background: rgba(92, 111, 109, 0.10);
+  transform: skewX(-18deg);
+}
