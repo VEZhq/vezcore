@@ -8,6 +8,10 @@ interface UserPreferences {
   sessionTimeout: number // in minutes
   autoLogoutOnIpChange: boolean
   hiddenModules: string[]
+  operationsPanelSize: {
+    width: number
+    height: number
+  }
 }
 
 interface UserPreferencesContextType {
@@ -32,6 +36,10 @@ const defaultPreferences: UserPreferences = {
   sessionTimeout: 15,
   autoLogoutOnIpChange: false,
   hiddenModules: [],
+  operationsPanelSize: {
+    width: 320,
+    height: 410,
+  },
 }
 
 function sanitizePreferences(raw: unknown): UserPreferences {
@@ -57,6 +65,21 @@ function sanitizePreferences(raw: unknown): UserPreferences {
           (m): m is string => typeof m === 'string' && VALID_MODULE_NAMES.includes(m)
         )
       : defaultPreferences.hiddenModules,
+    operationsPanelSize: (() => {
+      if (!obj.operationsPanelSize || typeof obj.operationsPanelSize !== 'object') {
+        return defaultPreferences.operationsPanelSize
+      }
+
+      const size = obj.operationsPanelSize as Record<string, unknown>
+      const width = typeof size.width === 'number'
+        ? Math.min(520, Math.max(280, Math.round(size.width)))
+        : defaultPreferences.operationsPanelSize.width
+      const height = typeof size.height === 'number'
+        ? Math.min(680, Math.max(300, Math.round(size.height)))
+        : defaultPreferences.operationsPanelSize.height
+
+      return { width, height }
+    })(),
   }
 }
 

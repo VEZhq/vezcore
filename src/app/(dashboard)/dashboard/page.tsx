@@ -1,29 +1,15 @@
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Bell, Bookmark, Clock3, Search, Settings, User, UserCog } from 'lucide-react'
+import { Activity, Bell, Clock3, Server, Settings, User, UserCog, Users } from 'lucide-react'
+import { getAuthenticatedUserPermissionState, getUserPermissions } from '@/lib/permissions'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
-import { DashboardModules } from './DashboardModules'
 import { getDashboardStatsForLast24Hours } from '@/lib/queries/dashboard'
-import { getUserPermissions } from '@/lib/permissions'
-import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
+import { DashboardModules } from './DashboardModules'
 
-type QuickCardTone = 'ok' | 'warning' | 'danger' | 'neutral'
-
-function formatCardDate(value: string | null | undefined) {
-  if (!value) return 'Brak danych'
-  return new Intl.DateTimeFormat('pl-PL', {
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value))
-}
+type Tone = 'ok' | 'warning' | 'danger' | 'neutral'
 
 export default async function DashboardPage() {
-  // Next.js can render a page in parallel with its parent layout. Guard the
-  // page itself before querying stats so a layout redirect cannot serialize
-  // sensitive dashboard data into an unauthenticated RSC response.
   const authState = await getAuthenticatedUserPermissionState()
   if (!authState) redirect('/login')
 
@@ -35,154 +21,160 @@ export default async function DashboardPage() {
     ? await getDashboardStatsForLast24Hours()
     : null
   const errors24h = dashboardStats?.errors_24h ?? 0
-  const auditTone = errors24h > 4 ? 'danger' : errors24h > 0 ? 'warning' : 'ok'
-  const profileTone: QuickCardTone = user.email_confirmed_at ? 'neutral' : 'warning'
+  const auditTone: Tone = errors24h > 4 ? 'danger' : errors24h > 0 ? 'warning' : 'ok'
+  const profileTone: Tone = user.email_confirmed_at ? 'neutral' : 'warning'
 
   const quickLinks = [
-    {
-      label: 'Profil',
-      meta: formatCardDate(user.last_sign_in_at),
-      tone: profileTone,
-      href: '/profile',
-      icon: User,
-    },
-    ...(permissions.canAccessKonta ? [{
-      label: 'Konta',
-      meta: `${dashboardStats?.total_users ?? 0} kont`,
-      tone: 'neutral' as QuickCardTone,
-      href: '/konta',
-      icon: UserCog,
-    }] : []),
-    ...(permissions.canAccessAudit ? [{
-      label: 'Aktywność',
-      meta: errors24h > 0
-        ? errors24h === 1 ? '1 błąd / 24h' : `${errors24h} błędów / 24h`
-        : `${dashboardStats?.recent_logins ?? 0} logowań / 24h`,
-      tone: auditTone,
-      href: '/audit',
-      icon: Clock3,
-    }] : []),
-    ...(permissions.canAccessSettings ? [{
-      label: 'Ustawienia',
-      meta: permissions.canAccessInfrastructure ? 'Core + Infra' : 'Core',
-      tone: 'neutral' as QuickCardTone,
-      href: '/settings',
-      icon: Settings,
-    }] : []),
+    { label: 'Profil', tone: profileTone, href: '/profile', icon: User },
+    ...(permissions.canAccessKonta
+      ? [{ label: 'Konta', tone: 'neutral' as Tone, href: '/konta', icon: UserCog }]
+      : []),
+    ...(permissions.canAccessAudit
+      ? [{ label: 'Aktywność', tone: auditTone, href: '/audit', icon: Clock3 }]
+      : []),
+    ...(permissions.canAccessSettings
+      ? [{ label: 'Ustawienia', tone: 'neutral' as Tone, href: '/settings', icon: Settings }]
+      : []),
   ]
 
   const dotClass = {
-    ok: 'bg-emerald-400 light:bg-emerald-600',
-    warning: 'bg-amber-300 light:bg-amber-500',
-    danger: 'bg-red-400 light:bg-red-600',
-    neutral: 'bg-[#5f5f5f] light:bg-[#999999]',
+    ok: 'bg-emerald-500',
+    warning: 'bg-amber-400',
+    danger: 'bg-red-500',
+    neutral: 'bg-[#9ca5a3]',
   } as const
 
+  const metrics = [
+    {
+      value: dashboardStats?.total_users ?? 0,
+      label: 'Konta',
+      tone: 'neutral' as Tone,
+      icon: Users,
+    },
+    {
+      value: dashboardStats?.recent_logins ?? 0,
+      label: 'Logowania / 24h',
+      tone: 'ok' as Tone,
+      icon: Activity,
+    },
+    {
+      value: errors24h,
+      label: 'Alerty / 24h',
+      tone: auditTone,
+      icon: Bell,
+    },
+  ]
+
   return (
-    <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020] transition-colors duration-300">
-      <div className="relative h-full w-full overflow-hidden bg-[#eef4f3]">
-        <div className="relative flex h-full flex-col px-6 py-5 sm:px-8 lg:px-10">
+    <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020]">
+      <main className="relative h-full w-full overflow-hidden bg-[#eef4f3]">
+        <div className="relative flex h-full flex-col px-5 py-4 sm:px-7 lg:px-9">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_32%_12%,rgba(255,255,255,0.75),transparent_28%),radial-gradient(circle_at_72%_78%,rgba(218,228,226,0.9),transparent_34%)]" />
+
           <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-            <header className="shrink-0 flex items-start justify-between gap-6">
-              <div className="flex min-w-[170px] items-center gap-3">
+            <header className="flex shrink-0 items-center gap-6 border-b border-[#d7e0de] pb-3">
+              <div className="flex min-w-[210px] items-center gap-4">
                 <Image
                   src="/logo/vezcore_logo_black_full.svg"
-                  alt="vezCore"
+                  alt="VEZcore"
                   width={144}
                   height={48}
                   className="h-auto w-[144px]"
                   priority
                 />
+                <span className="hidden h-7 w-px bg-[#d1dbd9] xl:block" />
+                <span className="hidden text-xs font-medium uppercase tracking-[0.12em] text-[#78827f] xl:block">
+                  Centrum operacyjne
+                </span>
               </div>
 
-              <nav className="hidden items-center gap-1.5 rounded-[14px] bg-white/35 p-1.5 shadow-[0_12px_30px_rgba(105,116,116,0.08)] backdrop-blur-xl lg:flex">
-                {quickLinks.map((link, index) => (
-                  <Link
-                    key={`${link.href}-${link.label}`}
-                    href={link.href}
-                    className={`group flex h-10 items-center gap-2 rounded-[12px] px-4 text-sm font-medium transition-all duration-200 ${
-                      index === 0
-                        ? 'bg-white text-[#202020] shadow-[0_10px_24px_rgba(105,116,116,0.12)]'
-                        : 'bg-[#e6eceb]/70 text-[#5e6664] hover:bg-white hover:text-[#202020]'
-                    }`}
-                  >
-                    <span>{link.label}</span>
-                    <span className={`h-1.5 w-1.5 rounded-full ${dotClass[link.tone as keyof typeof dotClass]}`} />
-                  </Link>
-                ))}
+              <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex" aria-label="Główna nawigacja">
+                {quickLinks.map((link, index) => {
+                  const Icon = link.icon
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`group flex h-9 items-center gap-2 rounded-[10px] px-3.5 text-sm font-medium transition-colors ${
+                        index === 0
+                          ? 'bg-white/80 text-[#202020] shadow-[0_7px_18px_rgba(105,116,116,0.10)]'
+                          : 'text-[#67716f] hover:bg-white/60 hover:text-[#202020]'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span>{link.label}</span>
+                      <span className={`h-1.5 w-1.5 rounded-full ${dotClass[link.tone]}`} />
+                    </Link>
+                  )
+                })}
               </nav>
 
-              <div className="flex items-center gap-3">
-                <button className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Szukaj">
-                  <Search className="h-5 w-5" />
-                </button>
-                <button className="relative flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Powiadomienia">
-                  <Bell className="h-5 w-5" />
-                  {errors24h > 0 && <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[#ff4d4d]" />}
-                </button>
-                <Link href="/profile" className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Profil">
+              <div className="ml-auto flex items-center gap-2">
+                {permissions.canAccessAudit && (
+                  <Link
+                    href="/audit"
+                    className="relative flex h-10 w-10 items-center justify-center rounded-[11px] bg-white/45 text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]"
+                    aria-label="Powiadomienia"
+                  >
+                    <Bell className="h-5 w-5" />
+                    {errors24h > 0 && <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-red-500" />}
+                  </Link>
+                )}
+                <Link
+                  href="/profile"
+                  className="flex h-10 w-10 items-center justify-center rounded-[11px] bg-white/70 text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]"
+                  aria-label="Profil"
+                >
                   <User className="h-5 w-5" />
                 </Link>
               </div>
             </header>
 
-            <div className="mt-9 shrink-0 grid gap-7 lg:grid-cols-[390px_minmax(0,1fr)_300px] lg:items-start">
-              <div className="flex items-start gap-4">
-                <Link href="/dashboard" className="mt-1 flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]">
-                  <span className="text-xl leading-none">←</span>
-                </Link>
+            <section className="mt-4 grid shrink-0 gap-5 lg:grid-cols-[minmax(260px,0.8fr)_minmax(520px,1.5fr)_auto] lg:items-center">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-[11px] bg-[#dfe8e6] text-[#66716e]">
+                  <Server className="h-5 w-5" />
+                </span>
                 <div>
-                  <h1 className="text-[38px] font-medium leading-none tracking-[-0.03em] text-[#202020]">
-                    VEZcore
-                  </h1>
-                  <p className="mt-2 text-sm text-[#707a78]">
-                    {user.email}
-                  </p>
+                  <h1 className="text-[25px] font-semibold leading-none text-[#202020]">VEZcore</h1>
+                  <p className="mt-1.5 text-xs text-[#707a78]">Produkcja · {user.email}</p>
                 </div>
               </div>
 
-              <div className="grid gap-5 sm:grid-cols-3">
-                {[
-                  { value: dashboardStats?.total_users ?? 0, label: 'Konta', tone: 'ok' as QuickCardTone },
-                  { value: dashboardStats?.recent_logins ?? 0, label: 'Logowania', tone: 'ok' as QuickCardTone },
-                  { value: errors24h, label: 'Alerty', tone: auditTone },
-                ].map((metric) => (
-                  <div key={metric.label} className="flex items-end gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-[34px] font-medium leading-none tracking-[-0.03em] text-[#202020]">{metric.value}</p>
-                        <span className={`mt-1 flex h-4 w-4 items-center justify-center rounded-[5px] text-[10px] text-white ${dotClass[metric.tone as keyof typeof dotClass]}`}>↗</span>
+              <div className="hidden grid-cols-3 divide-x divide-[#d4dedc] sm:grid">
+                {metrics.map((metric) => {
+                  const Icon = metric.icon
+                  return (
+                    <div key={metric.label} className="flex items-center justify-center gap-3 px-4">
+                      <Icon className="h-4 w-4 text-[#87918f]" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xl font-semibold leading-none text-[#202020]">{metric.value}</p>
+                          <span className={`h-1.5 w-1.5 rounded-full ${dotClass[metric.tone]}`} />
+                        </div>
+                        <p className="mt-1 text-[11px] text-[#77817f]">{metric.label}</p>
                       </div>
-                      <p className="mt-2 text-sm text-[#707a78]">{metric.label}</p>
                     </div>
-                    <div className="mb-1 hidden h-11 w-20 items-end gap-1 md:flex">
-                      {Array.from({ length: 18 }).map((_, index) => (
-                        <span
-                          key={index}
-                          className={`w-1 rounded-full ${index % 7 === 0 ? dotClass[metric.tone as keyof typeof dotClass] : 'bg-[#d4dcda]'}`}
-                          style={{ height: `${14 + ((index * 11) % 34)}px` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
 
-              <div className="flex items-center justify-end gap-3">
-                <div className="rounded-[14px] bg-[#e3e9e8] px-4 py-3 text-sm text-[#707a78]">
-                  Core <span className="mx-2 text-[#a0aaa8]">↔</span> Produkcja
+              <div className="flex items-center justify-end gap-2">
+                <div className="flex h-10 items-center gap-2 rounded-[11px] bg-[#e2eae8] px-3.5 text-xs font-medium text-[#626c6a]">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  Core online
                 </div>
                 {permissions.canAccessSettings && (
-                  <Link href="/settings" className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#e3e9e8] text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]" aria-label="Ustawienia">
+                  <Link
+                    href="/settings"
+                    className="flex h-10 w-10 items-center justify-center rounded-[11px] bg-white/55 text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]"
+                    aria-label="Ustawienia"
+                  >
                     <Settings className="h-5 w-5" />
                   </Link>
                 )}
-                <Link href="/audit" className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-white text-[#5e6664] transition-colors hover:text-[#202020]" aria-label="Aktywność">
-                  <Bookmark className="h-5 w-5" />
-                </Link>
               </div>
-            </div>
+            </section>
 
             <DashboardModules
               canAccessVezVision={permissions.canAccessVezVision}
@@ -190,7 +182,7 @@ export default async function DashboardPage() {
             />
           </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
