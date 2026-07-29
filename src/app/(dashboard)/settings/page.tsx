@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import SettingsClient from './SettingsClient'
+import SettingsWorkspace from './SettingsWorkspace'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 import { isAdminRole } from '@/lib/roles'
 
@@ -14,7 +14,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <SettingsClient
+    <SettingsWorkspace
       canAccessKonta={permissions.canAccessKonta}
       canManageDiscordMaintenance={isAdminRole(permissions.role)}
       canManageCache={permissions.role === 'super_admin'}

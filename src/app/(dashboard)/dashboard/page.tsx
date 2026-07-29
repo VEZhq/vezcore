@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Activity, Bell, Clock3, Settings, UserCog, Users } from 'lucide-react'
+import { Clock3, Settings, UserCog } from 'lucide-react'
 import { ProfileAvatar } from '@/components/ProfileAvatar'
 import { getAuthenticatedUserPermissionState, getUserPermissions } from '@/lib/permissions'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
@@ -10,7 +10,7 @@ import { getDashboardProfileSummary } from '@/lib/queries/profile'
 import { DashboardModules } from './DashboardModules'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
-type Tone = 'ok' | 'warning' | 'danger' | 'neutral'
+type Tone = 'neutral'
 
 export default async function DashboardPage() {
   const authState = await getAuthenticatedUserPermissionState()
@@ -27,7 +27,6 @@ export default async function DashboardPage() {
     ? await getDashboardStatsForLast24Hours()
     : null
   const errors24h = dashboardStats?.errors_24h ?? 0
-  const auditTone: Tone = errors24h > 4 ? 'danger' : errors24h > 0 ? 'warning' : 'ok'
 
   const quickLinks = [
     ...(permissions.canAccessKonta
@@ -44,27 +43,6 @@ export default async function DashboardPage() {
     danger: 'bg-red-500',
     neutral: 'bg-[#9ca5a3]',
   } as const
-
-  const metrics = [
-    {
-      value: dashboardStats?.total_users ?? 0,
-      label: 'Konta',
-      tone: 'neutral' as Tone,
-      icon: Users,
-    },
-    {
-      value: dashboardStats?.recent_logins ?? 0,
-      label: 'Logowania / 24h',
-      tone: 'ok' as Tone,
-      icon: Activity,
-    },
-    {
-      value: errors24h,
-      label: 'Alerty / 24h',
-      tone: auditTone,
-      icon: Bell,
-    },
-  ]
 
   return (
     <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020] dark:bg-black dark:text-[#ededed]">
@@ -115,21 +93,7 @@ export default async function DashboardPage() {
                 })}
               </nav>
 
-              <div className="ml-auto hidden items-center gap-3 xl:flex">
-                {metrics.map((metric) => {
-                  const Icon = metric.icon
-                  return (
-                    <div key={metric.label} className="flex items-center gap-1.5 border-l border-black/[0.06] pl-3 text-[10px] text-[#727977] dark:border-white/[0.08] dark:text-[#8e9491]">
-                      <Icon className="h-3.5 w-3.5 text-[#929895]" />
-                      <span>{metric.label}</span>
-                      <strong className="font-semibold text-[#2b2e2d] dark:text-[#e5e7e6]">{metric.value}</strong>
-                      <span className={`h-1 w-1 rounded-full ${dotClass[metric.tone]}`} />
-                    </div>
-                  )
-                })}
-              </div>
-
-              <div className="flex items-center gap-1.5">
+              <div className="ml-auto flex items-center gap-1.5">
                 <ThemeToggle />
                 {permissions.canAccessAudit && (
                   <Link
