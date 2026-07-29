@@ -442,22 +442,27 @@ export function DashboardModules({
       modulePositionsRef.current = preferences.dashboardModulePositions
       serviceNodePositionsRef.current = preferences.dashboardServiceNodePositions
       panelSizeRef.current = preferences.operationsPanelSize
-      panRef.current = preferences.dashboardCenter
       setModulePositions(preferences.dashboardModulePositions)
       setServiceNodePositions(preferences.dashboardServiceNodePositions)
       setPanelSize(preferences.operationsPanelSize)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [
+    preferences.dashboardModulePositions,
+    preferences.dashboardServiceNodePositions,
+    preferences.operationsPanelSize,
+  ])
+
+  useEffect(() => {
+    panRef.current = preferences.dashboardCenter
+    const frame = requestAnimationFrame(() => {
       if (sceneRef.current) {
         const { x, y } = preferences.dashboardCenter
         sceneRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`
       }
     })
     return () => cancelAnimationFrame(frame)
-  }, [
-    preferences.dashboardModulePositions,
-    preferences.dashboardServiceNodePositions,
-    preferences.dashboardCenter,
-    preferences.operationsPanelSize,
-  ])
+  }, [preferences.dashboardCenter])
 
   const permissionFilteredModules = useMemo(
     () => DASHBOARD_MODULES.filter((mod) => mod.name !== 'vezVision' || canAccessVezVision),
