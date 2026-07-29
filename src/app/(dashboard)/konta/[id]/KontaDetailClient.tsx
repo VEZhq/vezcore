@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-	Home, User, Settings, ArrowLeft, Mail, Shield, Calendar,
+	ArrowLeft, Mail, Shield, Calendar,
 	Trash2, Edit, Save, X, Lock, ShieldOff, Activity,
 	LogIn, LogOut, KeyRound, BadgeCheck, ShieldCheck, ShieldMinus, PencilLine, Circle,
 	ChevronRight
@@ -14,6 +15,7 @@ import { useConfirm } from '@/components/ConfirmDialog'
 import { useCSRFToken } from '@/hooks/useCSRFToken'
 import { updateUser, deleteUser, changeUserEmail } from '@/lib/actions/users'
 import { MobileNav } from '@/components/MobileNav'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 interface UserData {
   id: string
@@ -48,35 +50,6 @@ function getActivityMeta(action: string) {
     default:
       return { label: action, icon: Circle, iconClassName: 'text-[#666666] light:text-[#999999]' }
   }
-}
-
-function ActionRow({
-  icon: Icon,
-  title,
-  description,
-  accentClassName,
-  action,
-}: {
-	icon: typeof Mail
-	title: string
-	description: string
-	accentClassName: string
-  action: React.ReactNode
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 light:border-black/[0.06] light:bg-black/[0.02]">
-      <div className="min-w-0 flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03] light:border-black/[0.06] light:bg-black/[0.03]">
-          <Icon className={`h-4 w-4 ${accentClassName}`} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-white light:text-black">{title}</p>
-          <p className="text-xs text-[#666666] light:text-[#888888]">{description}</p>
-        </div>
-      </div>
-      <div className="shrink-0">{action}</div>
-    </div>
-  )
 }
 
 interface KontaDetailClientProps {
@@ -228,378 +201,225 @@ export default function KontaDetailClient({
 		setLoading(false)
 	}
 
+  const accountRows = [
+    { label: 'Adres e-mail', value: user.email, icon: Mail },
+    { label: 'Rola', value: user.role || 'client', icon: Shield },
+    { label: 'Utworzono', value: formatDate(user.created_at), icon: Calendar },
+  ]
+
   return (
-    <div className="min-h-screen bg-transparent transition-colors duration-300">
-	      <MobileNav currentPath="/konta" showKonta={true} showAudit={canAccessAudit} showSettings={canAccessSettings} />
-      
-      <div className="hidden lg:flex fixed top-6 left-6 right-6 z-50 items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-          >
-            <Home className="h-3 w-3" />
-            Dashboard
-          </Link>
-          <Link
-            href="/profile"
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-          >
-            <User className="h-3 w-3" />
-            Profil
-          </Link>
-          <Link
-            href="/konta"
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-          >
-            Konta
-          </Link>
-	          {canAccessAudit && (
-	            <Link
-	              href="/audit"
-	              className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-	            >
-	              Audit Log
-	            </Link>
-	          )}
-	          {canAccessSettings && (
-	            <Link
-	              href="/settings"
-	              className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-	            >
-	              <Settings className="h-3 w-3" />
-	              Ustawienia
-	            </Link>
-	          )}
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#f1f3f2] text-[#252927] dark:bg-[#070807] dark:text-[#eef0ef]">
+      <MobileNav currentPath="/konta" showKonta showAudit={canAccessAudit} showSettings={canAccessSettings} />
 
-      <div className="p-4 lg:p-8 pt-20 lg:pt-24">
-        <div className="max-w-6xl mx-auto space-y-6 lg:space-y-8">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/konta"
-              className="text-[#444444] hover:text-white light:hover:text-black transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
+      <header className="border-b border-black/[0.07] bg-white/45 dark:border-white/[0.08] dark:bg-[#090a09]">
+        <div className="mx-auto flex h-12 w-full max-w-[1180px] items-center px-4 sm:px-6">
+          <Image src="/logo/vezcore_logo_black_full.svg" alt="VEZcore" width={104} height={42} className="h-auto w-[104px] dark:hidden" priority />
+          <Image src="/logo/vezcore_logo_white_full.svg" alt="VEZcore" width={104} height={42} className="hidden h-auto w-[104px] dark:block" priority />
+          <span className="mx-3 h-4 w-px bg-black/[0.08] dark:bg-white/[0.1]" />
+          <span className="text-[10px] font-medium text-[#747b78] dark:text-[#8f9692]">Konto użytkownika</span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <ThemeToggle />
+            <Link href="/konta" className="flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-[10px] text-[#626966] hover:bg-black/[0.04] dark:text-[#aab0ad] dark:hover:bg-white/[0.07]">
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Lista kont
             </Link>
-            <div>
-              <h1 className="text-2xl font-medium text-white light:text-black transition-colors duration-300">
-                Szczegóły użytkownika
-              </h1>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mt-1 transition-colors duration-300">
-                {user.email}
-              </p>
-            </div>
           </div>
+        </div>
+      </header>
 
-          {error && (
-            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded">
-              <p className="text-sm text-red-400">{error}</p>
+      <main className="mx-auto w-full max-w-[1180px] px-4 py-6 sm:px-6 sm:py-8">
+        {error && <div className="mb-5 border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-[10px] text-red-600 dark:text-red-300">{error}</div>}
+
+        <section className="border-b border-black/[0.1] pb-7 dark:border-white/[0.09]">
+          <p className="text-[9px] font-semibold uppercase text-[#808783] dark:text-[#8f9692]">Użytkownik</p>
+          <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center">
+            <div className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-[14px] text-[20px] font-semibold ${getAvatarColor(user.full_name, user.email)}`}>
+              {getInitials(user.full_name, user.email)}
             </div>
-          )}
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.95fr)] xl:items-start">
-            <div className="space-y-6">
-              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
-                <div className="p-6 lg:p-8">
-                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                    <div className={`w-16 h-16 rounded-lg ${getAvatarColor(user.full_name, user.email)} flex items-center justify-center text-xl font-medium`}>
-                      {getInitials(user.full_name, user.email)}
-                    </div>
-                    <div className="flex-1">
-                      {isEditing ? (
-                        <div className="space-y-2">
-                          <input
-                            type="text"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            placeholder="Imię i nazwisko"
-                            className="w-full h-10 px-3 bg-white/[0.02] light:bg-black/[0.02] border border-white/[0.06] light:border-black/[0.06] text-white light:text-black text-sm focus:outline-none focus:border-emerald-500/50 transition-colors"
-                          />
-                          <select
-                            value={editRole}
-                            onChange={(e) => setEditRole(e.target.value)}
-                            className="w-full h-10 px-3 bg-white/[0.02] light:bg-black/[0.02] border border-white/[0.06] light:border-black/[0.06] text-white light:text-black text-sm focus:outline-none focus:border-emerald-500/50 transition-colors"
-                          >
-                            <option value="client">Client</option>
-                            <option value="admin">Admin</option>
-                            <option value="super_admin">Super Admin</option>
-                          </select>
-                        </div>
-                      ) : (
-                        <>
-                          <p className="text-xl font-medium text-white light:text-black">
-                            {user.full_name || user.email.split('@')[0]}
-                          </p>
-                          <p className="mt-1 text-xs text-[#666666] light:text-[#999999] font-mono">{user.email}</p>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 self-start sm:self-center">
-                      {isEditing ? (
-                        <>
-                          <button
-                            onClick={handleSave}
-                            disabled={loading}
-                            className="p-2 text-emerald-400 hover:bg-emerald-500/20 rounded transition-colors disabled:opacity-50"
-                          >
-                            <Save className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => setIsEditing(false)}
-                            className="p-2 text-[#666666] hover:bg-white/[0.05] rounded transition-colors"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </>
-                      ) : (
-                        canEditUsers && (
-                        <button
-                          onClick={() => setIsEditing(true)}
-                          className="p-2 text-[#666666] hover:text-white hover:bg-white/[0.05] rounded transition-colors"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        )
-                      )}
-                    </div>
-                  </div>
+            <div className="min-w-0 flex-1">
+              {isEditing ? (
+                <div className="grid max-w-xl gap-2 sm:grid-cols-[minmax(0,1fr)_170px]">
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(event) => setEditName(event.target.value)}
+                    placeholder="Imię i nazwisko"
+                    className="h-9 rounded-[8px] border border-black/[0.08] bg-white/65 px-3 text-[11px] outline-none focus:border-[#779182] dark:border-white/[0.09] dark:bg-white/[0.045]"
+                  />
+                  <select
+                    value={editRole}
+                    onChange={(event) => setEditRole(event.target.value)}
+                    className="h-9 rounded-[8px] border border-black/[0.08] bg-white px-3 text-[11px] outline-none dark:border-white/[0.09] dark:bg-[#111311]"
+                  >
+                    <option value="client">Client</option>
+                    <option value="admin">Admin</option>
+                    <option value="super_admin">Super Admin</option>
+                  </select>
                 </div>
-
-                <div className="p-6 lg:p-8 border-t border-white/[0.06] light:border-black/[0.06]">
-                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 light:border-black/[0.06] light:bg-black/[0.02]">
-                      <div className="w-10 h-10 rounded-md bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] flex items-center justify-center">
-                        <Shield className="h-5 w-5 text-[#d7bfd8] light:text-[#735671]" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-[#666666] light:text-[#999999]">Rola</p>
-                        <p className="text-sm text-white light:text-black">{user.role || 'client'}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 light:border-black/[0.06] light:bg-black/[0.02]">
-                      <div className="w-10 h-10 rounded-md bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] flex items-center justify-center">
-                        <Calendar className="h-5 w-5 text-orange-400 light:text-orange-600" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-[#666666] light:text-[#999999]">Data rejestracji</p>
-                        <p className="text-xs text-white light:text-black font-mono">{formatDate(user.created_at)}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 light:border-black/[0.06] light:bg-black/[0.02] sm:col-span-2 xl:col-span-1">
-                      <div className="w-10 h-10 rounded-md bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] flex items-center justify-center">
-                        {has2FA ? (
-                          <Shield className="h-5 w-5 text-emerald-400" />
-                        ) : (
-                          <ShieldOff className="h-5 w-5 text-[#666666]" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-[#666666] light:text-[#999999]">2FA</p>
-                        <p className={`text-sm ${has2FA ? 'text-emerald-400' : 'text-[#666666]'}`}>
-                          {has2FA ? '2FA Aktywne' : 'Brak 2FA'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {recentActivity.length > 0 && (
-                <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
-                  <div className="p-6 lg:p-8">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-4">
-                      Ostatnia aktywność
-                    </p>
-                    <div className="space-y-3">
-                      {recentActivity.map((activity, index) => {
-                        const activityIp = typeof activity.details?.ip === 'string' ? activity.details.ip : null
-                        const activityMeta = getActivityMeta(activity.action)
-                        const ActivityIcon = activityMeta.icon
-                        return (
-                          <div key={index} className="flex items-start justify-between gap-4 py-3 border-b border-white/[0.04] light:border-black/[0.04] last:border-0">
-                            <div className="min-w-0 flex items-start gap-3">
-                              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/[0.06] bg-white/[0.03] light:border-black/[0.06] light:bg-black/[0.03]">
-                                <ActivityIcon className={`h-3.5 w-3.5 ${activityMeta.iconClassName}`} />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-xs font-medium text-white light:text-black">
-                                  {activityMeta.label}
-                                </p>
-                                {activityIp && (
-                                  <p className="mt-1 text-[10px] text-[#444444] light:text-[#888888] font-mono">
-                                    IP: {activityIp}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                            <span className="shrink-0 pt-0.5 text-[10px] text-[#444444] light:text-[#888888] font-mono text-right">
-                              {formatDate(activity.created_at)}
-                            </span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
+              ) : (
+                <>
+                  <h1 className="truncate text-[27px] font-semibold leading-tight">{user.full_name || user.email.split('@')[0]}</h1>
+                  <p className="mt-1.5 truncate font-mono text-[11px] text-[#747b78] dark:text-[#8d9490]">{user.email}</p>
+                </>
               )}
             </div>
 
-            <div className="space-y-6 xl:sticky xl:top-24">
-              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
-                <div className="p-6">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-4">
-                    Akcje
-                  </p>
-                  <div className="space-y-6">
-					<div className="space-y-3">
-						<p className="text-[10px] uppercase tracking-[0.24em] text-[#444444] light:text-[#888888]">Konto</p>
-						<div className="space-y-2">
-							<ActionRow
-								icon={Mail}
-								title="Zmień email"
-                      description="Podmień adres logowania i kontaktowy przypisany do konta."
-                      accentClassName="text-[#d7bfd8] light:text-[#735671]"
-                      action={
-                        <button
-                          onClick={() => setShowEmailModal(true)}
-                          disabled={loading}
-                          className="inline-flex items-center gap-2 rounded-lg border border-[#d7bfd8]/20 bg-[#d7bfd8]/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-[#d7bfd8] transition-colors hover:bg-[#d7bfd8]/16 disabled:opacity-50 light:text-[#735671]"
-                        >
-                          Edytuj
-                        </button>
-								}
-							/>
-						</div>
-					</div>
+            <div className="flex items-center gap-1">
+              {isEditing ? (
+                <>
+                  <button onClick={handleSave} disabled={loading} className="flex h-8 w-8 items-center justify-center rounded-[7px] text-emerald-600 hover:bg-emerald-500/[0.08] disabled:opacity-50" aria-label="Zapisz">
+                    <Save className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => setIsEditing(false)} className="flex h-8 w-8 items-center justify-center rounded-[7px] text-[#777e7a] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]" aria-label="Anuluj">
+                    <X className="h-4 w-4" />
+                  </button>
+                </>
+              ) : canEditUsers ? (
+                <button onClick={() => setIsEditing(true)} className="flex h-8 items-center gap-1.5 rounded-[7px] px-2.5 text-[10px] text-[#68706c] hover:bg-black/[0.04] dark:text-[#a2a8a5] dark:hover:bg-white/[0.06]">
+                  <Edit className="h-3.5 w-3.5" />
+                  Edytuj
+                </button>
+              ) : null}
+            </div>
+          </div>
 
-                <div className="space-y-3">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#444444] light:text-[#888888]">Dostęp</p>
-                  <div className="space-y-2">
-                    {canManagePermissions && (
-                      <ActionRow
-                        icon={Lock}
-                        title="Pozwolenia"
-                        description="Zarządzaj zakresem uprawnień i dostępem użytkownika."
-                        accentClassName="text-[#c9d8c5] light:text-[#5f7358]"
-                        action={
-                          <Link
-                            href={`/konta/${user.id}/permissions`}
-                            className="inline-flex items-center gap-1 rounded-lg border border-[#c9d8c5]/20 bg-[#c9d8c5]/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-[#c9d8c5] transition-colors hover:bg-[#c9d8c5]/16 light:text-[#5f7358]"
-                          >
-                            Otwórz
-                            <ChevronRight className="h-3.5 w-3.5" />
-                          </Link>
-                        }
-                      />
-                    )}
-
-                    <ActionRow
-                      icon={Activity}
-                      title="Aktywność"
-                      description="Podejrzyj pełną historię zdarzeń powiązanych z tym kontem."
-                      accentClassName="text-[#c9d8c5] light:text-[#5f7358]"
-                      action={
-                        <Link
-                          href={`/konta/${user.id}/activity`}
-                          className="inline-flex items-center gap-1 rounded-lg border border-[#c9d8c5]/20 bg-[#c9d8c5]/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-[#c9d8c5] transition-colors hover:bg-[#c9d8c5]/16 light:text-[#5f7358]"
-                        >
-                          Otwórz
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </Link>
-                      }
-                    />
-                  </div>
+          <div className="mt-7 grid grid-cols-1 border-y border-black/[0.07] dark:border-white/[0.07] sm:grid-cols-4">
+            {accountRows.map(({ label, value, icon: Icon }, index) => (
+              <div key={label} className={`flex min-w-0 items-center gap-2.5 px-4 py-3 first:pl-0 ${index > 0 ? 'sm:border-l sm:border-black/[0.07] sm:dark:border-white/[0.07]' : ''}`}>
+                <Icon className="h-3.5 w-3.5 shrink-0 text-[#8c938f]" />
+                <div className="min-w-0">
+                  <p className="text-[8px] uppercase text-[#989e9b]">{label}</p>
+                  <p className="mt-0.5 truncate text-[10px] font-medium">{value}</p>
                 </div>
-
-                {canDeleteUsers && (
-                  <div className="space-y-3">
-                    <p className="text-[10px] uppercase tracking-[0.24em] text-red-400/80 light:text-red-600/80">Strefa ryzyka</p>
-                    <ActionRow
-                      icon={Trash2}
-                      title="Usuń użytkownika"
-                      description="Trwale usuń konto użytkownika i powiązane dane profilu."
-                      accentClassName="text-red-400 light:text-red-600"
-                      action={
-                        <button
-                          onClick={handleDelete}
-                          disabled={loading}
-                          className="inline-flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50 light:text-red-600"
-                        >
-                          Usuń
-                        </button>
-                      }
-                    />
-                  </div>
-                )}
-                  </div>
-                </div>
+              </div>
+            ))}
+            <div className="flex items-center gap-2.5 px-4 py-3 sm:border-l sm:border-black/[0.07] sm:dark:border-white/[0.07]">
+              {has2FA ? <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> : <ShieldOff className="h-3.5 w-3.5 text-amber-500" />}
+              <div>
+                <p className="text-[8px] uppercase text-[#989e9b]">2FA</p>
+                <p className="mt-0.5 text-[10px] font-medium">{has2FA ? 'Aktywne' : 'Wyłączone'}</p>
               </div>
             </div>
           </div>
+        </section>
+
+        <div className="grid gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <section>
+            <div className="flex items-center justify-between border-b border-black/[0.09] pb-3 dark:border-white/[0.09]">
+              <div>
+                <h2 className="text-[14px] font-semibold">Ostatnia aktywność</h2>
+                <p className="mt-1 text-[10px] text-[#858c88]">Najnowsze zdarzenia dotyczące tego konta</p>
+              </div>
+              <Link href={`/konta/${user.id}/activity`} className="flex h-8 items-center gap-1 text-[10px] text-[#68706c] hover:text-black dark:text-[#9ca29f] dark:hover:text-white">
+                Pełna historia
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            {recentActivity.length === 0 ? (
+              <p className="py-10 text-center text-[10px] text-[#929895]">Brak zapisanej aktywności</p>
+            ) : (
+              <div>
+                {recentActivity.map((activity, index) => {
+                  const activityIp = typeof activity.details?.ip === 'string' ? activity.details.ip : null
+                  const activityMeta = getActivityMeta(activity.action)
+                  const ActivityIcon = activityMeta.icon
+                  return (
+                    <div key={`${activity.created_at}-${index}`} className="grid grid-cols-[30px_minmax(0,1fr)_auto] gap-3 border-b border-black/[0.07] py-3.5 last:border-b-0 dark:border-white/[0.07]">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-black/[0.035] dark:bg-white/[0.05]">
+                        <ActivityIcon className={`h-3.5 w-3.5 ${activityMeta.iconClassName}`} />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-medium">{activityMeta.label}</p>
+                        {activityIp && <p className="mt-1 font-mono text-[9px] text-[#8b918e]">IP {activityIp}</p>}
+                      </div>
+                      <time className="font-mono text-[9px] text-[#8b918e]">{formatDate(activity.created_at)}</time>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+
+          <aside>
+            <div className="border-b border-black/[0.09] pb-3 dark:border-white/[0.09]">
+              <h2 className="text-[14px] font-semibold">Zarządzanie kontem</h2>
+              <p className="mt-1 text-[10px] text-[#858c88]">Dane logowania, dostęp i operacje administracyjne</p>
+            </div>
+
+            <button onClick={() => setShowEmailModal(true)} disabled={loading} className="flex w-full items-center gap-3 border-b border-black/[0.07] py-4 text-left dark:border-white/[0.07]">
+              <Mail className="h-4 w-4 text-[#8b918e]" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-[11px] font-medium">Zmień adres e-mail</span>
+                <span className="mt-0.5 block text-[9px] text-[#8b918e]">Aktualizuje login i adres kontaktowy</span>
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 text-[#989e9b]" />
+            </button>
+
+            {canManagePermissions && (
+              <Link href={`/konta/${user.id}/permissions`} className="flex items-center gap-3 border-b border-black/[0.07] py-4 dark:border-white/[0.07]">
+                <Lock className="h-4 w-4 text-[#768d80]" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[11px] font-medium">Uprawnienia</span>
+                  <span className="mt-0.5 block text-[9px] text-[#8b918e]">Moduły i operacje dostępne dla użytkownika</span>
+                </span>
+                <ChevronRight className="h-3.5 w-3.5 text-[#989e9b]" />
+              </Link>
+            )}
+
+            <Link href={`/konta/${user.id}/activity`} className="flex items-center gap-3 border-b border-black/[0.07] py-4 dark:border-white/[0.07]">
+              <Activity className="h-4 w-4 text-[#768d80]" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-[11px] font-medium">Aktywność i sesje</span>
+                <span className="mt-0.5 block text-[9px] text-[#8b918e]">Zdarzenia, urządzenia i historia adresów IP</span>
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 text-[#989e9b]" />
+            </Link>
+
+            {canDeleteUsers && (
+              <button onClick={handleDelete} disabled={loading} className="flex w-full items-center gap-3 py-4 text-left text-red-600 disabled:opacity-50 dark:text-red-400">
+                <Trash2 className="h-4 w-4" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[11px] font-medium">Usuń użytkownika</span>
+                  <span className="mt-0.5 block text-[9px] text-red-500/70">Operacja jest trwała i nieodwracalna</span>
+                </span>
+              </button>
+            )}
+          </aside>
         </div>
-      </div>
+      </main>
 
       {showEmailModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowEmailModal(false)}
-          />
-          
-          <div className="relative bg-[#111111] light:bg-white border border-white/[0.06] light:border-black/[0.06] w-full max-w-md mx-4 overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-white/[0.06] light:border-black/[0.06]">
-              <h3 className="text-sm font-medium text-white light:text-black">
-                Zmień email
-              </h3>
-              <button
-                onClick={() => setShowEmailModal(false)}
-                className="text-[#444444] hover:text-white light:hover:text-black transition-colors"
-              >
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+          <button className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" onClick={() => setShowEmailModal(false)} aria-label="Zamknij" />
+          <div className="relative w-full max-w-md overflow-hidden rounded-[12px] border border-black/[0.09] bg-[#f8faf8] shadow-2xl dark:border-white/[0.1] dark:bg-[#111311]">
+            <div className="flex items-start justify-between border-b border-black/[0.08] p-5 dark:border-white/[0.08]">
+              <div>
+                <h3 className="text-[14px] font-semibold">Zmień adres e-mail</h3>
+                <p className="mt-1 font-mono text-[9px] text-[#858c88]">{user.email}</p>
+              </div>
+              <button onClick={() => setShowEmailModal(false)} className="flex h-8 w-8 items-center justify-center rounded-[7px] text-[#7d8480] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]" aria-label="Zamknij">
                 <X className="h-4 w-4" />
               </button>
             </div>
-            
-            <div className="p-4 space-y-4">
-              {emailError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded">
-                  <p className="text-xs text-red-400">{emailError}</p>
-                </div>
-              )}
-
-              <div>
-                <p className="text-xs text-[#666666] light:text-[#999999] mb-2">
-                  Aktualny email: <span className="text-white light:text-black font-mono">{user.email}</span>
-                </p>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] block mb-1">
-                  Nowy email
-                </label>
+            <div className="p-5">
+              {emailError && <p className="mb-3 border border-red-500/20 bg-red-500/[0.06] p-3 text-[10px] text-red-600 dark:text-red-300">{emailError}</p>}
+              <label className="block">
+                <span className="mb-1.5 block text-[9px] uppercase text-[#7d8480]">Nowy adres e-mail</span>
                 <input
                   type="email"
                   value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  className="w-full h-10 px-3 bg-white/[0.02] light:bg-black/[0.02] border border-white/[0.06] light:border-black/[0.06] text-white light:text-black text-sm focus:outline-none focus:border-emerald-500/50 transition-colors"
+                  onChange={(event) => setNewEmail(event.target.value)}
+                  className="h-10 w-full rounded-[8px] border border-black/[0.08] bg-white px-3 text-[11px] outline-none focus:border-[#779182] dark:border-white/[0.09] dark:bg-white/[0.045]"
                   placeholder="nowy@example.com"
                 />
-              </div>
+              </label>
             </div>
-            
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-white/[0.06] light:border-black/[0.06]">
-              <button
-                onClick={() => setShowEmailModal(false)}
-                className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] border border-white/[0.06] light:border-black/[0.06] hover:bg-white/[0.02] light:hover:bg-black/[0.02] transition-colors"
-              >
-                Anuluj
-              </button>
-              <button
-                onClick={handleChangeEmail}
-                disabled={loading || !newEmail}
-                className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/16 border border-[#d7bfd8]/30 hover:bg-[#d7bfd8]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? 'Zmieniam...' : 'Zmień'}
+            <div className="flex justify-end gap-2 border-t border-black/[0.08] p-4 dark:border-white/[0.08]">
+              <button onClick={() => setShowEmailModal(false)} className="h-9 rounded-[8px] px-3 text-[10px] text-[#727975] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">Anuluj</button>
+              <button onClick={handleChangeEmail} disabled={loading || !newEmail} className="h-9 rounded-[8px] bg-[#26332c] px-4 text-[10px] font-medium text-white disabled:opacity-50 dark:bg-[#dce7e0] dark:text-[#172019]">
+                {loading ? 'Zapisywanie...' : 'Zapisz zmianę'}
               </button>
             </div>
           </div>

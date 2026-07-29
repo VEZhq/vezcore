@@ -4,24 +4,18 @@ import { useCallback, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import type { LucideIcon } from 'lucide-react'
 import {
   ArrowLeft,
-  Check,
   ChevronLeft,
   ChevronRight,
   Download,
   Edit,
-  Home,
   KeyRound,
   Mail,
   Plus,
   Search,
-  Settings,
   Shield,
-  ShieldCheck,
   Trash2,
-  User,
   UserCog,
   Users,
   X,
@@ -32,6 +26,7 @@ import { createUser, deleteUser, updateUser } from '@/lib/actions/users'
 import { getUsersForExport } from '@/lib/actions/export'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { MobileNav } from '@/components/MobileNav'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { useCSRFToken } from '@/hooks/useCSRFToken'
 import { formatDate as _formatDate, getInitials, getAvatarColor } from './konta-utils'
 import { downloadUserCsv } from './konta-csv'
@@ -67,81 +62,6 @@ function roleTone(role: string | null) {
   if (role === 'super_admin') return 'border-[#d7bfd8]/25 bg-[#d7bfd8]/10 text-[#ead8e9] light:text-[#735671]'
   if (role === 'admin') return 'border-[#d7bfd8]/25 bg-[#d7bfd8]/10 text-[#d7bfd8] light:text-[#735671]'
   return 'border-white/[0.07] bg-white/[0.03] text-[#999999] light:border-black/[0.08] light:bg-black/[0.03] light:text-[#666666]'
-}
-
-function NavLink({
-  href,
-  label,
-  icon: Icon,
-  active,
-}: {
-  href: string
-  label: string
-  icon?: LucideIcon
-  active?: boolean
-}) {
-  return (
-    <Link
-      href={href}
-      className={`inline-flex h-10 items-center gap-2 rounded-md border px-3 text-xs transition-colors ${
-        active
-          ? 'border-white/[0.12] bg-white/[0.06] text-white light:border-black/[0.12] light:bg-black/[0.05] light:text-black'
-          : 'border-white/[0.07] text-[#888888] hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black'
-      }`}
-    >
-      {Icon && <Icon className="h-4 w-4" />}
-      {label}
-    </Link>
-  )
-}
-
-function MetricCard({
-  label,
-  value,
-  helper,
-  icon: Icon,
-}: {
-  label: string
-  value: string | number
-  helper: string
-  icon: LucideIcon
-}) {
-  return (
-    <div className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-4 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#888888]">{label}</p>
-          <p className="mt-2 text-2xl font-semibold text-white light:text-black">{value}</p>
-        </div>
-        <div className="flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] bg-white/[0.03] light:border-black/[0.08] light:bg-black/[0.03]">
-          <Icon className="h-4 w-4 text-[#e6c7a7] light:text-[#7d5a38]" />
-        </div>
-      </div>
-      <p className="mt-3 text-xs text-[#777777] light:text-[#777777]">{helper}</p>
-    </div>
-  )
-}
-
-function PermissionPill({
-  label,
-  enabled,
-}: {
-  label: string
-  enabled: boolean
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3 border-b border-white/[0.05] py-3 last:border-b-0 light:border-black/[0.06]">
-      <span className="text-xs text-[#888888] light:text-[#666666]">{label}</span>
-      <span
-        className={`inline-flex items-center gap-2 text-xs ${
-          enabled ? 'text-[#e6c7a7] light:text-[#7d5a38]' : 'text-[#666666] light:text-[#999999]'
-        }`}
-      >
-        <span className={`h-2 w-2 rounded-full ${enabled ? 'bg-[#e6c7a7] light:bg-[#7d5a38]' : 'bg-[#444444] light:bg-[#b5b5b5]'}`} />
-        {enabled ? 'aktywny' : 'brak'}
-      </span>
-    </div>
-  )
 }
 
 function EmptyState({ search }: { search: string }) {
@@ -391,120 +311,149 @@ export default function KontaClient({
   }
 
   return (
-    <div className="min-h-screen bg-transparent transition-colors duration-300">
+    <div className="min-h-screen bg-[#f1f3f2] text-[#252927] dark:bg-[#070807] dark:text-[#eef0ef]">
       <MobileNav currentPath="/konta" showKonta showAudit={canAccessAudit} showSettings={canAccessSettings} />
 
-      <div className="mx-auto min-h-screen w-full max-w-7xl px-4 py-8 sm:py-10">
-        <header className="mb-6 flex flex-col gap-5 border-b border-white/[0.07] pb-5 light:border-black/[0.08] lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <Image
-              src="/logo/vezcore_logo_white_full.svg"
-              alt="vezCore"
-              width={178}
-              height={52}
-              className="h-auto w-[178px] max-w-[60vw] opacity-85 light:hidden"
-              priority
-            />
+      <header className="border-b border-black/[0.07] bg-white/45 dark:border-white/[0.08] dark:bg-[#090a09]">
+        <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center px-4 sm:px-6">
+          <div className="flex items-center">
             <Image
               src="/logo/vezcore_logo_black_full.svg"
-              alt="vezCore"
-              width={178}
-              height={52}
-              className="hidden h-auto w-[178px] max-w-[60vw] opacity-85 light:block"
+              alt="VEZcore"
+              width={104}
+              height={42}
+              className="h-auto w-[104px] dark:hidden"
               priority
             />
-            <p className="mt-4 text-[10px] uppercase tracking-[0.26em] text-[#666666] light:text-[#888888]">
-              Administracja
-            </p>
-            <h1 className="mt-1 text-2xl font-semibold text-white light:text-black">
-              Konta użytkowników
-            </h1>
+            <Image
+              src="/logo/vezcore_logo_white_full.svg"
+              alt="VEZcore"
+              width={104}
+              height={42}
+              className="hidden h-auto w-[104px] dark:block"
+              priority
+            />
+            <span className="mx-3 h-4 w-px bg-black/[0.08] dark:bg-white/[0.1]" />
+            <span className="text-[10px] font-medium text-[#747b78] dark:text-[#8f9692]">Konta</span>
           </div>
 
-          <nav className="flex flex-wrap gap-2">
-            <NavLink href="/dashboard" label="Dashboard" icon={ArrowLeft} />
-            <NavLink href="/profile" label="Profil" icon={User} />
-            <NavLink href="/konta" label="Konta" icon={Users} active />
-            {canAccessAudit && <NavLink href="/audit" label="Audit Log" icon={ShieldCheck} />}
-            {canAccessSettings && <NavLink href="/settings" label="Ustawienia" icon={Settings} />}
-          </nav>
-        </header>
-
-        <div className="mb-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <MetricCard label="Wszystkie konta" value={total} helper="Łączna liczba kont w systemie" icon={Users} />
-          <MetricCard label="Na tej stronie" value={paginatedUsers.length} helper={`Strona ${page}${totalPages > 0 ? ` z ${totalPages}` : ''}`} icon={Home} />
-          <MetricCard label="Admini" value={visibleAdmins} helper="Widoczni admini i super admini" icon={Shield} />
-          <MetricCard label="Zaznaczone" value={selectedCount} helper={selectedCount > 0 ? 'Gotowe do akcji zbiorczej' : 'Brak aktywnego zaznaczenia'} icon={Check} />
+          <div className="ml-auto flex items-center gap-1.5">
+            <ThemeToggle />
+            <Link
+              href="/dashboard"
+              className="flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-[10px] font-medium text-[#626966] transition-colors hover:bg-black/[0.04] hover:text-black dark:text-[#aab0ad] dark:hover:bg-white/[0.07] dark:hover:text-white"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Dashboard
+            </Link>
+          </div>
         </div>
+      </header>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
-          <main className="space-y-5">
-            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-              <div className="border-b border-white/[0.06] p-4 light:border-black/[0.06]">
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-white light:text-black">Lista kont</p>
-                    <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
-                      Szukaj, zaznaczaj i edytuj konta z jednego miejsca.
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <div className="relative min-w-0 sm:w-[320px]">
-                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666666] light:text-[#888888]" />
-                      <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                        placeholder="Szukaj po email lub nazwie"
-                        className="h-10 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
-                      />
-                    </div>
-                    <button
-                      onClick={handleExport}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
-                    >
-                      <Download className="h-4 w-4" />
-                      Eksport
-                    </button>
-                    {canAddUsers && (
-                      <button
-                        onClick={() => setShowAddModal(true)}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#e6c7a7]/25 bg-[#e6c7a7]/10 px-3 text-xs text-[#f0d9be] transition-colors hover:bg-[#e6c7a7]/15 light:text-[#7d5a38]"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Dodaj
-                      </button>
-                    )}
-                  </div>
-                </div>
+      <main className="mx-auto w-full max-w-[1240px] px-4 py-6 sm:px-6 sm:py-8">
+        <section className="border-b border-black/[0.1] pb-6 dark:border-white/[0.09]">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-[9px] font-semibold uppercase text-[#808783] dark:text-[#8f9692]">Administracja</p>
+              <h1 className="mt-1 text-[28px] font-semibold leading-tight">Konta użytkowników</h1>
+              <p className="mt-2 text-[11px] text-[#777e7a] dark:text-[#8e9591]">
+                Użytkownicy, role i zakres dostępu do ekosystemu.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="relative min-w-0 sm:w-[310px]">
+                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8b918e]" />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Szukaj po nazwie lub e-mailu"
+                  className="h-9 w-full rounded-[8px] border border-black/[0.08] bg-white/65 pl-9 pr-3 text-[11px] text-[#2a2e2c] outline-none transition-colors placeholder:text-[#9aa09d] focus:border-[#779182] dark:border-white/[0.09] dark:bg-white/[0.045] dark:text-[#e9ebe9] dark:focus:border-[#70877a]"
+                />
               </div>
-
-              {deleteError && (
-                <div className="border-b border-red-500/20 bg-red-500/10 px-4 py-3">
-                  <p className="text-xs text-red-300 light:text-red-700">{deleteError}</p>
-                </div>
+              <button
+                onClick={handleExport}
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-[8px] border border-black/[0.08] px-3 text-[10px] text-[#68706c] transition-colors hover:bg-white dark:border-white/[0.09] dark:text-[#a4aaa7] dark:hover:bg-white/[0.06]"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Eksport
+              </button>
+              {canAddUsers && (
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-[8px] bg-[#26332c] px-3.5 text-[10px] font-medium text-white transition-colors hover:bg-[#33453b] dark:bg-[#dce7e0] dark:text-[#172019] dark:hover:bg-white"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Nowe konto
+                </button>
               )}
+            </div>
+          </div>
 
-              {selectedCount > 0 && (
-                <div className="border-b border-white/[0.06] bg-white/[0.03] px-4 py-3 light:border-black/[0.06] light:bg-black/[0.03]">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-md border border-white/[0.07] px-3 py-2 text-xs text-white light:border-black/[0.08] light:text-black">
-                      Zaznaczono: {selectedCount}
-                    </span>
+          <div className="mt-7 grid grid-cols-2 border-y border-black/[0.07] py-4 dark:border-white/[0.07] sm:grid-cols-4">
+            {[
+              ['Wszystkie', total],
+              ['Na stronie', paginatedUsers.length],
+              ['Administratorzy', visibleAdmins],
+              ['Zaznaczone', selectedCount],
+            ].map(([label, value], index) => (
+              <div
+                key={String(label)}
+                className={`px-4 first:pl-0 last:pr-0 ${index > 0 ? 'border-l border-black/[0.07] dark:border-white/[0.07]' : ''}`}
+              >
+                <p className="text-[9px] uppercase text-[#969c99]">{label}</p>
+                <p className="mt-1 font-mono text-[18px] font-semibold text-[#303532] dark:text-[#e5e8e6]">{value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-3 border-b border-black/[0.08] py-4 dark:border-white/[0.08] lg:flex-row lg:items-center">
+          <div className="mr-auto flex items-center gap-2">
+            <Shield className="h-3.5 w-3.5 text-[#7b827e]" />
+            <span className="text-[10px] text-[#747b78] dark:text-[#929895]">Twój zakres:</span>
+            <strong className="text-[10px] font-semibold uppercase text-[#353a37] dark:text-[#d5d9d7]">{roleLabel(userRole)}</strong>
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {[
+              ['Dodawanie', canAddUsers],
+              ['Edycja', canEditUsers],
+              ['Usuwanie', canDeleteUsers],
+              ['Audit', canAccessAudit],
+              ['Ustawienia', canAccessSettings],
+            ].map(([label, enabled]) => (
+              <span key={String(label)} className="flex items-center gap-1.5 text-[9px] text-[#7c837f] dark:text-[#929895]">
+                <span className={`h-1.5 w-1.5 rounded-full ${enabled ? 'bg-emerald-500' : 'bg-[#b5bbb8] dark:bg-[#555b58]'}`} />
+                {label}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {deleteError && (
+          <div className="mt-5 border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-[10px] text-red-600 dark:text-red-300">
+            {deleteError}
+          </div>
+        )}
+
+        {selectedCount > 0 && (
+          <section className="mt-5 flex flex-wrap items-center gap-2 border border-black/[0.08] bg-white/55 px-3 py-2.5 dark:border-white/[0.09] dark:bg-white/[0.035]">
+            <strong className="mr-2 text-[10px] font-medium">{selectedCount} zaznaczonych</strong>
                     <button
                       onClick={handleBulkExport}
                       disabled={bulkActionLoading}
-                      className="inline-flex h-9 items-center gap-2 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50 light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+              className="inline-flex h-8 items-center gap-1.5 rounded-[7px] px-2.5 text-[10px] text-[#69706c] hover:bg-black/[0.04] disabled:opacity-50 dark:text-[#a4aaa7] dark:hover:bg-white/[0.06]"
                     >
-                      <Download className="h-4 w-4" />
-                      Eksportuj
+              <Download className="h-3.5 w-3.5" />
+              Eksport
                     </button>
                     {canEditUsers && (
                       <>
                         <select
                           value={bulkRole}
                           onChange={(e) => setBulkRole(e.target.value)}
-                          className="h-9 rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-xs text-white outline-none light:border-black/[0.08] light:bg-white light:text-black"
+                  className="h-8 rounded-[7px] border border-black/[0.08] bg-white px-2.5 text-[10px] outline-none dark:border-white/[0.09] dark:bg-[#111311]"
                         >
                           <option value="">Zmień rolę</option>
                           <option value="client">client</option>
@@ -515,7 +464,7 @@ export default function KontaClient({
                           <button
                             onClick={handleBulkRoleChange}
                             disabled={bulkActionLoading}
-                            className="inline-flex h-9 items-center rounded-md border border-[#e6c7a7]/25 bg-[#e6c7a7]/10 px-3 text-xs text-[#f0d9be] transition-colors hover:bg-[#e6c7a7]/15 disabled:cursor-not-allowed disabled:opacity-50 light:text-[#7d5a38]"
+                    className="inline-flex h-8 items-center rounded-[7px] bg-[#26332c] px-3 text-[10px] text-white disabled:opacity-50 dark:bg-[#dce7e0] dark:text-[#172019]"
                           >
                             Zatwierdź
                           </button>
@@ -526,28 +475,28 @@ export default function KontaClient({
                       <button
                         onClick={handleBulkDelete}
                         disabled={bulkActionLoading}
-                        className="inline-flex h-9 items-center gap-2 rounded-md border border-red-500/25 bg-red-500/10 px-3 text-xs text-red-300 transition-colors hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50 light:text-red-700"
+                className="inline-flex h-8 items-center gap-1.5 rounded-[7px] px-2.5 text-[10px] text-red-600 hover:bg-red-500/[0.06] disabled:opacity-50 dark:text-red-300"
                       >
-                        <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3.5 w-3.5" />
                         Usuń
                       </button>
                     )}
                     <button
                       onClick={clearSelection}
-                      className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+              className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-[7px] text-[#7c837f] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                       aria-label="Wyczyść zaznaczenie"
                     >
-                      <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
                     </button>
-                  </div>
-                </div>
-              )}
+          </section>
+        )}
 
+        <section className="mt-6 overflow-hidden border-y border-black/[0.09] bg-white/35 dark:border-white/[0.09] dark:bg-white/[0.018]">
               {paginatedUsers.length === 0 ? (
                 <EmptyState search={search} />
               ) : (
                 <div>
-                  <div className="grid grid-cols-[34px_minmax(0,1.5fr)_120px_170px_96px] items-center gap-4 border-b border-white/[0.06] px-4 py-3 light:border-black/[0.06] max-lg:hidden">
+              <div className="grid grid-cols-[34px_minmax(0,1.5fr)_120px_170px_96px] items-center gap-4 border-b border-black/[0.07] px-4 py-3 dark:border-white/[0.07] max-lg:hidden">
                     <Checkbox
                       checked={paginatedUsers.length > 0 && selectedIds.size === paginatedUsers.length}
                       indeterminate={selectedIds.size > 0 && selectedIds.size < paginatedUsers.length}
@@ -555,17 +504,17 @@ export default function KontaClient({
                       aria-label="Zaznacz wszystkich użytkowników"
                       className="cursor-pointer"
                     />
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-[#666666] light:text-[#888888]">Użytkownik</p>
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-[#666666] light:text-[#888888]">Rola</p>
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-[#666666] light:text-[#888888]">Utworzono</p>
-                    <p className="text-right text-[10px] uppercase tracking-[0.18em] text-[#666666] light:text-[#888888]">Akcje</p>
+                <p className="text-[9px] uppercase text-[#8d9490]">Użytkownik</p>
+                <p className="text-[9px] uppercase text-[#8d9490]">Rola</p>
+                <p className="text-[9px] uppercase text-[#8d9490]">Utworzono</p>
+                <p className="text-right text-[9px] uppercase text-[#8d9490]">Akcje</p>
                   </div>
 
-                  <div className="divide-y divide-white/[0.06] light:divide-black/[0.06]">
+              <div className="divide-y divide-black/[0.065] dark:divide-white/[0.065]">
                     {paginatedUsers.map((user) => (
                       <div
                         key={user.id}
-                        className="grid gap-4 px-4 py-4 transition-colors hover:bg-white/[0.025] light:hover:bg-black/[0.025] lg:grid-cols-[34px_minmax(0,1.5fr)_120px_170px_96px] lg:items-center"
+                    className="grid gap-4 px-4 py-3.5 transition-colors hover:bg-white/70 dark:hover:bg-white/[0.035] lg:grid-cols-[34px_minmax(0,1.5fr)_120px_170px_96px] lg:items-center"
                       >
                         <div className="flex items-center justify-between gap-3 lg:block">
                           <Checkbox
@@ -580,14 +529,14 @@ export default function KontaClient({
                         </div>
 
                         <div className="flex min-w-0 items-center gap-3">
-                          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-sm font-semibold ${getAvatarColor(user.full_name, user.email)}`}>
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[9px] text-[12px] font-semibold ${getAvatarColor(user.full_name, user.email)}`}>
                             {getInitials(user.full_name, user.email)}
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-white light:text-black">
+                        <p className="truncate text-[12px] font-medium text-[#2c312e] dark:text-[#e8ebe9]">
                               {user.full_name || user.email.split('@')[0]}
                             </p>
-                            <p className="mt-1 truncate font-mono text-xs text-[#777777] light:text-[#777777]">
+                        <p className="mt-0.5 truncate font-mono text-[10px] text-[#7b827e] dark:text-[#8e9591]">
                               {user.email}
                             </p>
                           </div>
@@ -603,7 +552,7 @@ export default function KontaClient({
                           <p className="text-[10px] uppercase tracking-[0.16em] text-[#666666] light:text-[#888888] lg:hidden">
                             Utworzono
                           </p>
-                          <p className="mt-1 font-mono text-xs text-[#888888] light:text-[#666666] lg:mt-0">
+                      <p className="mt-1 font-mono text-[10px] text-[#7d8480] dark:text-[#929895] lg:mt-0">
                             {formatDate(user.created_at)}
                           </p>
                         </div>
@@ -612,20 +561,20 @@ export default function KontaClient({
                           {canEditUsers && (
                             <Link
                               href={`/konta/${user.id}`}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-[7px] text-[#7b827e] transition-colors hover:bg-black/[0.05] hover:text-black dark:text-[#969c99] dark:hover:bg-white/[0.07] dark:hover:text-white"
                               aria-label={`Edytuj użytkownika ${user.email}`}
                             >
-                              <Edit className="h-4 w-4" />
+                          <Edit className="h-3.5 w-3.5" />
                             </Link>
                           )}
                           {canDeleteUsers && (
                             <button
                               onClick={() => handleDelete(user.id, user.email)}
                               disabled={deleteLoading === user.id}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] text-[#999999] transition-colors hover:border-red-500/30 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50 light:border-black/[0.08] light:text-[#666666] light:hover:text-red-700"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-[7px] text-[#8b918e] transition-colors hover:bg-red-500/[0.06] hover:text-red-600 disabled:opacity-50 dark:hover:text-red-300"
                               aria-label={`Usuń użytkownika ${user.email}`}
                             >
-                              <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           )}
                         </div>
@@ -634,11 +583,11 @@ export default function KontaClient({
                   </div>
                 </div>
               )}
-            </section>
+        </section>
 
             {totalPages > 1 && (
-              <div className="flex flex-col gap-3 rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-3 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84] sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-[#777777] light:text-[#777777]">
+          <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[10px] text-[#777e7a] dark:text-[#8e9591]">
                   Wyświetlane {((page - 1) * limit) + 1}-{Math.min(page * limit, total)} z {total} kont
                 </p>
 
@@ -646,7 +595,7 @@ export default function KontaClient({
                   <button
                     onClick={() => handlePageChange(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="inline-flex h-9 items-center gap-1 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-40 light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                className="inline-flex h-8 items-center gap-1 rounded-[7px] px-2.5 text-[10px] text-[#747b78] hover:bg-black/[0.04] disabled:opacity-35 dark:text-[#9ca29f] dark:hover:bg-white/[0.06]"
                   >
                     <ChevronLeft className="h-4 w-4" />
                     Poprzednia
@@ -669,10 +618,10 @@ export default function KontaClient({
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`h-9 w-9 rounded-md text-xs transition-colors ${
+                    className={`h-8 w-8 rounded-[7px] text-[10px] transition-colors ${
                             page === pageNum
-                              ? 'bg-white/[0.08] text-white light:bg-black/[0.08] light:text-black'
-                              : 'text-[#999999] hover:bg-white/[0.03] hover:text-white light:text-[#666666] light:hover:bg-black/[0.03] light:hover:text-black'
+                        ? 'bg-[#26332c] text-white dark:bg-[#dce7e0] dark:text-[#172019]'
+                        : 'text-[#747b78] hover:bg-black/[0.04] dark:text-[#9ca29f] dark:hover:bg-white/[0.06]'
                           }`}
                         >
                           {pageNum}
@@ -684,7 +633,7 @@ export default function KontaClient({
                   <button
                     onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
                     disabled={page === totalPages}
-                    className="inline-flex h-9 items-center gap-1 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-40 light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                className="inline-flex h-8 items-center gap-1 rounded-[7px] px-2.5 text-[10px] text-[#747b78] hover:bg-black/[0.04] disabled:opacity-35 dark:text-[#9ca29f] dark:hover:bg-white/[0.06]"
                   >
                     Następna
                     <ChevronRight className="h-4 w-4" />
@@ -692,98 +641,30 @@ export default function KontaClient({
                 </div>
               </div>
             )}
-          </main>
-
-          <aside className="space-y-5">
-            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-              <p className="text-sm font-medium text-white light:text-black">Zakres dostępu</p>
-              <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
-                Twoja rola: <span className="text-white light:text-black">{roleLabel(userRole)}</span>
-              </p>
-              <div className="mt-4">
-                <PermissionPill label="Dodawanie kont" enabled={canAddUsers} />
-                <PermissionPill label="Edycja danych" enabled={canEditUsers} />
-                <PermissionPill label="Usuwanie kont" enabled={canDeleteUsers} />
-                <PermissionPill label="Audit log" enabled={canAccessAudit} />
-                <PermissionPill label="Ustawienia" enabled={canAccessSettings} />
-              </div>
-            </section>
-
-            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-              <p className="text-sm font-medium text-white light:text-black">Szybkie akcje</p>
-              <div className="mt-4 space-y-2">
-                {canAddUsers && (
-                  <button
-                    onClick={() => setShowAddModal(true)}
-                    className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <Plus className="h-4 w-4 text-[#e6c7a7] light:text-[#7d5a38]" />
-                      Nowe konto
-                    </span>
-                    <span className="text-xs text-[#777777]">formularz</span>
-                  </button>
-                )}
-                <button
-                  onClick={handleExport}
-                  className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <Download className="h-4 w-4 text-[#d7bfd8] light:text-[#735671]" />
-                    Eksport CSV
-                  </span>
-                  <span className="text-xs text-[#777777]">pełna lista</span>
-                </button>
-                {canAccessAudit && (
-                  <Link
-                    href="/audit"
-                    className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <KeyRound className="h-4 w-4 text-amber-300 light:text-amber-600" />
-                      Audit Log
-                    </span>
-                    <span className="text-xs text-[#777777]">zdarzenia</span>
-                  </Link>
-                )}
-              </div>
-            </section>
-
-            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-              <p className="text-sm font-medium text-white light:text-black">Widoczna strona</p>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="rounded-md bg-white/[0.03] p-3 light:bg-black/[0.03]">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#777777]">Admini</p>
-                  <p className="mt-1 text-lg font-semibold text-white light:text-black">{visibleAdmins}</p>
-                </div>
-                <div className="rounded-md bg-white/[0.03] p-3 light:bg-black/[0.03]">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#777777]">Pozostałe</p>
-                  <p className="mt-1 text-lg font-semibold text-white light:text-black">{visibleClients}</p>
-                </div>
-              </div>
-            </section>
-          </aside>
-        </div>
-      </div>
+        <p className="mt-5 text-right text-[9px] text-[#979d9a]">
+          Widoczna strona: {visibleAdmins} administratorów · {visibleClients} pozostałych kont
+        </p>
+      </main>
 
       {showAddModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          <button
+            className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
             onClick={() => setShowAddModal(false)}
+            aria-label="Zamknij formularz"
           />
 
-          <div className="relative w-full max-w-lg overflow-hidden rounded-md border border-white/[0.07] bg-[#0d0d0d] shadow-2xl light:border-black/[0.08] light:bg-white">
-            <div className="flex items-start justify-between gap-4 border-b border-white/[0.06] p-5 light:border-black/[0.06]">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-[12px] border border-black/[0.09] bg-[#f8faf8] shadow-2xl dark:border-white/[0.1] dark:bg-[#111311]">
+            <div className="flex items-start justify-between gap-4 border-b border-black/[0.08] p-5 dark:border-white/[0.08]">
               <div>
-                <p className="text-sm font-medium text-white light:text-black">Dodaj konto</p>
-                <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
+                <p className="text-[14px] font-semibold">Nowe konto</p>
+                <p className="mt-1 text-[10px] text-[#7d8480]">
                   Utwórz konto z hasłem startowym. Rolę można zmienić po dodaniu.
                 </p>
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-[7px] text-[#7d8480] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                 aria-label="Zamknij formularz"
               >
                 <X className="h-4 w-4" />
@@ -799,48 +680,48 @@ export default function KontaClient({
 
               <div className="space-y-4">
                 <label className="block">
-                  <span className="mb-1 block text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">
-                    Email
+                  <span className="mb-1.5 block text-[9px] uppercase text-[#7d8480]">
+                    Adres e-mail
                   </span>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666666]" />
+                    <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8a918d]" />
                     <input
                       type="email"
                       value={addEmail}
                       onChange={(e) => setAddEmail(e.target.value)}
-                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                      className="h-10 w-full rounded-[8px] border border-black/[0.08] bg-white pl-9 pr-3 text-[11px] outline-none focus:border-[#779182] dark:border-white/[0.09] dark:bg-white/[0.045]"
                       placeholder="user@example.com"
                     />
                   </div>
                 </label>
 
                 <label className="block">
-                  <span className="mb-1 block text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">
+                  <span className="mb-1.5 block text-[9px] uppercase text-[#7d8480]">
                     Hasło startowe
                   </span>
                   <div className="relative">
-                    <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666666]" />
+                    <KeyRound className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8a918d]" />
                     <input
                       type="password"
                       value={addPassword}
                       onChange={(e) => setAddPassword(e.target.value)}
-                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                      className="h-10 w-full rounded-[8px] border border-black/[0.08] bg-white pl-9 pr-3 text-[11px] outline-none focus:border-[#779182] dark:border-white/[0.09] dark:bg-white/[0.045]"
                       placeholder="Minimum bezpiecznego hasła"
                     />
                   </div>
                 </label>
 
                 <label className="block">
-                  <span className="mb-1 block text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#777777]">
+                  <span className="mb-1.5 block text-[9px] uppercase text-[#7d8480]">
                     Imię i nazwisko
                   </span>
                   <div className="relative">
-                    <UserCog className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666666]" />
+                    <UserCog className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8a918d]" />
                     <input
                       type="text"
                       value={addName}
                       onChange={(e) => setAddName(e.target.value)}
-                      className="h-11 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
+                      className="h-10 w-full rounded-[8px] border border-black/[0.08] bg-white pl-9 pr-3 text-[11px] outline-none focus:border-[#779182] dark:border-white/[0.09] dark:bg-white/[0.045]"
                       placeholder="Jan Kowalski"
                     />
                   </div>
@@ -848,17 +729,17 @@ export default function KontaClient({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] p-5 light:border-black/[0.06]">
+            <div className="flex items-center justify-end gap-2 border-t border-black/[0.08] p-4 dark:border-white/[0.08]">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="inline-flex h-10 items-center rounded-md border border-white/[0.07] px-4 text-xs text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                className="inline-flex h-9 items-center rounded-[8px] px-3 text-[10px] text-[#727975] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
               >
                 Anuluj
               </button>
               <button
                 onClick={handleAddUser}
                 disabled={addLoading || !addEmail || !addPassword}
-                className="inline-flex h-10 items-center rounded-md border border-[#e6c7a7]/25 bg-[#e6c7a7]/10 px-4 text-xs text-[#f0d9be] transition-colors hover:bg-[#e6c7a7]/15 disabled:cursor-not-allowed disabled:opacity-50 light:text-[#7d5a38]"
+                className="inline-flex h-9 items-center rounded-[8px] bg-[#26332c] px-4 text-[10px] font-medium text-white disabled:opacity-50 dark:bg-[#dce7e0] dark:text-[#172019]"
               >
                 {addLoading ? 'Dodawanie...' : 'Dodaj konto'}
               </button>

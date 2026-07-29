@@ -187,6 +187,8 @@ const serviceNodeDescriptions: Record<ServiceNodeDefinition['id'], string> = {
 }
 const SCENE_WIDTH = 1360
 const SCENE_HEIGHT = 570
+const PAN_LIMIT_X = 700
+const PAN_LIMIT_Y = 400
 
 const serviceNodes: ServiceNodeDefinition[] = [
   { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 104, top: 210, width: 140, href: 'https://api.vezvision.com/healthz' },
@@ -581,8 +583,8 @@ export function DashboardModules({
     if (!drag || drag.pointerId !== event.pointerId) return
 
     panRef.current = {
-      x: clamp(drag.originX + event.clientX - drag.startX, -520, 230),
-      y: clamp(drag.originY + event.clientY - drag.startY, -120, 120),
+      x: clamp(drag.originX + event.clientX - drag.startX, -PAN_LIMIT_X, PAN_LIMIT_X),
+      y: clamp(drag.originY + event.clientY - drag.startY, -PAN_LIMIT_Y, PAN_LIMIT_Y),
     }
     scheduleSceneTransform()
   }
@@ -778,7 +780,7 @@ export function DashboardModules({
           <div
             ref={sceneRef}
             className="warehouse-map-scene absolute top-[8px] h-[570px] w-[1360px]"
-            style={{ left: canAccessInfrastructure ? 300 : 'calc(50% - 680px)' }}
+            style={{ left: 'calc(50% - 680px)' }}
           >
             <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1360 570" preserveAspectRatio="none">
               <title>Połączenia modułów ekosystemu</title>

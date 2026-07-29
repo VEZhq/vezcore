@@ -1,14 +1,16 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import {
-	Home, User, Settings, ArrowLeft, Shield, Clock, Globe, Smartphone, Laptop,
+	ArrowLeft, Shield, Clock, Globe, Smartphone, Laptop,
 	LogIn, LogOut, UserCog, KeyRound, ShieldCheck, ShieldPlus, ShieldOff,
 	RotateCcw, Eye, UserPlus, UserX, Mail, ClipboardList
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useUserPreferences } from '@/components/providers/UserPreferencesProvider'
 import { MobileNav } from '@/components/MobileNav'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 interface AuditLogEntry {
 	id: string
@@ -134,225 +136,111 @@ export default function ActivityClient({ user, auditLog, sessions, canAccessAudi
 		.sort((a, b) => new Date(b.last_seen).getTime() - new Date(a.last_seen).getTime())
 
 	return (
-		<div className="min-h-screen bg-transparent transition-colors duration-300">
-			<MobileNav currentPath="/konta" showKonta={true} showAudit={canAccessAudit} showSettings={canAccessSettings} />
-
-			<div className="hidden lg:flex fixed top-6 left-6 right-6 z-50 items-center justify-between">
-				<div className="flex items-center gap-6">
-					<Link
-						href="/dashboard"
-						className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-					>
-						<Home className="h-3 w-3" />
-						Dashboard
-					</Link>
-					<Link
-						href="/profile"
-						className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-					>
-						<User className="h-3 w-3" />
-						Profil
-					</Link>
-					<Link
-						href="/konta"
-						className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-					>
-						Konta
-					</Link>
-					{canAccessAudit && (
-						<Link
-							href="/audit"
-							className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-						>
-							Audit Log
+		<div className="min-h-screen bg-[#f1f3f2] text-[#252927] dark:bg-[#070807] dark:text-[#eef0ef]">
+			<MobileNav currentPath="/konta" showKonta showAudit={canAccessAudit} showSettings={canAccessSettings} />
+			<header className="border-b border-black/[0.07] bg-white/45 dark:border-white/[0.08] dark:bg-[#090a09]">
+				<div className="mx-auto flex h-12 w-full max-w-[1180px] items-center px-4 sm:px-6">
+					<Image src="/logo/vezcore_logo_black_full.svg" alt="VEZcore" width={104} height={42} className="h-auto w-[104px] dark:hidden" priority />
+					<Image src="/logo/vezcore_logo_white_full.svg" alt="VEZcore" width={104} height={42} className="hidden h-auto w-[104px] dark:block" priority />
+					<span className="mx-3 h-4 w-px bg-black/[0.08] dark:bg-white/[0.1]" />
+					<span className="text-[10px] text-[#747b78] dark:text-[#8f9692]">Aktywność konta</span>
+					<div className="ml-auto flex items-center gap-1.5">
+						<ThemeToggle />
+						<Link href={`/konta/${user.id}`} className="flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-[10px] text-[#626966] hover:bg-black/[0.04] dark:text-[#aab0ad] dark:hover:bg-white/[0.07]">
+							<ArrowLeft className="h-3.5 w-3.5" /> Konto
 						</Link>
-					)}
-					{canAccessSettings && (
-						<Link
-							href="/settings"
-							className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-						>
-							<Settings className="h-3 w-3" />
-							Ustawienia
-						</Link>
-					)}
-				</div>
-			</div>
-
-			<div className="p-4 lg:p-8 pt-20 lg:pt-24">
-				<div className="max-w-2xl mx-auto space-y-6 lg:space-y-8">
-					<div className="flex items-center gap-4">
-						<Link
-							href={`/konta/${user.id}`}
-							className="text-[#444444] hover:text-white light:hover:text-black transition-colors"
-						>
-							<ArrowLeft className="h-5 w-5" />
-						</Link>
-						<div>
-							<h1 className="text-2xl font-medium text-white light:text-black transition-colors duration-300">
-								Aktywność użytkownika
-							</h1>
-							<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mt-1 transition-colors duration-300">
-								{user.email}
-							</p>
-						</div>
-					</div>
-
-					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
-						<div className="p-6">
-							<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-4">
-								Dziennik aktywności
-							</p>
-							{auditLog.length === 0 ? (
-								<p className="text-xs text-[#444444] light:text-[#888888] py-4 text-center">
-									Brak aktywności
-								</p>
-							) : (
-								<div className="divide-y divide-white/[0.04] light:divide-black/[0.04]">
-									{auditLog.map((entry) => {
-										const ip = typeof entry.details?.ip === 'string' ? entry.details.ip : null
-										const actionMeta = ACTION_META[entry.action] ?? {
-											label: entry.action,
-											Icon: ClipboardList,
-											iconClassName: 'text-[#666666] light:text-[#999999]',
-										}
-										const ActivityIcon = actionMeta.Icon
-										return (
-											<div key={entry.id} className="py-3">
-												<div className="flex items-center justify-between gap-4">
-													<div className="flex min-w-0 items-start gap-2">
-														<ActivityIcon className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${actionMeta.iconClassName}`} />
-														<div className="min-w-0">
-															<p className="text-xs text-white light:text-black truncate">
-																{actionMeta.label}
-															</p>
-															{entry.entity_type && (
-																<p className="text-[10px] text-[#444444] light:text-[#888888] mt-0.5">
-																	{entry.entity_type}{entry.entity_id ? ` · ${entry.entity_id}` : ''}
-																</p>
-															)}
-															{ip && (
-																<p className="text-[10px] text-[#444444] light:text-[#888888] font-mono mt-0.5">
-																	IP: {ip}
-																</p>
-															)}
-														</div>
-													</div>
-													<span className="text-[10px] text-[#444444] light:text-[#888888] font-mono shrink-0">
-														{formatDate(entry.created_at)}
-													</span>
-												</div>
-											</div>
-										)
-									})}
-								</div>
-							)}
-						</div>
-					</div>
-
-					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
-						<div className="p-6 border-b border-white/[0.06] light:border-black/[0.06]">
-							<div className="flex items-center gap-2">
-								<Shield className="h-4 w-4 text-[#444444] light:text-[#888888]" />
-								<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
-									Aktywne sesje
-								</p>
-							</div>
-						</div>
-						{sessions.length === 0 ? (
-							<div className="p-8 text-center">
-								<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
-									Brak aktywnych sesji
-								</p>
-							</div>
-						) : (
-							<div className="divide-y divide-white/[0.04] light:divide-black/[0.04]">
-								{sessions.map((session) => {
-									const DeviceIcon = isMobile(session.user_agent) ? Smartphone : Laptop
-									const deviceLabel = parseDeviceLabel(session.user_agent)
-									const isAal2 = session.aal === 'aal2'
-
-									return (
-										<div
-											key={session.id}
-											className="p-4 hover:bg-white/[0.02] light:hover:bg-black/[0.02] transition-colors"
-										>
-											<div className="flex items-center gap-3">
-												<DeviceIcon className="h-4 w-4 text-[#666666] light:text-[#999999] shrink-0" />
-												<div>
-													<div className="flex items-center gap-2 flex-wrap">
-														<p className="text-sm text-white light:text-black">
-															{deviceLabel}
-														</p>
-														{session.is_current && (
-															<span className="text-[9px] uppercase tracking-[0.2em] text-emerald-400 border border-emerald-400/30 px-1.5 py-0.5">
-																Bieżąca
-															</span>
-														)}
-														{isAal2 && (
-															<span className="text-[9px] uppercase tracking-[0.2em] text-[#d7bfd8] border border-[#d7bfd8]/30 px-1.5 py-0.5">
-																2FA
-															</span>
-														)}
-													</div>
-													<div className="flex items-center gap-4 mt-1 flex-wrap">
-														<div className="flex items-center gap-1">
-															<Globe className="h-3 w-3 text-[#444444] light:text-[#888888]" />
-															<p className="text-[10px] text-[#666666] light:text-[#999999]">
-																{session.ip}
-															</p>
-														</div>
-														<div className="flex items-center gap-1">
-															<Clock className="h-3 w-3 text-[#444444] light:text-[#888888]" />
-															<p className="text-[10px] text-[#666666] light:text-[#999999]">
-																{formatDate(session.updated_at)}
-															</p>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-									)
-								})}
-							</div>
-						)}
-					</div>
-
-					<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
-						<div className="p-6">
-							<div className="flex items-center gap-2 mb-4">
-								<Globe className="h-4 w-4 text-[#444444] light:text-[#888888]" />
-								<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
-									Historia IP
-								</p>
-							</div>
-							{ipHistory.length === 0 ? (
-								<p className="text-xs text-[#444444] light:text-[#888888] py-4 text-center">
-									Brak danych IP
-								</p>
-							) : (
-								<div className="divide-y divide-white/[0.04] light:divide-black/[0.04]">
-									{ipHistory.map((entry) => (
-										<div key={entry.ip} className="flex items-center justify-between py-3">
-											<div>
-												<p className="text-xs text-white light:text-black font-mono">
-													{entry.ip}
-												</p>
-												<p className="text-[10px] text-[#444444] light:text-[#888888] mt-0.5">
-													{entry.count} {entry.count === 1 ? 'zdarzenie' : entry.count < 5 ? 'zdarzenia' : 'zdarzeń'}
-												</p>
-											</div>
-											<span className="text-[10px] text-[#444444] light:text-[#888888] font-mono shrink-0">
-												{formatDate(entry.last_seen)}
-											</span>
-										</div>
-									))}
-								</div>
-							)}
-						</div>
 					</div>
 				</div>
-			</div>
+			</header>
+
+			<main className="mx-auto w-full max-w-[1180px] px-4 py-6 sm:px-6 sm:py-8">
+				<section className="border-b border-black/[0.1] pb-6 dark:border-white/[0.09]">
+					<p className="text-[9px] font-semibold uppercase text-[#808783] dark:text-[#8f9692]">Historia bezpieczeństwa</p>
+					<h1 className="mt-1 text-[28px] font-semibold">Aktywność użytkownika</h1>
+					<p className="mt-1.5 font-mono text-[10px] text-[#777e7a] dark:text-[#8e9591]">{user.email}</p>
+					<div className="mt-6 grid grid-cols-3 border-y border-black/[0.07] py-4 dark:border-white/[0.07]">
+						{[['Zdarzenia', auditLog.length], ['Aktywne sesje', sessions.length], ['Adresy IP', ipHistory.length]].map(([label, value], index) => (
+							<div key={String(label)} className={`px-4 first:pl-0 ${index > 0 ? 'border-l border-black/[0.07] dark:border-white/[0.07]' : ''}`}>
+								<p className="text-[9px] uppercase text-[#969c99]">{label}</p>
+								<p className="mt-1 font-mono text-[18px] font-semibold">{value}</p>
+							</div>
+						))}
+					</div>
+				</section>
+
+				<div className="grid gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_370px]">
+					<section>
+						<div className="border-b border-black/[0.09] pb-3 dark:border-white/[0.09]">
+							<h2 className="text-[14px] font-semibold">Dziennik aktywności</h2>
+							<p className="mt-1 text-[10px] text-[#858c88]">Zdarzenia zapisane dla tego użytkownika</p>
+						</div>
+						{auditLog.length === 0 ? (
+							<p className="py-10 text-center text-[10px] text-[#929895]">Brak zapisanej aktywności</p>
+						) : auditLog.map((entry) => {
+							const ip = typeof entry.details?.ip === 'string' ? entry.details.ip : null
+							const actionMeta = ACTION_META[entry.action] ?? { label: entry.action, Icon: ClipboardList, iconClassName: 'text-[#777e7a]' }
+							const ActivityIcon = actionMeta.Icon
+							return (
+								<div key={entry.id} className="grid grid-cols-[30px_minmax(0,1fr)_auto] gap-3 border-b border-black/[0.07] py-3.5 dark:border-white/[0.07]">
+									<span className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-black/[0.035] dark:bg-white/[0.05]">
+										<ActivityIcon className={`h-3.5 w-3.5 ${actionMeta.iconClassName}`} />
+									</span>
+									<div className="min-w-0">
+										<p className="truncate text-[11px] font-medium">{actionMeta.label}</p>
+										<p className="mt-1 truncate font-mono text-[9px] text-[#8b918e]">
+											{entry.entity_type || 'konto'}{entry.entity_id ? ` · ${entry.entity_id}` : ''}{ip ? ` · IP ${ip}` : ''}
+										</p>
+									</div>
+									<time className="font-mono text-[9px] text-[#8b918e]">{formatDate(entry.created_at)}</time>
+								</div>
+							)
+						})}
+					</section>
+
+					<aside className="space-y-7">
+						<section>
+							<div className="border-b border-black/[0.09] pb-3 dark:border-white/[0.09]">
+								<h2 className="text-[14px] font-semibold">Aktywne sesje</h2>
+								<p className="mt-1 text-[10px] text-[#858c88]">Urządzenia z ważnym dostępem</p>
+							</div>
+							{sessions.length === 0 ? (
+								<p className="py-6 text-[10px] text-[#929895]">Brak aktywnych sesji</p>
+							) : sessions.map((session) => {
+								const DeviceIcon = isMobile(session.user_agent) ? Smartphone : Laptop
+								return (
+									<div key={session.id} className="flex gap-3 border-b border-black/[0.07] py-3.5 dark:border-white/[0.07]">
+										<DeviceIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#838a86]" />
+										<div className="min-w-0 flex-1">
+											<div className="flex items-center gap-2">
+												<p className="truncate text-[11px] font-medium">{parseDeviceLabel(session.user_agent)}</p>
+												{session.is_current && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" title="Bieżąca sesja" />}
+												{session.aal === 'aal2' && <span className="text-[8px] font-medium text-[#806b86] dark:text-[#c5adc9]">2FA</span>}
+											</div>
+											<p className="mt-1 flex items-center gap-1 font-mono text-[9px] text-[#8b918e]"><Globe className="h-2.5 w-2.5" /> {session.ip}</p>
+											<p className="mt-1 flex items-center gap-1 text-[9px] text-[#8b918e]"><Clock className="h-2.5 w-2.5" /> {formatDate(session.updated_at)}</p>
+										</div>
+									</div>
+								)
+							})}
+						</section>
+
+						<section>
+							<div className="border-b border-black/[0.09] pb-3 dark:border-white/[0.09]">
+								<h2 className="text-[14px] font-semibold">Historia IP</h2>
+							</div>
+							{ipHistory.length === 0 ? <p className="py-6 text-[10px] text-[#929895]">Brak danych IP</p> : ipHistory.map((entry) => (
+								<div key={entry.ip} className="flex items-center justify-between border-b border-black/[0.07] py-3 dark:border-white/[0.07]">
+									<div>
+										<p className="font-mono text-[10px]">{entry.ip}</p>
+										<p className="mt-0.5 text-[9px] text-[#8b918e]">{entry.count} zdarzeń</p>
+									</div>
+									<time className="font-mono text-[9px] text-[#8b918e]">{formatDate(entry.last_seen)}</time>
+								</div>
+							))}
+						</section>
+					</aside>
+				</div>
+			</main>
 		</div>
 	)
 }

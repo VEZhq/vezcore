@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
-  Home, User, Settings, ArrowLeft, Shield, Check, X, RefreshCw,
+  ArrowLeft, Shield, Check, X, RefreshCw,
   ChevronDown, ChevronRight, Users, Globe, FileText, HardDrive, Search
 } from 'lucide-react'
 import { useUserPreferences } from '@/components/providers/UserPreferencesProvider'
@@ -17,6 +18,7 @@ import { AVAILABLE_PERMISSIONS } from '@/lib/constants'
 import { DASHBOARD_MODULES, DASHBOARD_MODULE_ICON_COLORS, type DashboardModuleName } from '@/lib/constants/modules'
 import { MobileNav } from '@/components/MobileNav'
 import { useCSRFToken } from '@/hooks/useCSRFToken'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 interface UserData {
   id: string
@@ -218,112 +220,97 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
   const visibleGroups = PERMISSION_GROUPS.filter(group => group.ecosystem === selectedEcosystem)
 
   return (
-    <div className="min-h-screen bg-transparent transition-colors duration-300">
-      <MobileNav currentPath="/konta" showKonta={true} showAudit={canAccessAudit} showSettings={canAccessSettings} />
-
-      <div className="hidden lg:flex fixed top-6 left-6 right-6 z-50 items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-          >
-            <Home className="h-3 w-3" />
-            Dashboard
-          </Link>
-          <Link
-            href="/profile"
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-          >
-            <User className="h-3 w-3" />
-            Profil
-          </Link>
-          <Link
-            href="/konta"
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-          >
-            Konta
-          </Link>
-          {canAccessAudit && (
-            <Link
-              href="/audit"
-              className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-            >
-              Audit Log
+    <div className="min-h-screen bg-[#f1f3f2] text-[#252927] dark:bg-[#070807] dark:text-[#eef0ef]">
+      <MobileNav currentPath="/konta" showKonta showAudit={canAccessAudit} showSettings={canAccessSettings} />
+      <header className="border-b border-black/[0.07] bg-white/45 dark:border-white/[0.08] dark:bg-[#090a09]">
+        <div className="mx-auto flex h-12 w-full max-w-[1180px] items-center px-4 sm:px-6">
+          <Image src="/logo/vezcore_logo_black_full.svg" alt="VEZcore" width={104} height={42} className="h-auto w-[104px] dark:hidden" priority />
+          <Image src="/logo/vezcore_logo_white_full.svg" alt="VEZcore" width={104} height={42} className="hidden h-auto w-[104px] dark:block" priority />
+          <span className="mx-3 h-4 w-px bg-black/[0.08] dark:bg-white/[0.1]" />
+          <span className="text-[10px] text-[#747b78] dark:text-[#8f9692]">Uprawnienia konta</span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <ThemeToggle />
+            <Link href={`/konta/${user.id}`} className="flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-[10px] text-[#626966] hover:bg-black/[0.04] dark:text-[#aab0ad] dark:hover:bg-white/[0.07]">
+              <ArrowLeft className="h-3.5 w-3.5" /> Konto
             </Link>
-          )}
-          {canAccessSettings && (
-            <Link
-              href="/settings"
-              className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#444444] light:text-[#888888] hover:text-white light:hover:text-black transition-colors duration-300"
-            >
-              <Settings className="h-3 w-3" />
-              Ustawienia
-            </Link>
-          )}
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div className="p-4 lg:p-8 pt-20 lg:pt-24">
-        <div className="mx-auto w-full max-w-7xl space-y-6 lg:space-y-8">
-          <div className="flex items-center gap-4">
-            <Link
-              href={`/konta/${user.id}`}
-              className="text-[#444444] hover:text-white light:hover:text-black transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
+      <main className="mx-auto w-full max-w-[1180px] px-4 py-6 sm:px-6 sm:py-8">
+        <section className="border-b border-black/[0.1] pb-6 dark:border-white/[0.09]">
+          <p className="text-[9px] font-semibold uppercase text-[#808783] dark:text-[#8f9692]">Kontrola dostępu</p>
+          <div className="mt-1 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-2xl font-medium text-white light:text-black transition-colors duration-300">
-                Pozwolenia
-              </h1>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mt-1 transition-colors duration-300">
-                {user.email}
-              </p>
+              <h1 className="text-[28px] font-semibold">Uprawnienia</h1>
+              <p className="mt-1.5 font-mono text-[10px] text-[#777e7a] dark:text-[#8e9591]">{user.email}</p>
+            </div>
+            <div className="relative w-full sm:w-[310px]">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8b918e]" />
+              <input
+                type="search"
+                placeholder="Szukaj uprawnienia"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="h-9 w-full rounded-[8px] border border-black/[0.08] bg-white/65 pl-9 pr-3 text-[11px] outline-none focus:border-[#779182] dark:border-white/[0.09] dark:bg-white/[0.045]"
+              />
             </div>
           </div>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {ecosystemOptions.map((option) => {
+              const Icon = option.icon
+              const isActive = selectedEcosystem === option.name
+              return (
+                <button
+                  key={option.name}
+                  type="button"
+                  onClick={() => setSelectedEcosystem(option.name)}
+                  className={`flex h-9 items-center gap-2 rounded-[8px] border px-3 text-[10px] transition-colors ${
+                    isActive
+                      ? 'border-[#788d81]/30 bg-[#dfe9e3] text-[#26332c] dark:border-white/[0.12] dark:bg-white/[0.09] dark:text-white'
+                      : 'border-black/[0.07] text-[#747b78] hover:bg-white dark:border-white/[0.08] dark:text-[#969c99] dark:hover:bg-white/[0.05]'
+                  }`}
+                >
+                  <Icon className={`h-3.5 w-3.5 ${DASHBOARD_MODULE_ICON_COLORS[option.color].dark} ${DASHBOARD_MODULE_ICON_COLORS[option.color].light}`} />
+                  {option.label}
+                </button>
+              )
+            })}
+          </div>
+        </section>
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-            <div className="space-y-6">
-              {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded">
-                  <p className="text-sm text-red-400">{error}</p>
-                </div>
-              )}
+        {error && <div className="mt-5 border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-[10px] text-red-600 dark:text-red-300">{error}</div>}
+        {isAdminUser && (
+          <div className="mt-5 flex items-center gap-2 border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-3 text-[10px] text-emerald-700 dark:text-emerald-300">
+            <Shield className="h-3.5 w-3.5" />
+            Rola {user.role} zapewnia wszystkie uprawnienia domyślnie.
+          </div>
+        )}
 
-              {isAdminUser && (
-                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3">
-                  <Shield className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <p className="text-xs text-emerald-400">
-                    Ten użytkownik ma rolę <span className="font-medium">{user.role}</span> — posiada wszystkie uprawnienia domyślnie.
-                  </p>
-                </div>
-              )}
-
-              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md p-5 lg:p-6 transition-colors duration-300">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
-                      Zarządzanie uprawnieniami
-                    </p>
-                    <p className="mt-2 text-sm text-[#666666] light:text-[#888888] max-w-2xl leading-relaxed">
-                      Grupuj, filtruj i zmieniaj dostęp szybciej — bez przewijania jednej długiej kolumny przez środek ekranu.
-                    </p>
-                  </div>
-
-                  <div className="relative w-full lg:max-w-sm xl:max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#444444] light:text-[#888888]" />
-                    <input
-                      type="text"
-                      placeholder="Szukaj uprawnienia..."
-                      value={search}
-                      onChange={e => setSearch(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2.5 bg-white/[0.03] light:bg-black/[0.03] border border-white/[0.06] light:border-black/[0.06] text-sm text-white light:text-black placeholder-[#444444] light:placeholder-[#888888] focus:outline-none focus:border-emerald-500/40 transition-colors duration-300"
-                    />
-                  </div>
-                </div>
+        <div className="grid gap-8 py-7 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <aside>
+            <div className="border-b border-black/[0.09] pb-3 dark:border-white/[0.09]">
+              <h2 className="text-[13px] font-semibold">Konto</h2>
+            </div>
+            {[
+              ['E-mail', user.email],
+              ['Nazwa', user.full_name || 'Nie ustawiono'],
+              ['Rola', user.role || 'viewer'],
+              ['Utworzono', formatDate(user.created_at)],
+            ].map(([label, value]) => (
+              <div key={label} className="border-b border-black/[0.07] py-3 dark:border-white/[0.07]">
+                <p className="text-[8px] uppercase text-[#969c99]">{label}</p>
+                <p className="mt-1 break-all text-[10px] font-medium">{value}</p>
               </div>
+            ))}
+          </aside>
 
-              <div className="grid gap-5 2xl:grid-cols-2">
+          <section>
+            <div className="mb-4">
+              <h2 className="text-[14px] font-semibold">{ecosystemOptions.find((option) => option.name === selectedEcosystem)?.label}</h2>
+              <p className="mt-1 text-[10px] text-[#858c88]">Włączaj wyłącznie dostęp potrzebny do wykonywania zadań.</p>
+            </div>
+            <div className="space-y-5">
                 {visibleGroups.map(group => {
                   const groupPerms = group.keys
                     .map(k => permMap.get(k))
@@ -341,26 +328,23 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                   const isOpen = !collapsed[group.id]
 
                   return (
-                    <div
-                      key={group.id}
-                      className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300"
-                    >
-                      <div className="flex items-center justify-between gap-4 p-5 hover:bg-white/[0.02] light:hover:bg-black/[0.02] transition-colors duration-200">
+                    <div key={group.id} className="border-y border-black/[0.08] dark:border-white/[0.08]">
+                      <div className="flex items-center justify-between gap-4 py-3.5">
                         <button
                           type="button"
                           onClick={() => toggleCollapse(group.id)}
                           className="flex min-w-0 flex-1 items-center gap-3 text-left"
                         >
-                          <span className="text-[#444444] light:text-[#888888] shrink-0">{group.icon}</span>
-                          <span className="truncate text-[10px] uppercase tracking-[0.25em] text-[#888888] light:text-[#666666] font-medium">
+                          <span className="shrink-0 text-[#838a86]">{group.icon}</span>
+                          <span className="truncate text-[11px] font-semibold">
                             {group.label}
                           </span>
-                          <span className={`shrink-0 text-[9px] px-2 py-0.5 rounded-full font-mono tabular-nums ${
+                          <span className={`shrink-0 rounded-[5px] px-2 py-0.5 font-mono text-[9px] tabular-nums ${
                             enabledCount === groupPerms.length
-                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                               : enabledCount === 0
-                                ? 'bg-white/[0.04] light:bg-black/[0.04] text-[#555555] light:text-[#aaaaaa] border border-white/[0.06] light:border-black/[0.06]'
-                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                ? 'bg-black/[0.035] text-[#8b918e] dark:bg-white/[0.05]'
+                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                           }`}>
                             {enabledCount}/{groupPerms.length}
                           </span>
@@ -372,14 +356,14 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                               <button
                                 type="button"
                                 onClick={() => handleBulkEnable(group.keys)}
-                                className="text-[9px] uppercase tracking-[0.15em] px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-colors duration-200"
+                                className="rounded-[6px] px-2 py-1 text-[9px] text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400"
                               >
                                 Wszystkie
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleBulkDisable(group.keys)}
-                                className="text-[9px] uppercase tracking-[0.15em] px-2.5 py-1 bg-white/[0.04] light:bg-black/[0.04] border border-white/[0.06] light:border-black/[0.06] text-[#666666] light:text-[#999999] hover:text-white light:hover:text-black hover:bg-white/[0.08] light:hover:bg-black/[0.08] transition-colors duration-200"
+                                className="rounded-[6px] px-2 py-1 text-[9px] text-[#7d8480] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                               >
                                 Brak
                               </button>
@@ -389,7 +373,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                           <button
                             type="button"
                             onClick={() => toggleCollapse(group.id)}
-                            className="text-[#444444] light:text-[#888888]"
+                            className="text-[#8b918e]"
                             aria-label={isOpen ? `Zwiń grupę ${group.label}` : `Rozwiń grupę ${group.label}`}
                             aria-expanded={isOpen}
                           >
@@ -402,8 +386,8 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                       </div>
 
                       {isOpen && (
-                        <div className="border-t border-white/[0.04] light:border-black/[0.04]">
-                          <div className="p-4 space-y-2">
+                        <div className="border-t border-black/[0.06] dark:border-white/[0.06]">
+                          <div>
                             {visiblePerms.map(perm => {
                               const isEnabled = hasPermission(perm.key)
                               const isLoading = loadingPermission === perm.key
@@ -411,16 +395,12 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                               return (
                                 <div
                                   key={perm.key}
-                                  className={`flex items-center justify-between gap-4 px-4 py-3 border transition-colors duration-200 ${
-                                    isEnabled
-                                      ? 'bg-emerald-500/[0.04] border-emerald-500/[0.12] light:bg-emerald-500/[0.04] light:border-emerald-500/[0.15]'
-                                      : 'bg-white/[0.02] light:bg-black/[0.02] border-white/[0.04] light:border-black/[0.04]'
-                                  }`}
+                                  className="flex items-center justify-between gap-4 border-b border-black/[0.06] py-3.5 last:border-b-0 dark:border-white/[0.06]"
                                 >
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-white light:text-black leading-snug">{perm.label}</p>
-                                    <p className="text-[10px] text-[#555555] light:text-[#aaaaaa] mt-0.5 font-mono break-all">{perm.key}</p>
-                                    <p className="text-[11px] text-[#666666] light:text-[#999999] mt-1 leading-relaxed">
+                                    <p className="text-[11px] font-medium leading-snug">{perm.label}</p>
+                                    <p className="mt-0.5 break-all font-mono text-[9px] text-[#969c99]">{perm.key}</p>
+                                    <p className="mt-1 text-[10px] leading-relaxed text-[#777e7a] dark:text-[#8e9591]">
                                       {perm.description}
                                     </p>
                                   </div>
@@ -429,15 +409,15 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                                     <button
                                       onClick={() => handleTogglePermission(perm.key)}
                                       disabled={isLoading}
-                                      className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-300 ${
-                                        isEnabled ? 'bg-emerald-500' : 'bg-[#333333] light:bg-[#cccccc]'
+                                      className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+                                        isEnabled ? 'bg-emerald-500' : 'bg-[#c6cbc8] dark:bg-[#3d423f]'
                                       }`}
                                     >
                                       {isLoading ? (
-                                        <RefreshCw className="h-3 w-3 absolute top-1.5 left-3.5 animate-spin text-white" />
+                                        <RefreshCw className="absolute left-3 top-1 h-3 w-3 animate-spin text-white" />
                                       ) : (
-                                        <div className={`w-4 h-4 rounded-full bg-white shadow-md absolute top-1 transition-transform duration-300 ${
-                                          isEnabled ? 'translate-x-6' : 'translate-x-1'
+                                        <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                                          isEnabled ? 'translate-x-[18px]' : 'translate-x-0.5'
                                         }`} />
                                       )}
                                     </button>
@@ -461,90 +441,9 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                   )
                 })}
               </div>
-            </div>
-
-            <aside className="xl:sticky xl:top-24">
-              <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
-                <div className="p-6">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-4">
-                    Informacje o koncie
-                  </p>
-                  <div className="space-y-3">
-                    <div className="flex justify-between gap-4">
-                      <span className="text-[10px] text-[#666666] light:text-[#999999]">Email</span>
-                      <span className="text-xs text-white light:text-black font-mono text-right break-all">{user.email}</span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <span className="text-[10px] text-[#666666] light:text-[#999999]">Imię</span>
-                      <span className="text-xs text-white light:text-black text-right">{user.full_name || 'Nie ustawiono'}</span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <span className="text-[10px] text-[#666666] light:text-[#999999]">Rola</span>
-                      <span className="text-xs text-white light:text-black text-right">{user.role || 'viewer'}</span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <span className="text-[10px] text-[#666666] light:text-[#999999]">Data utworzenia</span>
-                      <span className="text-xs text-white light:text-black font-mono text-right">{formatDate(user.created_at)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] backdrop-blur-md transition-colors duration-300">
-                <div className="p-6">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888] mb-2">
-                    Ekosystem / projekt
-                  </p>
-                  <p className="text-xs text-[#666666] light:text-[#999999] leading-relaxed mb-4">
-                    Wybierz kafelek z dashboardu, dla którego chcesz otworzyć system pozwoleń.
-                  </p>
-
-                  <div className="space-y-2">
-                    {ecosystemOptions.map(option => {
-                      const isActive = selectedEcosystem === option.name
-                      const Icon = option.icon
-
-                      return (
-                        <button
-                          key={option.name}
-                          type="button"
-                          onClick={() => setSelectedEcosystem(option.name)}
-                          className={`w-full text-left border p-4 transition-all duration-200 ${
-                            isActive
-                              ? 'border-[#e8cfae]/30 bg-[#e8cfae]/[0.06] light:border-[#7d5a38]/[0.24] light:bg-[#7d5a38]/[0.06]'
-                              : 'border-white/[0.06] light:border-black/[0.06] bg-white/[0.02] light:bg-black/[0.02] hover:bg-white/[0.04] light:hover:bg-black/[0.04]'
-                          }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/[0.06] light:border-black/[0.06] bg-white/[0.03] light:bg-black/[0.03]">
-                              <Icon className={`h-5 w-5 ${DASHBOARD_MODULE_ICON_COLORS[option.color].dark} ${DASHBOARD_MODULE_ICON_COLORS[option.color].light}`} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between gap-3">
-                                <p className="text-sm font-medium text-white light:text-black">
-                                  {option.label}
-                                </p>
-                                {isActive && (
-                                  <span className="text-[9px] uppercase tracking-[0.2em] text-[#e8cfae] light:text-[#7d5a38]">
-                                    Aktywny
-                                  </span>
-                                )}
-                              </div>
-                              <p className="mt-1 text-xs text-[#666666] light:text-[#999999] leading-relaxed">
-                                {option.description}
-                              </p>
-                            </div>
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            </aside>
-          </div>
+          </section>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
