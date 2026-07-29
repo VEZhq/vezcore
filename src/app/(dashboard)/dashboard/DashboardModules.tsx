@@ -21,6 +21,7 @@ import {
   EyeOff,
   GripVertical,
   HardDrive,
+  Info,
   MoveDiagonal2,
   Rocket,
   RotateCcw,
@@ -37,20 +38,6 @@ import {
 type HealthStatus = 'checking' | 'healthy' | 'warning' | 'error' | 'unknown'
 type DeployStatus = 'success' | 'failure' | 'pending' | 'unknown'
 type PanelFilter = 'all' | 'alert'
-
-type NavigationAccess = {
-  canAccessKonta: boolean
-  canAccessAudit: boolean
-  canAccessSettings: boolean
-  canViewVezVisionBlog: boolean
-  canViewVezVisionPortfolio: boolean
-  canViewVezVisionServices: boolean
-  canViewVezVisionFaq: boolean
-  canViewVezVisionNewsletter: boolean
-  canViewVezVisionFiles: boolean
-  canViewVezVisionSettings: boolean
-  canViewVezVisionCalendar: boolean
-}
 
 type InfrastructureResource = {
   module: 'vez' | 'vezVision' | 'vezLabs'
@@ -109,12 +96,6 @@ type ResizeState = {
   originHeight: number
 }
 
-type InternalLink = {
-  label: string
-  href: string
-  description: string
-}
-
 type ServiceNodeDefinition = {
   id: 'prodApi' | 'database' | 'deploy' | 'labApi' | 'minio' | 'monitor'
   label: string
@@ -168,9 +149,9 @@ const moduleLayout: Record<DashboardModuleName, { left: number; top: number; wid
 const serviceNodes: ServiceNodeDefinition[] = [
   { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 104, top: 210, width: 140 },
   { id: 'database', label: 'Core DB', checkKey: 'database', owner: 'vez', icon: Database, left: 342, top: 280, width: 132 },
-  { id: 'deploy', label: 'Deploy', deploy: true, owner: 'vez', icon: Rocket, left: 766, top: 280, width: 126 },
+  { id: 'deploy', label: 'Deploy', deploy: true, owner: 'vez', icon: Rocket, left: 746, top: 280, width: 126 },
   { id: 'labApi', label: 'Lab API', checkKey: 'labApi', owner: 'vezLabs', icon: Server, left: 806, top: 28, width: 132 },
-  { id: 'minio', label: 'MinIO', checkKey: 'minio', owner: 'vezLabs', icon: HardDrive, left: 812, top: 280, width: 126 },
+  { id: 'minio', label: 'MinIO', checkKey: 'minio', owner: 'vezLabs', icon: HardDrive, left: 900, top: 280, width: 126 },
   { id: 'monitor', label: 'Monitor', checkKey: 'monitor', owner: 'vezLabs', icon: Activity, left: 1202, top: 102, width: 132 },
 ]
 
@@ -274,52 +255,12 @@ function getServiceNodeDetail(node: ServiceNodeDefinition, infraData: InfraData 
   return check.latencyMs ? `${check.detail} · ${check.latencyMs}ms` : check.detail
 }
 
-function buildInternalLinks(access: NavigationAccess): Record<DashboardModuleName, InternalLink[]> {
-  return {
-    vez: [],
-    vezVision: [
-      { label: 'Centrum VEZvision', href: '/vezvision', description: 'Przegląd modułu' },
-      ...(access.canViewVezVisionBlog
-        ? [{ label: 'Blog', href: '/vezvision/blog', description: 'Publikacje i szkice' }]
-        : []),
-      ...(access.canViewVezVisionPortfolio
-        ? [{ label: 'Portfolio', href: '/vezvision/portfolio', description: 'Projekty i realizacje' }]
-        : []),
-      ...(access.canViewVezVisionServices
-        ? [{ label: 'Usługi', href: '/vezvision/services', description: 'Oferta usług' }]
-        : []),
-      ...(access.canViewVezVisionFaq
-        ? [{ label: 'FAQ', href: '/vezvision/faq', description: 'Pytania i odpowiedzi' }]
-        : []),
-      ...(access.canViewVezVisionFiles
-        ? [{ label: 'Pliki', href: '/vezvision/files', description: 'Zasoby i foldery' }]
-        : []),
-      ...(access.canViewVezVisionNewsletter
-        ? [{ label: 'Newsletter', href: '/vezvision/newsletter', description: 'Kampanie i odbiorcy' }]
-        : []),
-      ...(access.canViewVezVisionCalendar
-        ? [{ label: 'Kalendarz', href: '/vezvision/calendar', description: 'Terminy i wydarzenia' }]
-        : []),
-      ...(access.canViewVezVisionSettings
-        ? [{ label: 'Ustawienia VEZvision', href: '/vezvision/settings', description: 'Konfiguracja modułu' }]
-        : []),
-    ],
-    vezLabs: [],
-    vezRent: [],
-    vezStudio: [],
-    vezWork: [],
-    nably: [],
-  }
-}
-
 export function DashboardModules({
   canAccessVezVision,
   canAccessInfrastructure,
-  navigationAccess,
 }: {
   canAccessVezVision: boolean
   canAccessInfrastructure: boolean
-  navigationAccess: NavigationAccess
 }) {
   const { preferences, updatePreferences } = useUserPreferences()
   const [editMode, setEditMode] = useState(false)
@@ -355,7 +296,6 @@ export function DashboardModules({
     if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
   }, [])
 
-  const internalLinks = useMemo(() => buildInternalLinks(navigationAccess), [navigationAccess])
   const permissionFilteredModules = useMemo(
     () => DASHBOARD_MODULES.filter((mod) => mod.name !== 'vezVision' || canAccessVezVision),
     [canAccessVezVision]
@@ -567,10 +507,10 @@ export function DashboardModules({
               {sceneModuleNames.has('vezLabs') && (
                 <>
                   {([
-                    ['nably', 'M1012 182 V328 L990 350 H150 V430'],
-                    ['vezWork', 'M1052 182 V350 L1032 370 H458 V430'],
-                    ['vezRent', 'M1092 182 V370 L1072 390 H788 V430'],
-                    ['vezStudio', 'M1132 182 V390 L1112 410 H1098 V430'],
+                    ['nably', 'M1040 182 V328 L1018 350 H150 V430'],
+                    ['vezWork', 'M1080 182 V350 L1060 370 H458 V430'],
+                    ['vezRent', 'M1120 182 V370 L1100 390 H788 V430'],
+                    ['vezStudio', 'M1160 182 V390 L1140 410 H1098 V430'],
                   ] as const).map(([name, path]) => {
                     if (!sceneModuleNames.has(name)) return null
                     const branchStatus = dependencyStatus(labsStatus, statusByModule[name] ?? 'unknown')
@@ -590,13 +530,13 @@ export function DashboardModules({
               {canAccessInfrastructure && sceneModuleNames.has('vez') && (
                 <>
                   <path d="M510 304 H492 L474 304" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.database)}`} />
-                  <path d="M730 304 H748 L766 304" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.deploy)}`} />
+                  <path d="M730 304 H746" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.deploy)}`} />
                 </>
               )}
               {canAccessInfrastructure && sceneModuleNames.has('vezLabs') && (
                 <>
                   <path d="M994 70 V52 H938" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.labApi)}`} />
-                  <path d="M994 182 V252 L966 280 H938" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.minio)}`} />
+                  <path d="M994 182 V252 L1026 280" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.minio)}`} />
                   <path d="M1178 126 H1202" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.monitor)}`} />
                 </>
               )}
@@ -627,17 +567,34 @@ export function DashboardModules({
                       <span className="warehouse-module-icon">
                         <Icon className="h-[18px] w-[18px]" />
                       </span>
-                      {editMode ? (
-                        <button
-                          onClick={() => toggleModule(mod.name)}
-                          className="rounded-[8px] border border-black/[0.05] bg-white/80 p-1.5 text-[#69706e] transition-colors hover:bg-white"
-                          title={isHidden ? 'Pokaż moduł' : 'Ukryj moduł'}
+                      <span className="flex items-center gap-1">
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          className="group/info relative flex h-7 w-7 items-center justify-center rounded-full text-[#8c9391] transition-colors hover:bg-black/[0.04] hover:text-[#343836] focus:bg-black/[0.04] focus:outline-none"
+                          onClick={(event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                          }}
+                          aria-label={`Informacje o ${mod.label}`}
                         >
-                          {isHidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                        </button>
-                      ) : mod.href ? (
-                        <ArrowUpRight className="h-4 w-4 text-[#89908e] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                      ) : null}
+                          <Info className="h-3.5 w-3.5" />
+                          <span className="pointer-events-none absolute right-0 top-9 z-50 hidden w-52 rounded-[8px] bg-[#242725] px-3 py-2 text-left text-[10px] font-normal leading-relaxed text-white shadow-xl group-hover/info:block group-focus/info:block">
+                            {mod.description}
+                          </span>
+                        </span>
+                        {editMode ? (
+                          <button
+                            onClick={() => toggleModule(mod.name)}
+                            className="rounded-[8px] border border-black/[0.05] bg-white/80 p-1.5 text-[#69706e] transition-colors hover:bg-white"
+                            title={isHidden ? 'Pokaż moduł' : 'Ukryj moduł'}
+                          >
+                            {isHidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                          </button>
+                        ) : mod.href ? (
+                          <ArrowUpRight className="h-4 w-4 text-[#89908e] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                        ) : null}
+                      </span>
                     </div>
 
                     <div className="mt-auto">
@@ -714,8 +671,8 @@ export function DashboardModules({
         >
           <div className="flex shrink-0 items-center justify-between px-3.5 pb-2 pt-3">
             <div>
-              <p className="text-[12px] font-semibold text-[#242725]">Report operations</p>
-              <p className="mt-0.5 text-[9px] text-[#8a918f]">
+              <p className="text-[13px] font-semibold text-[#242725]">Report operations</p>
+              <p className="mt-0.5 text-[10px] text-[#8a918f]">
                 {healthyModuleCount} działa · {alertModuleCount} alertów
               </p>
             </div>
@@ -748,7 +705,6 @@ export function DashboardModules({
               const status = statusMeta[moduleStatus]
               const palette = modulePalette[mod.color]
               const isOpen = openModule === mod.name
-              const links = internalLinks[mod.name]
               const resources = canAccessInfrastructure
                 ? (infraData?.resources ?? []).filter((resource) => resource.module === mod.name)
                 : []
@@ -762,9 +718,11 @@ export function DashboardModules({
                 >
                   <button
                     type="button"
-                    onClick={() => setOpenModule(isOpen ? null : mod.name)}
+                    onClick={() => {
+                      if (resources.length > 0) setOpenModule(isOpen ? null : mod.name)
+                    }}
                     className="flex w-full items-center gap-2 p-2 text-left"
-                    aria-expanded={isOpen}
+                    aria-expanded={resources.length > 0 ? isOpen : undefined}
                   >
                     <span
                       className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px]"
@@ -772,13 +730,15 @@ export function DashboardModules({
                     >
                       <Icon className="h-3.5 w-3.5" />
                     </span>
-                    <span className="min-w-0 flex-1 truncate text-[10px] font-semibold text-[#272a29]">
+                    <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-[#272a29]">
                       {mod.label}
                     </span>
                     <span className="flex shrink-0 items-center gap-1.5">
                       <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-                      <span className="text-[8px] text-[#7e8583]">{status.label}</span>
-                      <ChevronDown className={`h-3 w-3 text-[#9ca2a0] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      <span className="text-[9px] text-[#7e8583]">{status.label}</span>
+                      {resources.length > 0 && (
+                        <ChevronDown className={`h-3 w-3 text-[#9ca2a0] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      )}
                     </span>
                   </button>
 
@@ -794,27 +754,9 @@ export function DashboardModules({
                         )}
                       </div>
 
-                      {links.length > 0 && (
-                        <div className="mt-2">
-                          <p className="mb-1 text-[8px] font-medium text-[#9aa09e]">Strony</p>
-                          <div className="grid grid-cols-2 gap-1">
-                            {links.map((link) => (
-                              <Link
-                                key={link.href}
-                                href={link.href}
-                                className="group/link flex min-w-0 items-center gap-1 rounded-[6px] bg-[#f7f8f7] px-2 py-1.5 transition-colors hover:bg-[#f1f2f1]"
-                              >
-                                <span className="min-w-0 flex-1 truncate text-[9px] font-medium text-[#454a48]">{link.label}</span>
-                                <ArrowUpRight className="h-2.5 w-2.5 shrink-0 text-[#a1a7a5] group-hover/link:text-[#4f5654]" />
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
                       {resources.length > 0 && (
                         <div className="mt-2">
-                          <p className="mb-1 text-[8px] font-medium text-[#9aa09e]">Zasoby</p>
+                          <p className="mb-1.5 text-[9px] font-medium text-[#8d9492]">Infrastruktura</p>
                           <div className="space-y-1">
                             {resources.map((resource) => {
                               const resourceKey = `${mod.name}-${resource.label}`
@@ -829,13 +771,13 @@ export function DashboardModules({
                                     rel="noreferrer"
                                     className="group/resource flex items-center gap-2"
                                   >
-                                    <span className="min-w-0 flex-1 truncate text-[9px] font-medium text-[#454a48]">{resource.label}</span>
-                                    <ExternalLink className="h-2.5 w-2.5 shrink-0 text-[#a1a7a5] group-hover/resource:text-[#4f5654]" />
+                                    <span className="min-w-0 flex-1 truncate text-[10px] font-medium text-[#454a48]">{resource.label}</span>
+                                    <ExternalLink className="h-3 w-3 shrink-0 text-[#a1a7a5] group-hover/resource:text-[#4f5654]" />
                                   </a>
                                   <button
                                     type="button"
                                     onClick={() => handleAliasClick(resourceKey, resource.alias)}
-                                    className="group/alias mt-1 flex h-6 w-full items-center justify-between gap-2 rounded-[5px] bg-white px-1.5 font-mono text-[8px] text-[#6f7774] transition-colors hover:bg-[#fdfdfd]"
+                                    className="group/alias mt-1.5 flex h-7 w-full items-center justify-between gap-2 rounded-[5px] bg-white px-2 font-mono text-[9px] text-[#6f7774] transition-colors hover:bg-[#fdfdfd]"
                                     title="Najedź, aby odsłonić. Kliknij, aby skopiować."
                                   >
                                     <span className="flex min-w-0 items-center gap-1.5">

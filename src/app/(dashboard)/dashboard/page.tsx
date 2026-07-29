@@ -29,9 +29,6 @@ export default async function DashboardPage() {
     ...(permissions.canAccessKonta
       ? [{ label: 'Konta', tone: 'neutral' as Tone, href: '/konta', icon: UserCog }]
       : []),
-    ...(permissions.canAccessAudit
-      ? [{ label: 'Aktywność', tone: auditTone, href: '/audit', icon: Clock3 }]
-      : []),
     ...(permissions.canAccessSettings
       ? [{ label: 'Ustawienia', tone: 'neutral' as Tone, href: '/settings', icon: Settings }]
       : []),
@@ -129,9 +126,10 @@ export default async function DashboardPage() {
                   <Link
                     href="/audit"
                     className="relative flex h-8 w-8 items-center justify-center rounded-[8px] text-[#69706e] transition-colors hover:bg-white hover:text-[#202020]"
-                    aria-label="Powiadomienia"
+                    aria-label="Aktywność"
+                    title="Aktywność"
                   >
-                    <Bell className="h-4 w-4" />
+                    <Clock3 className="h-4 w-4" />
                     {errors24h > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-500" />}
                   </Link>
                 )}
@@ -148,19 +146,6 @@ export default async function DashboardPage() {
             <DashboardModules
               canAccessVezVision={permissions.canAccessVezVision}
               canAccessInfrastructure={permissions.canAccessInfrastructure}
-              navigationAccess={{
-                canAccessKonta: permissions.canAccessKonta,
-                canAccessAudit: permissions.canAccessAudit,
-                canAccessSettings: permissions.canAccessSettings,
-                canViewVezVisionBlog: permissions.canViewVezVisionBlog,
-                canViewVezVisionPortfolio: permissions.canViewVezVisionPortfolio,
-                canViewVezVisionServices: permissions.canViewVezVisionServices,
-                canViewVezVisionFaq: permissions.canViewVezVisionFaq,
-                canViewVezVisionNewsletter: permissions.canViewVezVisionNewsletter,
-                canViewVezVisionFiles: permissions.canViewVezVisionFiles,
-                canViewVezVisionSettings: permissions.canViewVezVisionSettings,
-                canViewVezVisionCalendar: permissions.canViewVezVisionCalendar,
-              }}
             />
           </div>
         </div>

@@ -8,61 +8,67 @@ import type { LucideIcon } from 'lucide-react'
 import {
   AlertTriangle,
   ArrowLeft,
-  CheckCircle,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  Filter,
-  Keyboard,
+  Clock3,
   KeyRound,
   LogIn,
   LogOut,
   RefreshCw,
   Search,
-  Settings,
   Shield,
   ShieldCheck,
   User,
   Users,
   X,
 } from 'lucide-react'
-import { useConfirm } from '@/components/ConfirmDialog'
+import { MobileNav } from '@/components/MobileNav'
 import { useUserPreferences } from '@/components/providers/UserPreferencesProvider'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { getAuditLogs, getAuditLogActions, type AuditLog } from '@/lib/actions/audit'
-import { MobileNav } from '@/components/MobileNav'
-import { AuditLogSkeleton } from '@/components/skeletons'
 
-const actionMeta: Record<string, { label: string; tone: string; icon: LucideIcon; severity: 'ok' | 'warn' | 'critical' | 'info' }> = {
-  login: { label: 'Logowanie', tone: 'text-emerald-400 light:text-emerald-600 bg-emerald-500/10 border-emerald-500/20', icon: LogIn, severity: 'ok' },
-  logout: { label: 'Wylogowanie', tone: 'text-[#aaaaaa] light:text-[#666666] bg-white/[0.03] border-white/[0.07] light:bg-black/[0.03] light:border-black/[0.08]', icon: LogOut, severity: 'info' },
-  failed_login: { label: 'Nieudane logowanie', tone: 'text-red-300 light:text-red-700 bg-red-500/10 border-red-500/25', icon: AlertTriangle, severity: 'critical' },
-  ip_blocked: { label: 'Blokada IP', tone: 'text-red-300 light:text-red-700 bg-red-500/10 border-red-500/25', icon: AlertTriangle, severity: 'critical' },
-  password_change: { label: 'Zmiana hasła', tone: 'text-amber-300 light:text-amber-700 bg-amber-500/10 border-amber-500/25', icon: KeyRound, severity: 'warn' },
-  email_change: { label: 'Zmiana emaila', tone: 'text-amber-300 light:text-amber-700 bg-amber-500/10 border-amber-500/25', icon: User, severity: 'warn' },
-  profile_update: { label: 'Aktualizacja profilu', tone: 'text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/10 border-[#d7bfd8]/25', icon: User, severity: 'info' },
-  avatar_upload: { label: 'Avatar dodany', tone: 'text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/10 border-[#d7bfd8]/25', icon: User, severity: 'info' },
-  avatar_remove: { label: 'Avatar usunięty', tone: 'text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/10 border-[#d7bfd8]/25', icon: User, severity: 'info' },
-  '2fa_enable': { label: '2FA włączone', tone: 'text-emerald-400 light:text-emerald-600 bg-emerald-500/10 border-emerald-500/20', icon: ShieldCheck, severity: 'ok' },
-  '2fa_disable': { label: '2FA wyłączone', tone: 'text-orange-300 light:text-orange-700 bg-orange-500/10 border-orange-500/25', icon: AlertTriangle, severity: 'warn' },
-  '2fa_verify': { label: '2FA potwierdzone', tone: 'text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/10 border-[#d7bfd8]/25', icon: Shield, severity: 'ok' },
-  '2fa_failed': { label: 'Błąd 2FA', tone: 'text-red-300 light:text-red-700 bg-red-500/10 border-red-500/25', icon: AlertTriangle, severity: 'critical' },
-  user_create: { label: 'Konto utworzone', tone: 'text-emerald-400 light:text-emerald-600 bg-emerald-500/10 border-emerald-500/20', icon: Users, severity: 'ok' },
-  user_update: { label: 'Konto zmienione', tone: 'text-[#d7bfd8] light:text-[#735671] bg-[#d7bfd8]/10 border-[#d7bfd8]/25', icon: Users, severity: 'info' },
-  user_delete: { label: 'Konto usunięte', tone: 'text-red-300 light:text-red-700 bg-red-500/10 border-red-500/25', icon: Users, severity: 'critical' },
-  user_deactivate: { label: 'Konto wyłączone', tone: 'text-orange-300 light:text-orange-700 bg-orange-500/10 border-orange-500/25', icon: Users, severity: 'warn' },
-  user_activate: { label: 'Konto aktywowane', tone: 'text-emerald-400 light:text-emerald-600 bg-emerald-500/10 border-emerald-500/20', icon: Users, severity: 'ok' },
-  session_revoke: { label: 'Sesja wycofana', tone: 'text-amber-300 light:text-amber-700 bg-amber-500/10 border-amber-500/25', icon: KeyRound, severity: 'warn' },
-  all_sessions_revoked: { label: 'Sesje wycofane', tone: 'text-amber-300 light:text-amber-700 bg-amber-500/10 border-amber-500/25', icon: KeyRound, severity: 'warn' },
-  permission_grant: { label: 'Uprawnienie nadane', tone: 'text-emerald-400 light:text-emerald-600 bg-emerald-500/10 border-emerald-500/20', icon: ShieldCheck, severity: 'ok' },
-  permission_revoke: { label: 'Uprawnienie cofnięte', tone: 'text-orange-300 light:text-orange-700 bg-orange-500/10 border-orange-500/25', icon: Shield, severity: 'warn' },
+type Severity = 'ok' | 'warn' | 'critical' | 'info'
+
+type ActionMeta = {
+  label: string
+  icon: LucideIcon
+  severity: Severity
+  dot: string
+  iconStyle: string
 }
 
-const defaultActionMeta = {
+const actionMeta: Record<string, ActionMeta> = {
+  login: { label: 'Zalogowano', icon: LogIn, severity: 'ok', dot: 'bg-[#67ad7c]', iconStyle: 'bg-[#edf6f0] text-[#4c8660]' },
+  logout: { label: 'Wylogowano', icon: LogOut, severity: 'info', dot: 'bg-[#9da4a1]', iconStyle: 'bg-[#f0f2f1] text-[#737a77]' },
+  failed_login: { label: 'Nieudane logowanie', icon: AlertTriangle, severity: 'critical', dot: 'bg-[#d86c6c]', iconStyle: 'bg-[#faeeee] text-[#b74f4f]' },
+  ip_blocked: { label: 'Zablokowano IP', icon: Shield, severity: 'critical', dot: 'bg-[#d86c6c]', iconStyle: 'bg-[#faeeee] text-[#b74f4f]' },
+  password_change: { label: 'Zmieniono hasło', icon: KeyRound, severity: 'warn', dot: 'bg-[#d5a64e]', iconStyle: 'bg-[#faf3e5] text-[#a47a2f]' },
+  email_change: { label: 'Zmieniono e-mail', icon: User, severity: 'warn', dot: 'bg-[#d5a64e]', iconStyle: 'bg-[#faf3e5] text-[#a47a2f]' },
+  profile_update: { label: 'Zmieniono profil', icon: User, severity: 'info', dot: 'bg-[#a692ad]', iconStyle: 'bg-[#f3eef4] text-[#806a82]' },
+  avatar_upload: { label: 'Dodano avatar', icon: User, severity: 'info', dot: 'bg-[#a692ad]', iconStyle: 'bg-[#f3eef4] text-[#806a82]' },
+  avatar_remove: { label: 'Usunięto avatar', icon: User, severity: 'info', dot: 'bg-[#a692ad]', iconStyle: 'bg-[#f3eef4] text-[#806a82]' },
+  '2fa_enable': { label: 'Włączono 2FA', icon: ShieldCheck, severity: 'ok', dot: 'bg-[#67ad7c]', iconStyle: 'bg-[#edf6f0] text-[#4c8660]' },
+  '2fa_disable': { label: 'Wyłączono 2FA', icon: AlertTriangle, severity: 'warn', dot: 'bg-[#d5a64e]', iconStyle: 'bg-[#faf3e5] text-[#a47a2f]' },
+  '2fa_verify': { label: 'Potwierdzono 2FA', icon: ShieldCheck, severity: 'ok', dot: 'bg-[#67ad7c]', iconStyle: 'bg-[#edf6f0] text-[#4c8660]' },
+  '2fa_failed': { label: 'Błąd 2FA', icon: AlertTriangle, severity: 'critical', dot: 'bg-[#d86c6c]', iconStyle: 'bg-[#faeeee] text-[#b74f4f]' },
+  user_create: { label: 'Utworzono konto', icon: Users, severity: 'ok', dot: 'bg-[#67ad7c]', iconStyle: 'bg-[#edf6f0] text-[#4c8660]' },
+  user_update: { label: 'Zmieniono konto', icon: Users, severity: 'info', dot: 'bg-[#a692ad]', iconStyle: 'bg-[#f3eef4] text-[#806a82]' },
+  user_delete: { label: 'Usunięto konto', icon: Users, severity: 'critical', dot: 'bg-[#d86c6c]', iconStyle: 'bg-[#faeeee] text-[#b74f4f]' },
+  user_deactivate: { label: 'Wyłączono konto', icon: Users, severity: 'warn', dot: 'bg-[#d5a64e]', iconStyle: 'bg-[#faf3e5] text-[#a47a2f]' },
+  user_activate: { label: 'Aktywowano konto', icon: Users, severity: 'ok', dot: 'bg-[#67ad7c]', iconStyle: 'bg-[#edf6f0] text-[#4c8660]' },
+  session_revoke: { label: 'Wycofano sesję', icon: KeyRound, severity: 'warn', dot: 'bg-[#d5a64e]', iconStyle: 'bg-[#faf3e5] text-[#a47a2f]' },
+  all_sessions_revoked: { label: 'Wycofano sesje', icon: KeyRound, severity: 'warn', dot: 'bg-[#d5a64e]', iconStyle: 'bg-[#faf3e5] text-[#a47a2f]' },
+  permission_grant: { label: 'Nadano uprawnienie', icon: ShieldCheck, severity: 'ok', dot: 'bg-[#67ad7c]', iconStyle: 'bg-[#edf6f0] text-[#4c8660]' },
+  permission_revoke: { label: 'Cofnięto uprawnienie', icon: Shield, severity: 'warn', dot: 'bg-[#d5a64e]', iconStyle: 'bg-[#faf3e5] text-[#a47a2f]' },
+}
+
+const defaultActionMeta: ActionMeta = {
   label: 'Zdarzenie systemowe',
-  tone: 'text-[#aaaaaa] light:text-[#666666] bg-white/[0.03] border-white/[0.07] light:bg-black/[0.03] light:border-black/[0.08]',
-  icon: Clock,
-  severity: 'info' as const,
+  icon: Clock3,
+  severity: 'info',
+  dot: 'bg-[#9da4a1]',
+  iconStyle: 'bg-[#f0f2f1] text-[#737a77]',
 }
 
 interface AuditPageClientProps {
@@ -71,7 +77,7 @@ interface AuditPageClientProps {
 }
 
 function getMeta(action: string) {
-  return actionMeta[action] || { ...defaultActionMeta, label: action }
+  return actionMeta[action] ?? { ...defaultActionMeta, label: action.replaceAll('_', ' ') }
 }
 
 function formatDetailValue(value: unknown) {
@@ -81,76 +87,9 @@ function formatDetailValue(value: unknown) {
   return JSON.stringify(value)
 }
 
-function NavLink({
-  href,
-  label,
-  icon: Icon,
-  active,
-}: {
-  href: string
-  label: string
-  icon?: LucideIcon
-  active?: boolean
-}) {
-  return (
-    <Link
-      href={href}
-      className={`inline-flex h-10 items-center gap-2 rounded-md border px-3 text-xs transition-colors ${
-        active
-          ? 'border-white/[0.12] bg-white/[0.06] text-white light:border-black/[0.12] light:bg-black/[0.05] light:text-black'
-          : 'border-white/[0.07] text-[#888888] hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black'
-      }`}
-    >
-      {Icon && <Icon className="h-4 w-4" />}
-      {label}
-    </Link>
-  )
-}
-
-function MetricCard({
-  label,
-  value,
-  helper,
-  icon: Icon,
-  tone = 'text-[#e6c7a7] light:text-[#7d5a38]',
-}: {
-  label: string
-  value: string | number
-  helper: string
-  icon: LucideIcon
-  tone?: string
-}) {
-  return (
-    <div className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-4 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.18em] text-[#777777] light:text-[#888888]">{label}</p>
-          <p className="mt-2 text-2xl font-semibold text-white light:text-black">{value}</p>
-        </div>
-        <div className="flex h-9 w-9 items-center justify-center rounded-md border border-white/[0.07] bg-white/[0.03] light:border-black/[0.08] light:bg-black/[0.03]">
-          <Icon className={`h-4 w-4 ${tone}`} />
-        </div>
-      </div>
-      <p className="mt-3 text-xs text-[#777777] light:text-[#777777]">{helper}</p>
-    </div>
-  )
-}
-
-function ShortcutCard({ label, keys }: { label: string; keys: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-md bg-white/[0.03] px-3 py-2 light:bg-black/[0.03]">
-      <span className="text-xs text-[#888888] light:text-[#666666]">{label}</span>
-      <kbd className="rounded border border-white/[0.1] bg-white/[0.04] px-2 py-1 text-[10px] text-white light:border-black/[0.1] light:bg-black/[0.04] light:text-black">
-        {keys}
-      </kbd>
-    </div>
-  )
-}
-
 export default function AuditPageClient({ canAccessKonta, canAccessSettings }: AuditPageClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { confirm } = useConfirm()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const { preferences } = useUserPreferences()
 
@@ -159,29 +98,25 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [actions, setActions] = useState<string[]>([])
-  const [showShortcuts, setShowShortcuts] = useState(false)
-
   const [search, setSearch] = useState(searchParams.get('search') || '')
   const [actionFilter, setActionFilter] = useState(searchParams.get('action') || '')
   const [startDate, setStartDate] = useState(searchParams.get('start') || '')
   const [endDate, setEndDate] = useState(searchParams.get('end') || '')
   const [page, setPage] = useState(parseInt(searchParams.get('page') || '1'))
-  const [showFilters, setShowFilters] = useState(false)
 
   const limit = 20
   const totalPages = Math.ceil(total / limit)
   const hasFilters = Boolean(search || actionFilter || startDate || endDate)
-
   const criticalCount = useMemo(
-    () => logs.filter(log => getMeta(log.action).severity === 'critical').length,
+    () => logs.filter((log) => getMeta(log.action).severity === 'critical').length,
     [logs]
   )
   const warningCount = useMemo(
-    () => logs.filter(log => getMeta(log.action).severity === 'warn').length,
+    () => logs.filter((log) => getMeta(log.action).severity === 'warn').length,
     [logs]
   )
   const uniqueUsers = useMemo(
-    () => new Set(logs.map(log => log.user_email || log.user_id || 'system')).size,
+    () => new Set(logs.map((log) => log.user_email || log.user_id || 'system')).size,
     [logs]
   )
 
@@ -204,25 +139,13 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
       setTotal(result.total)
     }
     setLoading(false)
-  }, [actionFilter, startDate, endDate, search, page])
+  }, [actionFilter, endDate, page, search, startDate])
 
   useKeyboardShortcuts({
-    onSearch: () => {
-      searchInputRef.current?.focus()
-    },
-    onRefresh: () => {
-      void fetchLogs()
-    },
+    onSearch: () => searchInputRef.current?.focus(),
+    onRefresh: () => void fetchLogs(),
     onCancel: () => {
-      if (document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur()
-      }
-      setShowFilters(false)
-      setShowShortcuts(false)
-    },
-    onToggleTheme: () => {
-      const toggle = document.querySelector('[data-theme-toggle]') as HTMLButtonElement
-      toggle?.click()
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
     },
     onGoDashboard: () => router.push('/dashboard'),
     onGoProfile: () => router.push('/profile'),
@@ -232,18 +155,12 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
   useEffect(() => {
     let cancelled = false
     getAuditLogActions().then((result) => {
-      if (!cancelled) {
-        setActions(result)
-      }
+      if (!cancelled) setActions(result)
     })
-
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [])
 
   useEffect(() => {
-    // Initial and filter-driven sync with the server-side audit source.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchLogs()
   }, [fetchLogs])
@@ -255,332 +172,213 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
     if (startDate) params.set('start', startDate)
     if (endDate) params.set('end', endDate)
     if (page > 1) params.set('page', page.toString())
-
     router.replace(params.toString() ? `?${params.toString()}` : '/audit', { scroll: false })
-  }, [search, actionFilter, startDate, endDate, page, router])
+  }, [actionFilter, endDate, page, router, search, startDate])
 
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return 'Brak daty'
-    const date = new Date(dateStr)
-    return date.toLocaleDateString('pl-PL', {
+  const eventDate = (value: string | null) => {
+    if (!value) return 'Brak daty'
+    return new Intl.DateTimeFormat('pl-PL', {
       timeZone: preferences.timezone,
       day: '2-digit',
-      month: '2-digit',
+      month: 'long',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+    }).format(new Date(value))
   }
 
-  const clearFilters = async () => {
-    const confirmed = await confirm({
-      title: 'Wyczyścić filtry?',
-      message: 'Czy na pewno chcesz wyczyścić wszystkie filtry? Spowoduje to usunięcie aktualnego wyszukiwania i filtrów.',
-      confirmText: 'Wyczyść',
-      cancelText: 'Anuluj',
-      variant: 'warning',
-    })
+  const eventTime = (value: string | null) => {
+    if (!value) return '--:--'
+    return new Intl.DateTimeFormat('pl-PL', {
+      timeZone: preferences.timezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(new Date(value))
+  }
 
-    if (confirmed) {
-      setSearch('')
-      setActionFilter('')
-      setStartDate('')
-      setEndDate('')
-      setPage(1)
-    }
+  const clearFilters = () => {
+    setSearch('')
+    setActionFilter('')
+    setStartDate('')
+    setEndDate('')
+    setPage(1)
   }
 
   return (
-    <div className="min-h-screen bg-transparent transition-colors duration-300">
+    <div className="min-h-screen bg-[#eef1f0] text-[#242725]">
       <MobileNav currentPath="/audit" showKonta={canAccessKonta} showAudit showSettings={canAccessSettings} />
 
-      <div className="mx-auto min-h-screen w-full max-w-7xl px-4 py-8 sm:py-10">
-        <header className="mb-6 flex flex-col gap-5 border-b border-white/[0.07] pb-5 light:border-black/[0.08] lg:flex-row lg:items-end lg:justify-between">
+      <div className="mx-auto min-h-screen w-full max-w-[1540px] px-4 py-4 sm:px-7 sm:py-6">
+        <header className="flex min-h-14 flex-wrap items-center gap-4 border-b border-black/[0.08] pb-4">
+          <Image
+            src="/logo/vezcore_logo_black_full.svg"
+            alt="VEZcore"
+            width={122}
+            height={42}
+            className="h-auto w-[122px]"
+            priority
+          />
+          <span className="hidden h-6 w-px bg-black/[0.09] sm:block" />
           <div>
-            <Image
-              src="/logo/vezcore_logo_white_full.svg"
-              alt="vezCore"
-              width={178}
-              height={52}
-              className="h-auto w-[178px] max-w-[60vw] opacity-85 light:hidden"
-              priority
-            />
-            <Image
-              src="/logo/vezcore_logo_black_full.svg"
-              alt="vezCore"
-              width={178}
-              height={52}
-              className="hidden h-auto w-[178px] max-w-[60vw] opacity-85 light:block"
-              priority
-            />
-            <p className="mt-4 text-[10px] uppercase tracking-[0.26em] text-[#666666] light:text-[#888888]">
-              Bezpieczeństwo
-            </p>
-            <h1 className="mt-1 text-2xl font-semibold text-white light:text-black">
-              Audit Log
-            </h1>
+            <p className="text-[9px] font-medium uppercase text-[#929896]">Bezpieczeństwo</p>
+            <h1 className="text-lg font-semibold">Aktywność</h1>
           </div>
 
-          <nav className="flex flex-wrap gap-2">
-            <NavLink href="/dashboard" label="Dashboard" icon={ArrowLeft} />
-            <NavLink href="/profile" label="Profil" icon={User} />
-            {canAccessKonta && <NavLink href="/konta" label="Konta" icon={Users} />}
-            <NavLink href="/audit" label="Audit Log" icon={ShieldCheck} active />
-            {canAccessSettings && <NavLink href="/settings" label="Ustawienia" icon={Settings} />}
-          </nav>
+          <div className="ml-auto flex items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="flex h-9 items-center gap-2 rounded-[8px] px-3 text-[11px] text-[#68706d] transition-colors hover:bg-white hover:text-[#242725]"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Dashboard
+            </Link>
+            <button
+              type="button"
+              onClick={() => void fetchLogs()}
+              className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-white text-[#68706d] shadow-sm transition-colors hover:text-[#242725]"
+              aria-label="Odśwież aktywność"
+              title="Odśwież"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </header>
 
-        <div className="mb-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <MetricCard label="Zdarzenia" value={total} helper="Wynik dla aktualnych filtrów" icon={ShieldCheck} />
-          <MetricCard label="Na stronie" value={logs.length} helper={`Strona ${page}${totalPages > 0 ? ` z ${totalPages}` : ''}`} icon={Clock} />
-          <MetricCard label="Użytkownicy" value={uniqueUsers} helper="Unikalni autorzy na tej stronie" icon={Users} tone="text-[#d7bfd8] light:text-[#735671]" />
-          <MetricCard label="Uwaga" value={criticalCount + warningCount} helper={`${criticalCount} krytyczne, ${warningCount} ostrzegawcze`} icon={AlertTriangle} tone={criticalCount > 0 ? 'text-red-300 light:text-red-700' : 'text-amber-300 light:text-amber-700'} />
+        <div className="grid border-b border-black/[0.07] py-4 sm:grid-cols-4">
+          {[
+            ['Zdarzenia', total],
+            ['Na stronie', logs.length],
+            ['Użytkownicy', uniqueUsers],
+            ['Wymaga uwagi', criticalCount + warningCount],
+          ].map(([label, value]) => (
+            <div key={label} className="flex items-baseline justify-between border-black/[0.07] px-3 py-2 first:pl-0 sm:border-r sm:last:border-r-0">
+              <span className="text-[10px] text-[#858c89]">{label}</span>
+              <strong className="text-base font-semibold text-[#343836]">{value}</strong>
+            </div>
+          ))}
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
-          <main className="space-y-5">
-            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-              <div className="border-b border-white/[0.06] p-4 light:border-black/[0.06]">
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-white light:text-black">Zdarzenia systemowe</p>
-                    <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
-                      Najnowsze logowania, zmiany uprawnień, 2FA, sesje i zdarzenia administracyjne.
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <div className="relative min-w-0 sm:w-[320px]">
-                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666666] light:text-[#888888]" />
-                      <input
-                        ref={searchInputRef}
-                        type="text"
-                        value={search}
-                        onChange={(event) => {
-                          setSearch(event.target.value)
-                          setPage(1)
-                        }}
-                        placeholder="Szukaj akcji lub obiektu"
-                        className="h-10 w-full rounded-md border border-white/[0.07] bg-white/[0.03] pl-10 pr-3 text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-black/[0.03] light:text-black light:placeholder:text-[#999999]"
-                      />
-                    </div>
-                    <button
-                      onClick={() => setShowFilters(!showFilters)}
-                      className={`inline-flex h-10 items-center justify-center gap-2 rounded-md border px-3 text-xs transition-colors ${
-                        showFilters || hasFilters
-                          ? 'border-[#e6c7a7]/25 bg-[#e6c7a7]/10 text-[#f0d9be] light:text-[#7d5a38]'
-                          : 'border-white/[0.07] text-[#999999] hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black'
-                      }`}
-                    >
-                      <Filter className="h-4 w-4" />
-                      Filtry
-                      {hasFilters && <span className="h-2 w-2 rounded-full bg-[#e6c7a7] light:bg-[#7d5a38]" />}
-                    </button>
-                    <button
-                      onClick={() => void fetchLogs()}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                      Odśwież
-                    </button>
-                  </div>
-                </div>
+        <div className="grid min-h-[calc(100vh-155px)] xl:grid-cols-[minmax(0,1fr)_330px]">
+          <main className="min-w-0 bg-white/75 px-4 py-5 sm:px-7">
+            <div className="mb-6 flex flex-col gap-3 border-b border-black/[0.07] pb-5 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold">Oś zdarzeń</p>
+                <p className="mt-1 text-[11px] text-[#7d8582]">
+                  Logowania, bezpieczeństwo, konta, sesje i zmiany uprawnień.
+                </p>
               </div>
+              <p className="text-[10px] text-[#929896]">
+                Strona {page}{totalPages > 0 ? ` z ${totalPages}` : ''}
+              </p>
+            </div>
 
-              {showFilters && (
-                <div className="border-b border-white/[0.06] bg-white/[0.025] p-4 light:border-black/[0.06] light:bg-black/[0.025]">
-                  <div className="grid gap-3 md:grid-cols-[minmax(0,1.2fr)_1fr_1fr_auto] md:items-end">
-                    <label className="block">
-                      <span className="mb-1 block text-[10px] uppercase tracking-[0.16em] text-[#777777]">Akcja</span>
-                      <select
-                        value={actionFilter}
-                        onChange={(event) => {
-                          setActionFilter(event.target.value)
-                          setPage(1)
-                        }}
-                        className="h-10 w-full rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-sm text-white outline-none focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-white light:text-black"
-                      >
-                        <option value="">Wszystkie akcje</option>
-                        {actions.map(action => (
-                          <option key={action} value={action}>{getMeta(action).label}</option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <label className="block">
-                      <span className="mb-1 block text-[10px] uppercase tracking-[0.16em] text-[#777777]">Od daty</span>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(event) => {
-                          setStartDate(event.target.value)
-                          setPage(1)
-                        }}
-                        className="h-10 w-full rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-sm text-white outline-none focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-white light:text-black"
-                      />
-                    </label>
-
-                    <label className="block">
-                      <span className="mb-1 block text-[10px] uppercase tracking-[0.16em] text-[#777777]">Do daty</span>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(event) => {
-                          setEndDate(event.target.value)
-                          setPage(1)
-                        }}
-                        className="h-10 w-full rounded-md border border-white/[0.07] bg-[#0d0d0d] px-3 text-sm text-white outline-none focus:border-[#e6c7a7]/45 light:border-black/[0.08] light:bg-white light:text-black"
-                      />
-                    </label>
-
-                    {hasFilters && (
-                      <button
-                        onClick={() => void clearFilters()}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-red-500/25 bg-red-500/10 px-3 text-xs text-red-300 transition-colors hover:bg-red-500/15 light:text-red-700"
-                      >
-                        <X className="h-4 w-4" />
-                        Wyczyść
-                      </button>
-                    )}
+            {loading ? (
+              <div className="space-y-6 py-3">
+                {Array.from({ length: 6 }, (_, index) => (
+                  <div key={index} className="grid animate-pulse grid-cols-[58px_24px_minmax(0,1fr)] gap-3">
+                    <div className="h-3 rounded bg-black/[0.05]" />
+                    <div className="mx-auto h-5 w-5 rounded-full bg-black/[0.06]" />
+                    <div>
+                      <div className="h-3 w-2/5 rounded bg-black/[0.06]" />
+                      <div className="mt-3 h-3 w-3/4 rounded bg-black/[0.04]" />
+                    </div>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
+            ) : fetchError ? (
+              <div className="flex min-h-[360px] flex-col items-center justify-center text-center">
+                <AlertTriangle className="h-7 w-7 text-[#bd5c5c]" />
+                <p className="mt-3 text-sm font-medium">Nie udało się pobrać aktywności</p>
+                <p className="mt-1 text-xs text-[#7d8582]">{fetchError}</p>
+              </div>
+            ) : logs.length === 0 ? (
+              <div className="flex min-h-[360px] flex-col items-center justify-center text-center">
+                <CheckCircle2 className="h-7 w-7 text-[#7b9d85]" />
+                <p className="mt-3 text-sm font-medium">Brak zdarzeń</p>
+                <p className="mt-1 text-xs text-[#7d8582]">Zmień filtry albo sprawdź ponownie później.</p>
+              </div>
+            ) : (
+              <div>
+                {logs.map((log, index) => {
+                  const meta = getMeta(log.action)
+                  const Icon = meta.icon
+                  const details = log.details ? Object.entries(log.details).slice(0, 4) : []
+                  const dateLabel = eventDate(log.created_at)
+                  const previousDate = index > 0 ? eventDate(logs[index - 1].created_at) : null
+                  const showDate = dateLabel !== previousDate
 
-              {loading ? (
-                <AuditLogSkeleton count={5} />
-              ) : fetchError ? (
-                <div className="flex min-h-[340px] flex-col items-center justify-center px-6 text-center">
-                  <AlertTriangle className="h-8 w-8 text-red-300 light:text-red-700" />
-                  <p className="mt-4 text-sm font-medium text-white light:text-black">Nie udało się pobrać logów</p>
-                  <p className="mt-2 text-xs text-[#777777] light:text-[#777777]">{fetchError}</p>
-                </div>
-              ) : logs.length === 0 ? (
-                <div className="flex min-h-[340px] flex-col items-center justify-center px-6 text-center">
-                  <CheckCircle className="h-8 w-8 text-[#777777] light:text-[#777777]" />
-                  <p className="mt-4 text-sm font-medium text-white light:text-black">Brak zdarzeń</p>
-                  <p className="mt-2 max-w-sm text-xs text-[#777777] light:text-[#777777]">
-                    {hasFilters ? 'Nie ma wyników dla aktualnych filtrów.' : 'Aktywność systemu pojawi się tutaj automatycznie.'}
-                  </p>
-                </div>
-              ) : (
-                <div className="divide-y divide-white/[0.06] light:divide-black/[0.06]">
-                  {logs.map((log) => {
-                    const meta = getMeta(log.action)
-                    const Icon = meta.icon
-                    const details = log.details ? Object.entries(log.details).slice(0, 6) : []
-
-                    return (
-                      <article
-                        key={log.id}
-                        className="grid gap-4 px-4 py-4 transition-colors hover:bg-white/[0.025] light:hover:bg-black/[0.025] lg:grid-cols-[44px_minmax(0,1fr)_180px]"
-                      >
-                        <div className={`flex h-11 w-11 items-center justify-center rounded-md border ${meta.tone}`}>
-                          <Icon className="h-4 w-4" />
+                  return (
+                    <div key={log.id}>
+                      {showDate && (
+                        <div className="grid grid-cols-[58px_24px_minmax(0,1fr)] gap-3 py-3">
+                          <span />
+                          <span className="mx-auto h-px w-6 bg-black/[0.10]" />
+                          <span className="text-[10px] font-semibold uppercase text-[#8b9290]">{dateLabel}</span>
                         </div>
-
-                        <div className="min-w-0">
+                      )}
+                      <article className="group grid grid-cols-[58px_24px_minmax(0,1fr)] gap-3">
+                        <time className="pt-3 text-right font-mono text-[10px] text-[#7f8784]">
+                          {eventTime(log.created_at)}
+                        </time>
+                        <div className="relative flex justify-center">
+                          <span className="absolute bottom-0 top-0 w-px bg-black/[0.09]" />
+                          <span className={`relative mt-3 h-2.5 w-2.5 rounded-full border-2 border-white ${meta.dot}`} />
+                        </div>
+                        <div className="min-w-0 border-b border-black/[0.06] py-2.5 pb-4">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className={`rounded-md border px-2 py-1 text-[10px] uppercase tracking-[0.12em] ${meta.tone}`}>
-                              {meta.label}
+                            <span className={`flex h-7 w-7 items-center justify-center rounded-[7px] ${meta.iconStyle}`}>
+                              <Icon className="h-3.5 w-3.5" />
                             </span>
-                            <span className="font-mono text-xs text-[#888888] light:text-[#666666]">
-                              {log.action}
+                            <strong className="text-[12px] font-semibold">{log.user_email || 'system'}</strong>
+                            <span className="text-[12px] text-[#626a67]">{meta.label}</span>
+                          </div>
+                          <div className="ml-9 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-[#8a918f]">
+                            <span>{log.action}</span>
+                            <span>
+                              {log.entity_type || 'system'}
+                              {log.entity_id ? ` / ${log.entity_id.slice(0, 8)}` : ''}
                             </span>
                           </div>
-
-                          <div className="mt-3 grid gap-2 text-xs text-[#888888] light:text-[#666666] sm:grid-cols-2">
-                            <div className="min-w-0">
-                              <p className="text-[10px] uppercase tracking-[0.16em] text-[#666666] light:text-[#888888]">Użytkownik</p>
-                              <p className="mt-1 truncate font-mono text-white light:text-black">{log.user_email || 'system'}</p>
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-[10px] uppercase tracking-[0.16em] text-[#666666] light:text-[#888888]">Obiekt</p>
-                              <p className="mt-1 truncate font-mono text-white light:text-black">
-                                {log.entity_type || 'system'}
-                                {log.entity_id ? ` / ${log.entity_id.substring(0, 8)}` : ''}
-                              </p>
-                            </div>
-                          </div>
-
                           {details.length > 0 && (
-                            <div className="mt-4 grid gap-2 rounded-md border border-white/[0.05] bg-white/[0.025] p-3 light:border-black/[0.06] light:bg-black/[0.025] sm:grid-cols-2 xl:grid-cols-3">
+                            <div className="ml-9 mt-2 flex flex-wrap gap-x-4 gap-y-1 rounded-[7px] bg-[#f4f5f4] px-3 py-2">
                               {details.map(([key, value]) => (
-                                <div key={key} className="min-w-0">
-                                  <p className="text-[9px] uppercase tracking-[0.16em] text-[#666666] light:text-[#888888]">{key}</p>
-                                  <p className="mt-1 truncate font-mono text-[11px] text-[#aaaaaa] light:text-[#555555]">
-                                    {formatDetailValue(value)}
-                                  </p>
-                                </div>
+                                <span key={key} className="flex max-w-full min-w-0 items-center gap-1 text-[9px] text-[#858c89]">
+                                  <b className="shrink-0 font-medium text-[#626966]">{key}:</b>
+                                  <span className="truncate font-mono">{formatDetailValue(value)}</span>
+                                </span>
                               ))}
                             </div>
                           )}
                         </div>
-
-                        <div className="flex items-start justify-between gap-3 lg:justify-end">
-                          <div className="lg:text-right">
-                            <p className="text-[10px] uppercase tracking-[0.16em] text-[#666666] light:text-[#888888]">Czas</p>
-                            <p className="mt-1 font-mono text-xs text-[#aaaaaa] light:text-[#555555]">
-                              {formatDate(log.created_at)}
-                            </p>
-                          </div>
-                        </div>
                       </article>
-                    )
-                  })}
-                </div>
-              )}
-            </section>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
 
             {totalPages > 1 && (
-              <div className="flex flex-col gap-3 rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-3 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84] sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-[#777777] light:text-[#777777]">
-                  Wyświetlane {((page - 1) * limit) + 1}-{Math.min(page * limit, total)} z {total} logów
+              <div className="mt-5 flex items-center justify-between border-t border-black/[0.07] pt-4">
+                <p className="text-[10px] text-[#858c89]">
+                  {((page - 1) * limit) + 1}-{Math.min(page * limit, total)} z {total}
                 </p>
-
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1">
                   <button
-                    onClick={() => setPage(current => Math.max(1, current - 1))}
+                    type="button"
+                    onClick={() => setPage((current) => Math.max(1, current - 1))}
                     disabled={page === 1}
-                    className="inline-flex h-9 items-center gap-1 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-40 light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                    className="flex h-8 w-8 items-center justify-center rounded-[7px] text-[#69706e] hover:bg-[#f0f1f0] disabled:opacity-30"
+                    aria-label="Poprzednia strona"
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    Poprzednia
                   </button>
-
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, index) => {
-                      let pageNum: number
-                      if (totalPages <= 5) {
-                        pageNum = index + 1
-                      } else if (page <= 3) {
-                        pageNum = index + 1
-                      } else if (page >= totalPages - 2) {
-                        pageNum = totalPages - 4 + index
-                      } else {
-                        pageNum = page - 2 + index
-                      }
-
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setPage(pageNum)}
-                          className={`h-9 w-9 rounded-md text-xs transition-colors ${
-                            page === pageNum
-                              ? 'bg-white/[0.08] text-white light:bg-black/[0.08] light:text-black'
-                              : 'text-[#999999] hover:bg-white/[0.03] hover:text-white light:text-[#666666] light:hover:bg-black/[0.03] light:hover:text-black'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      )
-                    })}
-                  </div>
-
+                  <span className="min-w-12 text-center text-[10px] text-[#6f7774]">{page} / {totalPages}</span>
                   <button
-                    onClick={() => setPage(current => Math.min(totalPages, current + 1))}
+                    type="button"
+                    onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                     disabled={page === totalPages}
-                    className="inline-flex h-9 items-center gap-1 rounded-md border border-white/[0.07] px-3 text-xs text-[#999999] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-40 light:border-black/[0.08] light:text-[#666666] light:hover:text-black"
+                    className="flex h-8 w-8 items-center justify-center rounded-[7px] text-[#69706e] hover:bg-[#f0f1f0] disabled:opacity-30"
+                    aria-label="Następna strona"
                   >
-                    Następna
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -588,77 +386,109 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
             )}
           </main>
 
-          <aside className="space-y-5">
-            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-              <div className="flex items-center justify-between gap-3">
+          <aside className="border-l border-black/[0.07] bg-[#f6f8f7] px-5 py-6">
+            <div className="sticky top-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-white light:text-black">Filtry aktywne</p>
-                  <p className="mt-1 text-xs text-[#777777] light:text-[#777777]">
-                    Zakres widoku logów
-                  </p>
+                  <p className="text-base font-semibold">Filtry</p>
+                  <p className="mt-1 text-[10px] text-[#858c89]">Zawęź widoczną aktywność</p>
                 </div>
-                <span className={`h-2.5 w-2.5 rounded-full ${hasFilters ? 'bg-[#e6c7a7] light:bg-[#7d5a38]' : 'bg-[#444444] light:bg-[#b5b5b5]'}`} />
+                {hasFilters && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="flex h-8 w-8 items-center justify-center rounded-[7px] text-[#8a918f] hover:bg-white hover:text-[#b65555]"
+                    aria-label="Wyczyść filtry"
+                    title="Wyczyść"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
-              <div className="mt-4 space-y-2">
-                <div className="rounded-md bg-white/[0.03] p-3 light:bg-black/[0.03]">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#777777]">Akcja</p>
-                  <p className="mt-1 truncate text-sm text-white light:text-black">
-                    {actionFilter ? getMeta(actionFilter).label : 'Wszystkie'}
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-md bg-white/[0.03] p-3 light:bg-black/[0.03]">
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-[#777777]">Od</p>
-                    <p className="mt-1 text-sm text-white light:text-black">{startDate || 'brak'}</p>
-                  </div>
-                  <div className="rounded-md bg-white/[0.03] p-3 light:bg-black/[0.03]">
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-[#777777]">Do</p>
-                    <p className="mt-1 text-sm text-white light:text-black">{endDate || 'brak'}</p>
-                  </div>
-                </div>
-              </div>
-            </section>
 
-            <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-              <p className="text-sm font-medium text-white light:text-black">Szybkie akcje</p>
-              <div className="mt-4 space-y-2">
-                <button
-                  onClick={() => void fetchLogs()}
-                  className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4 text-[#e6c7a7] light:text-[#7d5a38]" />
-                    Odśwież logi
-                  </span>
-                  <span className="text-xs text-[#777777]">⌘R</span>
-                </button>
-                <button
-                  onClick={() => setShowShortcuts(!showShortcuts)}
-                  className="flex w-full items-center justify-between rounded-md border border-white/[0.07] px-3 py-3 text-left text-sm text-white transition-colors hover:bg-white/[0.03] light:border-black/[0.08] light:text-black light:hover:bg-black/[0.03]"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <Keyboard className="h-4 w-4 text-[#d7bfd8] light:text-[#735671]" />
-                    Skróty
-                  </span>
-                  <span className="text-xs text-[#777777]">{showShortcuts ? 'ukryj' : 'pokaż'}</span>
-                </button>
-              </div>
-            </section>
+              <label className="mt-6 block">
+                <span className="mb-2 block text-[10px] font-medium text-[#69716e]">Szukaj</span>
+                <span className="relative block">
+                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#969d9a]" />
+                  <input
+                    ref={searchInputRef}
+                    type="search"
+                    value={search}
+                    onChange={(event) => {
+                      setSearch(event.target.value)
+                      setPage(1)
+                    }}
+                    placeholder="Akcja lub obiekt"
+                    className="h-10 w-full rounded-[7px] border border-black/[0.08] bg-white pl-9 pr-3 text-[11px] outline-none placeholder:text-[#a0a6a4] focus:border-black/[0.18]"
+                  />
+                </span>
+              </label>
 
-            {showShortcuts && (
-              <section className="rounded-md border border-white/[0.07] bg-[#141310]/[0.74] p-5 light:border-black/[0.08] light:bg-[#fffdfa]/[0.84]">
-                <p className="text-sm font-medium text-white light:text-black">Skróty klawiszowe</p>
-                <div className="mt-4 space-y-2">
-                  <ShortcutCard label="Szukaj" keys="⌘K" />
-                  <ShortcutCard label="Odśwież" keys="⌘R" />
-                  <ShortcutCard label="Dashboard" keys="⌘⇧D" />
-                  <ShortcutCard label="Profil" keys="⌘⇧P" />
-                  <ShortcutCard label="Motyw" keys="⌘⇧T" />
-                  {canAccessSettings && <ShortcutCard label="Ustawienia" keys="⌘⇧S" />}
-                  <ShortcutCard label="Anuluj" keys="Esc" />
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <label>
+                  <span className="mb-2 block text-[10px] font-medium text-[#69716e]">Od</span>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(event) => {
+                      setStartDate(event.target.value)
+                      setPage(1)
+                    }}
+                    className="h-10 w-full rounded-[7px] border border-black/[0.08] bg-white px-2 text-[10px] outline-none focus:border-black/[0.18]"
+                  />
+                </label>
+                <label>
+                  <span className="mb-2 block text-[10px] font-medium text-[#69716e]">Do</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(event) => {
+                      setEndDate(event.target.value)
+                      setPage(1)
+                    }}
+                    className="h-10 w-full rounded-[7px] border border-black/[0.08] bg-white px-2 text-[10px] outline-none focus:border-black/[0.18]"
+                  />
+                </label>
+              </div>
+
+              <div className="mt-6">
+                <p className="mb-2 text-[10px] font-medium text-[#69716e]">Typ zdarzenia</p>
+                <div className="max-h-[430px] space-y-0.5 overflow-y-auto pr-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActionFilter('')
+                      setPage(1)
+                    }}
+                    className={`flex w-full items-center justify-between rounded-[6px] px-2.5 py-2 text-left text-[10px] ${
+                      actionFilter === '' ? 'bg-white font-medium text-[#252927] shadow-sm' : 'text-[#737b78] hover:bg-white/70'
+                    }`}
+                  >
+                    Wszystkie zdarzenia
+                    <span className="text-[#a0a6a4]">{total}</span>
+                  </button>
+                  {actions.map((action) => {
+                    const meta = getMeta(action)
+                    return (
+                      <button
+                        key={action}
+                        type="button"
+                        onClick={() => {
+                          setActionFilter(action)
+                          setPage(1)
+                        }}
+                        className={`flex w-full items-center gap-2 rounded-[6px] px-2.5 py-2 text-left text-[10px] ${
+                          actionFilter === action ? 'bg-white font-medium text-[#252927] shadow-sm' : 'text-[#737b78] hover:bg-white/70'
+                        }`}
+                      >
+                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${meta.dot}`} />
+                        <span className="truncate">{meta.label}</span>
+                      </button>
+                    )
+                  })}
                 </div>
-              </section>
-            )}
+              </div>
+            </div>
           </aside>
         </div>
       </div>
