@@ -1,10 +1,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Activity, Bell, Clock3, Settings, User, UserCog, Users } from 'lucide-react'
+import { Activity, Bell, Clock3, Settings, UserCog, Users } from 'lucide-react'
+import { ProfileAvatar } from '@/components/ProfileAvatar'
 import { getAuthenticatedUserPermissionState, getUserPermissions } from '@/lib/permissions'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { getDashboardStatsForLast24Hours } from '@/lib/queries/dashboard'
+import { getDashboardProfileSummary } from '@/lib/queries/profile'
 import { DashboardModules } from './DashboardModules'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
@@ -17,16 +19,17 @@ export default async function DashboardPage() {
   const user = await getDashboardAuthUser()
   if (!user) redirect('/login')
 
-  const permissions = await getUserPermissions()
+  const [permissions, dashboardProfile] = await Promise.all([
+    getUserPermissions(),
+    getDashboardProfileSummary(user.id),
+  ])
   const dashboardStats = permissions.canAccessKonta || permissions.canAccessAudit
     ? await getDashboardStatsForLast24Hours()
     : null
   const errors24h = dashboardStats?.errors_24h ?? 0
   const auditTone: Tone = errors24h > 4 ? 'danger' : errors24h > 0 ? 'warning' : 'ok'
-  const profileTone: Tone = user.email_confirmed_at ? 'neutral' : 'warning'
 
   const quickLinks = [
-    { label: 'Profil', tone: profileTone, href: '/profile', icon: User },
     ...(permissions.canAccessKonta
       ? [{ label: 'Konta', tone: 'neutral' as Tone, href: '/konta', icon: UserCog }]
       : []),
@@ -96,17 +99,13 @@ export default async function DashboardPage() {
               </div>
 
               <nav className="hidden flex-1 items-center justify-center gap-0.5 lg:flex" aria-label="Główna nawigacja">
-                {quickLinks.map((link, index) => {
+                {quickLinks.map((link) => {
                   const Icon = link.icon
                   return (
                     <Link
                       key={link.href}
                       href={link.href}
-                      className={`group flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-[11px] font-medium transition-colors ${
-                        index === 0
-                          ? 'bg-white text-[#202020] shadow-sm dark:bg-white/[0.09] dark:text-white'
-                          : 'text-[#69706e] hover:bg-white/70 hover:text-[#202020] dark:text-[#949a97] dark:hover:bg-white/[0.06] dark:hover:text-white'
-                      }`}
+                      className="group flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-[11px] font-medium text-[#69706e] transition-colors hover:bg-white/70 hover:text-[#202020] dark:text-[#949a97] dark:hover:bg-white/[0.06] dark:hover:text-white"
                     >
                       <Icon className="h-3.5 w-3.5" />
                       <span>{link.label}</span>
@@ -145,10 +144,16 @@ export default async function DashboardPage() {
                 )}
                 <Link
                   href="/profile"
-                  className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-white/75 text-[#69706e] transition-colors hover:bg-white hover:text-[#202020] dark:bg-white/[0.05] dark:text-[#a7adaa] dark:hover:bg-white/[0.09] dark:hover:text-white"
+                  className="flex h-8 w-8 items-center justify-center rounded-[8px] ring-1 ring-black/[0.07] transition-opacity hover:opacity-80 dark:ring-white/[0.1]"
                   aria-label="Profil"
+                  title="Profil"
                 >
-                  <User className="h-4 w-4" />
+                  <ProfileAvatar
+                    url={dashboardProfile?.avatar_url}
+                    label={dashboardProfile?.full_name || user.email || 'Profil'}
+                    className="h-8 w-8 rounded-[8px]"
+                    fallbackClassName="text-[9px]"
+                  />
                 </Link>
               </div>
             </header>

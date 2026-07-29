@@ -8,6 +8,7 @@ interface UserPreferences {
   sessionTimeout: number // in minutes
   autoLogoutOnIpChange: boolean
   hiddenModules: string[]
+  hiddenServiceNodes: string[]
   operationsPanelSize: {
     width: number
     height: number
@@ -45,6 +46,7 @@ const defaultPreferences: UserPreferences = {
   sessionTimeout: 15,
   autoLogoutOnIpChange: false,
   hiddenModules: [],
+  hiddenServiceNodes: [],
   operationsPanelSize: {
     width: 300,
     height: 360,
@@ -76,6 +78,11 @@ function sanitizePreferences(raw: unknown): UserPreferences {
           (m): m is string => typeof m === 'string' && VALID_MODULE_NAMES.includes(m)
         )
       : defaultPreferences.hiddenModules,
+    hiddenServiceNodes: Array.isArray(obj.hiddenServiceNodes)
+      ? (obj.hiddenServiceNodes as unknown[]).filter(
+          (name): name is string => typeof name === 'string' && VALID_SERVICE_NODE_NAMES.includes(name)
+        )
+      : defaultPreferences.hiddenServiceNodes,
     operationsPanelSize: (() => {
       if (!obj.operationsPanelSize || typeof obj.operationsPanelSize !== 'object') {
         return defaultPreferences.operationsPanelSize

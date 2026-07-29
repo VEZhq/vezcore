@@ -5,6 +5,7 @@ export interface AccountListUser {
   id: string
   email: string
   full_name: string | null
+  avatar_url: string | null
   role: string | null
   created_at: string
 }
@@ -12,6 +13,7 @@ export interface AccountListUser {
 export interface AccountProfile {
   id: string
   full_name: string | null
+  avatar_url: string | null
   role: string | null
   created_at: string
 }
@@ -48,6 +50,7 @@ export interface AccountSessionEntry {
 interface ProfileRow {
   id: string
   full_name: string | null
+  avatar_url: string | null
   role: string | null
   created_at: string
 }
@@ -99,7 +102,7 @@ export async function getAccountsPageData(input: {
   const offset = (input.page - 1) * input.limit
   let query = supabase
     .from('profiles')
-    .select('id, full_name, role, created_at', { count: 'exact' })
+    .select('id, full_name, avatar_url, role, created_at', { count: 'exact' })
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
@@ -115,6 +118,7 @@ export async function getAccountsPageData(input: {
       id: profile.id,
       email: emailMap.get(profile.id) || '',
       full_name: profile.full_name,
+      avatar_url: profile.avatar_url,
       role: profile.role,
       created_at: profile.created_at,
     })),
@@ -132,7 +136,7 @@ export async function getAccountDetailData(id: string): Promise<{
 
   const { data: targetProfile } = await supabase
     .from('profiles')
-    .select('id, full_name, role, created_at')
+    .select('id, full_name, avatar_url, role, created_at')
     .eq('id', id)
     .is('deleted_at', null)
     .single()
@@ -155,6 +159,7 @@ export async function getAccountDetailData(id: string): Promise<{
       id: profile.id,
       email: authUserData?.user?.email || '',
       full_name: profile.full_name,
+      avatar_url: profile.avatar_url,
       role: profile.role,
       created_at: profile.created_at,
     },
@@ -169,7 +174,7 @@ export async function getAccountPermissionsUserData(id: string): Promise<Account
 
   const { data: targetProfile } = await supabase
     .from('profiles')
-    .select('id, full_name, role, created_at')
+    .select('id, full_name, avatar_url, role, created_at')
     .eq('id', id)
     .is('deleted_at', null)
     .single()
@@ -183,6 +188,7 @@ export async function getAccountPermissionsUserData(id: string): Promise<Account
     id: profile.id,
     email: authUserData?.user?.email || '',
     full_name: profile.full_name,
+    avatar_url: profile.avatar_url,
     role: profile.role,
     created_at: profile.created_at,
   }

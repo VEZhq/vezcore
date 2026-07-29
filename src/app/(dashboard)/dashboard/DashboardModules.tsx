@@ -187,8 +187,7 @@ const serviceNodeDescriptions: Record<ServiceNodeDefinition['id'], string> = {
 }
 const SCENE_WIDTH = 1360
 const SCENE_HEIGHT = 570
-const PAN_LIMIT_X = 700
-const PAN_LIMIT_Y = 400
+const PAN_LIMIT = 1200
 
 const serviceNodes: ServiceNodeDefinition[] = [
   { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 104, top: 210, width: 140, href: 'https://api.vezvision.com/healthz' },
@@ -490,6 +489,9 @@ export function DashboardModules({
     ...node,
     ...serviceNodePositions[node.id],
   }))
+  const sceneServiceNodes = effectiveServiceNodes.filter(
+    (node) => editMode || !preferences.hiddenServiceNodes.includes(node.id)
+  )
   const projectConnections = [
     {
       id: 'vision-core',
@@ -535,6 +537,13 @@ export function DashboardModules({
       ? preferences.hiddenModules.filter((moduleName) => moduleName !== name)
       : [...preferences.hiddenModules, name]
     updatePreferences({ hiddenModules: next })
+  }
+
+  const toggleServiceNode = (id: ServiceNodeDefinition['id']) => {
+    const next = preferences.hiddenServiceNodes.includes(id)
+      ? preferences.hiddenServiceNodes.filter((nodeId) => nodeId !== id)
+      : [...preferences.hiddenServiceNodes, id]
+    updatePreferences({ hiddenServiceNodes: next })
   }
 
   const scheduleSceneTransform = () => {
@@ -583,8 +592,8 @@ export function DashboardModules({
     if (!drag || drag.pointerId !== event.pointerId) return
 
     panRef.current = {
-      x: clamp(drag.originX + event.clientX - drag.startX, -PAN_LIMIT_X, PAN_LIMIT_X),
-      y: clamp(drag.originY + event.clientY - drag.startY, -PAN_LIMIT_Y, PAN_LIMIT_Y),
+      x: clamp(drag.originX + event.clientX - drag.startX, -PAN_LIMIT, PAN_LIMIT),
+      y: clamp(drag.originY + event.clientY - drag.startY, -PAN_LIMIT, PAN_LIMIT),
     }
     scheduleSceneTransform()
   }
@@ -641,7 +650,7 @@ export function DashboardModules({
     event: ReactPointerEvent<HTMLElement>,
     node: ServiceNodeDefinition
   ) => {
-    if (!editMode || (event.target as HTMLElement).closest('[role="button"]')) return
+    if (!editMode || (event.target as HTMLElement).closest('button, a, [role="button"]')) return
     event.preventDefault()
     event.stopPropagation()
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -779,8 +788,11 @@ export function DashboardModules({
         >
           <div
             ref={sceneRef}
-            className="warehouse-map-scene absolute top-[8px] h-[570px] w-[1360px]"
-            style={{ left: 'calc(50% - 680px)' }}
+            className="warehouse-map-scene absolute h-[570px] w-[1360px]"
+            style={{
+              left: 'calc(50% - 550px)',
+              top: 'calc(50% - 285px)',
+            }}
           >
             <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1360 570" preserveAspectRatio="none">
               <title>Połączenia modułów ekosystemu</title>
@@ -814,7 +826,7 @@ export function DashboardModules({
                   <g key={connection.id}>{edge}</g>
                 )
               })}
-              {effectiveServiceNodes
+              {sceneServiceNodes
                 .filter((node) => canAccessInfrastructure && sceneModuleNames.has(node.owner))
                 .map((node) => {
                   const path = serviceConnector(effectiveLayout[node.owner], node)
@@ -955,7 +967,7 @@ export function DashboardModules({
               return <div key={mod.name} className="contents">{tile}</div>
             })}
 
-            {effectiveServiceNodes
+            {sceneServiceNodes
               .filter((node) => canAccessInfrastructure && sceneModuleNames.has(node.owner))
               .map((node) => {
                 const Icon = node.icon
@@ -964,6 +976,7 @@ export function DashboardModules({
                 const detail = getServiceNodeDetail(node, infraData)
                 const href = getServiceNodeHref(node, infraData)
                 const showNodeInfoAbove = node.top > 390
+                const isHidden = preferences.hiddenServiceNodes.includes(node.id)
 
                 const nodeContent = (
                   <>
@@ -977,24 +990,40 @@ export function DashboardModules({
                       </span>
                       <span className="mt-0.5 block truncate text-[8px] text-[#858c89] dark:text-[#858b88]">{detail}</span>
                     </span>
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      className="group/nodeinfo relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-black/[0.07] bg-white/70 text-[#89918e] transition-colors hover:border-black/[0.14] hover:text-[#39403d] focus:border-black/[0.14] focus:outline-none dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-[#929895] dark:hover:text-white"
-                      onClick={(event) => {
-                        event.preventDefault()
-                        event.stopPropagation()
-                      }}
-                      aria-label={`Informacje o ${node.label}`}
-                    >
-                      <Info className="h-3 w-3" strokeWidth={1.8} />
-                      <span className={`pointer-events-none absolute right-0 z-50 hidden w-48 rounded-[8px] border border-white/10 bg-[#252825]/95 px-3 py-2 text-left text-[9px] font-normal leading-relaxed text-white shadow-[0_8px_22px_rgba(20,24,22,0.2)] backdrop-blur-md group-hover/nodeinfo:block group-focus/nodeinfo:block ${
-                        showNodeInfoAbove ? 'bottom-7' : 'top-7'
-                      }`}>
-                        <span className="block font-medium">{serviceNodeDescriptions[node.id]}</span>
-                        <span className="mt-1 block text-white/65">{detail}</span>
+                    {editMode ? (
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          toggleServiceNode(node.id)
+                        }}
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] text-[#89918e] hover:bg-black/[0.05] hover:text-[#39403d] dark:hover:bg-white/[0.07] dark:hover:text-white"
+                        aria-label={isHidden ? `Pokaż ${node.label}` : `Ukryj ${node.label}`}
+                        title={isHidden ? `Pokaż ${node.label}` : `Ukryj ${node.label}`}
+                      >
+                        {isHidden ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                      </button>
+                    ) : (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        className="group/nodeinfo relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-black/[0.07] bg-white/70 text-[#89918e] transition-colors hover:border-black/[0.14] hover:text-[#39403d] focus:border-black/[0.14] focus:outline-none dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-[#929895] dark:hover:text-white"
+                        onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                        }}
+                        aria-label={`Informacje o ${node.label}`}
+                      >
+                        <Info className="h-3 w-3" strokeWidth={1.8} />
+                        <span className={`pointer-events-none absolute right-0 z-50 hidden w-48 rounded-[8px] border border-white/10 bg-[#252825]/95 px-3 py-2 text-left text-[9px] font-normal leading-relaxed text-white shadow-[0_8px_22px_rgba(20,24,22,0.2)] backdrop-blur-md group-hover/nodeinfo:block group-focus/nodeinfo:block ${
+                          showNodeInfoAbove ? 'bottom-7' : 'top-7'
+                        }`}>
+                          <span className="block font-medium">{serviceNodeDescriptions[node.id]}</span>
+                          <span className="mt-1 block text-white/65">{detail}</span>
+                        </span>
                       </span>
-                    </span>
+                    )}
                   </>
                 )
 
@@ -1022,7 +1051,7 @@ export function DashboardModules({
                     onLostPointerCapture={endServiceNodeDrag}
                     className={`ecosystem-service-node absolute z-30 flex items-center gap-2.5 ${
                       editMode ? 'is-editing cursor-grab touch-none active:cursor-grabbing' : ''
-                    }`}
+                    } ${isHidden ? 'opacity-40' : ''}`}
                     style={{ left: node.left, top: node.top, width: node.width }}
                     title={editMode ? `Przeciągnij ${node.label}` : `${node.label}: ${detail}`}
                   >

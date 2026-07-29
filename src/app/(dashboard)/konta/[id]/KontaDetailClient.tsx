@@ -16,11 +16,13 @@ import { useCSRFToken } from '@/hooks/useCSRFToken'
 import { updateUser, deleteUser, changeUserEmail } from '@/lib/actions/users'
 import { MobileNav } from '@/components/MobileNav'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { ProfileAvatar } from '@/components/ProfileAvatar'
 
 interface UserData {
   id: string
   email: string
   full_name: string | null
+  avatar_url: string | null
   role: string | null
   created_at: string
 }
@@ -97,34 +99,6 @@ export default function KontaDetailClient({
       hour: '2-digit',
       minute: '2-digit'
     })
-  }
-
-  const getInitials = (name: string | null, email: string) => {
-    if (name) {
-      const parts = name.trim().split(' ')
-      if (parts.length >= 2) {
-        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      }
-      return name.substring(0, 2).toUpperCase()
-    }
-    return email.substring(0, 2).toUpperCase()
-  }
-
-  const getAvatarColor = (name: string | null, email: string) => {
-    const str = name || email
-    let hash = 0
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash)
-    }
-    const colors = [
-      'bg-emerald-500/20 text-emerald-400 light:text-emerald-600',
-      'bg-[#d7bfd8]/16 text-[#d7bfd8] light:text-[#735671]',
-      'bg-[#d7bfd8]/16 text-[#d7bfd8] light:text-[#735671]',
-      'bg-orange-500/20 text-orange-400 light:text-orange-600',
-      'bg-pink-500/20 text-pink-400 light:text-pink-600',
-      'bg-[#c9d8c5]/16 text-[#c9d8c5] light:text-[#5f7358]',
-    ]
-    return colors[Math.abs(hash) % colors.length]
   }
 
   const handleSave = async () => {
@@ -233,9 +207,12 @@ export default function KontaDetailClient({
         <section className="border-b border-black/[0.1] pb-7 dark:border-white/[0.09]">
           <p className="text-[9px] font-semibold uppercase text-[#808783] dark:text-[#8f9692]">Użytkownik</p>
           <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center">
-            <div className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-[14px] text-[20px] font-semibold ${getAvatarColor(user.full_name, user.email)}`}>
-              {getInitials(user.full_name, user.email)}
-            </div>
+            <ProfileAvatar
+              url={user.avatar_url}
+              label={user.full_name || user.email}
+              className="h-20 w-20 rounded-[14px] ring-1 ring-black/[0.08] dark:ring-white/[0.1]"
+              fallbackClassName="text-[20px]"
+            />
 
             <div className="min-w-0 flex-1">
               {isEditing ? (

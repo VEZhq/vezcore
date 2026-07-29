@@ -27,14 +27,16 @@ import { getUsersForExport } from '@/lib/actions/export'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { MobileNav } from '@/components/MobileNav'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { ProfileAvatar } from '@/components/ProfileAvatar'
 import { useCSRFToken } from '@/hooks/useCSRFToken'
-import { formatDate as _formatDate, getInitials, getAvatarColor } from './konta-utils'
+import { formatDate as _formatDate } from './konta-utils'
 import { downloadUserCsv } from './konta-csv'
 
 interface UserData {
   id: string
   email: string
   full_name: string | null
+  avatar_url: string | null
   role: string | null
   created_at: string
 }
@@ -59,9 +61,9 @@ function roleLabel(role: string | null) {
 }
 
 function roleTone(role: string | null) {
-  if (role === 'super_admin') return 'border-[#d7bfd8]/25 bg-[#d7bfd8]/10 text-[#ead8e9] light:text-[#735671]'
-  if (role === 'admin') return 'border-[#d7bfd8]/25 bg-[#d7bfd8]/10 text-[#d7bfd8] light:text-[#735671]'
-  return 'border-white/[0.07] bg-white/[0.03] text-[#999999] light:border-black/[0.08] light:bg-black/[0.03] light:text-[#666666]'
+  if (role === 'super_admin') return 'border-[#bba7bd]/25 bg-[#e9dfea]/70 text-[#665468] dark:bg-[#bba7bd]/[0.12] dark:text-[#d6c7d8]'
+  if (role === 'admin') return 'border-[#9eb3a6]/25 bg-[#e1eae4]/75 text-[#53675b] dark:bg-[#9eb3a6]/[0.11] dark:text-[#bfd0c5]'
+  return 'border-black/[0.07] bg-black/[0.025] text-[#69706d] dark:border-white/[0.07] dark:bg-white/[0.035] dark:text-[#9da3a0]'
 }
 
 function EmptyState({ search }: { search: string }) {
@@ -528,19 +530,22 @@ export default function KontaClient({
                           </span>
                         </div>
 
-                        <div className="flex min-w-0 items-center gap-3">
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[9px] text-[12px] font-semibold ${getAvatarColor(user.full_name, user.email)}`}>
-                            {getInitials(user.full_name, user.email)}
-                          </div>
+                        <Link href={`/konta/${user.id}`} className="group flex min-w-0 items-center gap-3 rounded-[7px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#789083]/35">
+                          <ProfileAvatar
+                            url={user.avatar_url}
+                            label={user.full_name || user.email}
+                            className="h-10 w-10 rounded-[9px] ring-1 ring-black/[0.06] transition-opacity group-hover:opacity-85 dark:ring-white/[0.08]"
+                            fallbackClassName="text-[11px]"
+                          />
                           <div className="min-w-0">
-                        <p className="truncate text-[12px] font-medium text-[#2c312e] dark:text-[#e8ebe9]">
+                        <p className="truncate text-[12px] font-medium text-[#2c312e] group-hover:underline group-hover:decoration-black/20 group-hover:underline-offset-4 dark:text-[#e8ebe9] dark:group-hover:decoration-white/25">
                               {user.full_name || user.email.split('@')[0]}
                             </p>
                         <p className="mt-0.5 truncate font-mono text-[10px] text-[#7b827e] dark:text-[#8e9591]">
                               {user.email}
                             </p>
                           </div>
-                        </div>
+                        </Link>
 
                         <div className="hidden lg:block">
                           <span className={`inline-flex rounded-md border px-2 py-1 text-[10px] uppercase tracking-[0.12em] ${roleTone(user.role)}`}>

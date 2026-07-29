@@ -54,3 +54,17 @@ export async function getProfilePageData(user: DashboardAuthUser): Promise<{
     twoFactors,
   }
 }
+
+export async function getDashboardProfileSummary(userId: string): Promise<{
+  full_name: string | null
+  avatar_url: string | null
+} | null> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('profiles')
+    .select('full_name, avatar_url')
+    .eq('id', userId)
+    .single()
+
+  return data as { full_name: string | null; avatar_url: string | null } | null
+}

@@ -19,11 +19,13 @@ import { DASHBOARD_MODULES, DASHBOARD_MODULE_ICON_COLORS, type DashboardModuleNa
 import { MobileNav } from '@/components/MobileNav'
 import { useCSRFToken } from '@/hooks/useCSRFToken'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { ProfileAvatar } from '@/components/ProfileAvatar'
 
 interface UserData {
   id: string
   email: string
   full_name: string | null
+  avatar_url: string | null
   role: string | null
   created_at: string
 }
@@ -161,19 +163,43 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
   }
 
   const handleBulkEnable = async (keys: string[]) => {
-    for (const key of keys) {
-      if (!hasPermission(key)) {
-        await handleTogglePermission(key)
-      }
+    if (!canEditUsers || !csrfToken) {
+      if (!csrfToken) setError('Brak tokenu bezpieczeństwa. Odśwież stronę i spróbuj ponownie.')
+      return
     }
+
+    const missingKeys = keys.filter((key) => !hasPermission(key))
+    if (missingKeys.length === 0) return
+
+    setLoadingPermission('bulk')
+    setError(null)
+    const results = await Promise.all(
+      missingKeys.map((key) => grantPermission(user.id, key, csrfToken))
+    )
+    const failed = results.find((result) => 'error' in result)
+    if (failed && 'error' in failed) setError(failed.error)
+    await loadPermissions()
+    setLoadingPermission(null)
   }
 
   const handleBulkDisable = async (keys: string[]) => {
-    for (const key of keys) {
-      if (hasPermission(key)) {
-        await handleTogglePermission(key)
-      }
+    if (!canEditUsers || !csrfToken) {
+      if (!csrfToken) setError('Brak tokenu bezpieczeństwa. Odśwież stronę i spróbuj ponownie.')
+      return
     }
+
+    const grantedKeys = keys.filter((key) => hasPermission(key))
+    if (grantedKeys.length === 0) return
+
+    setLoadingPermission('bulk')
+    setError(null)
+    const results = await Promise.all(
+      grantedKeys.map((key) => revokePermission(user.id, key, csrfToken))
+    )
+    const failed = results.find((result) => 'error' in result)
+    if (failed && 'error' in failed) setError(failed.error)
+    await loadPermissions()
+    setLoadingPermission(null)
   }
 
   const toggleCollapse = (groupId: string) => {
@@ -218,6 +244,10 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
 
   const permMap = new Map(AVAILABLE_PERMISSIONS.map(p => [p.key, p]))
   const visibleGroups = PERMISSION_GROUPS.filter(group => group.ecosystem === selectedEcosystem)
+  const enabledPermissionCount = isAdminUser
+    ? AVAILABLE_PERMISSIONS.length
+    : AVAILABLE_PERMISSIONS.filter((permission) => hasPermission(permission.key)).length
+  const selectedEcosystemData = ecosystemOptions.find((option) => option.name === selectedEcosystem)
 
   return (
     <div className="min-h-screen bg-[#f1f3f2] text-[#252927] dark:bg-[#070807] dark:text-[#eef0ef]">
@@ -239,43 +269,38 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
 
       <main className="mx-auto w-full max-w-[1180px] px-4 py-6 sm:px-6 sm:py-8">
         <section className="border-b border-black/[0.1] pb-6 dark:border-white/[0.09]">
-          <p className="text-[9px] font-semibold uppercase text-[#808783] dark:text-[#8f9692]">Kontrola dostępu</p>
-          <div className="mt-1 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-[28px] font-semibold">Uprawnienia</h1>
-              <p className="mt-1.5 font-mono text-[10px] text-[#777e7a] dark:text-[#8e9591]">{user.email}</p>
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <ProfileAvatar
+              url={user.avatar_url}
+              label={user.full_name || user.email}
+              className="h-14 w-14 rounded-[12px] ring-1 ring-black/[0.08] dark:ring-white/[0.1]"
+              fallbackClassName="text-[14px]"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] font-semibold uppercase text-[#808783] dark:text-[#8f9692]">Kontrola dostępu</p>
+              <h1 className="mt-1 truncate text-[25px] font-semibold">{user.full_name || user.email.split('@')[0]}</h1>
+              <p className="mt-1 truncate font-mono text-[10px] text-[#777e7a] dark:text-[#8e9591]">{user.email}</p>
             </div>
-            <div className="relative w-full sm:w-[310px]">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8b918e]" />
-              <input
-                type="search"
-                placeholder="Szukaj uprawnienia"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                className="h-9 w-full rounded-[8px] border border-black/[0.08] bg-white/65 pl-9 pr-3 text-[11px] outline-none focus:border-[#779182] dark:border-white/[0.09] dark:bg-white/[0.045]"
-              />
+            <div className="flex shrink-0 items-center gap-6 border-l border-black/[0.08] pl-6 dark:border-white/[0.09]">
+              <div>
+                <p className="font-mono text-[20px] font-semibold tabular-nums">{enabledPermissionCount}</p>
+                <p className="mt-0.5 text-[8px] uppercase text-[#8b918e]">Aktywne</p>
+              </div>
+              <div>
+                <p className="font-mono text-[20px] font-semibold tabular-nums">{AVAILABLE_PERMISSIONS.length}</p>
+                <p className="mt-0.5 text-[8px] uppercase text-[#8b918e]">Dostępne</p>
+              </div>
             </div>
           </div>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {ecosystemOptions.map((option) => {
-              const Icon = option.icon
-              const isActive = selectedEcosystem === option.name
-              return (
-                <button
-                  key={option.name}
-                  type="button"
-                  onClick={() => setSelectedEcosystem(option.name)}
-                  className={`flex h-9 items-center gap-2 rounded-[8px] border px-3 text-[10px] transition-colors ${
-                    isActive
-                      ? 'border-[#788d81]/30 bg-[#dfe9e3] text-[#26332c] dark:border-white/[0.12] dark:bg-white/[0.09] dark:text-white'
-                      : 'border-black/[0.07] text-[#747b78] hover:bg-white dark:border-white/[0.08] dark:text-[#969c99] dark:hover:bg-white/[0.05]'
-                  }`}
-                >
-                  <Icon className={`h-3.5 w-3.5 ${DASHBOARD_MODULE_ICON_COLORS[option.color].dark} ${DASHBOARD_MODULE_ICON_COLORS[option.color].light}`} />
-                  {option.label}
-                </button>
-              )
-            })}
+          <div className="relative mt-5 max-w-[420px]">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8b918e]" />
+            <input
+              type="search"
+              placeholder="Szukaj po nazwie, opisie lub kluczu"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="h-9 w-full rounded-[8px] border border-black/[0.08] bg-white/65 pl-9 pr-3 text-[11px] outline-none focus:border-[#779182] dark:border-white/[0.09] dark:bg-white/[0.045]"
+            />
           </div>
         </section>
 
@@ -287,28 +312,50 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
           </div>
         )}
 
-        <div className="grid gap-8 py-7 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside>
-            <div className="border-b border-black/[0.09] pb-3 dark:border-white/[0.09]">
-              <h2 className="text-[13px] font-semibold">Konto</h2>
+        <div className="grid gap-8 py-7 lg:grid-cols-[230px_minmax(0,1fr)]">
+          <aside className="lg:border-r lg:border-black/[0.08] lg:pr-5 dark:lg:border-white/[0.08]">
+            <p className="mb-2 text-[8px] font-semibold uppercase text-[#969c99]">Obszar</p>
+            <div className="space-y-1">
+              {ecosystemOptions.map((option) => {
+                const Icon = option.icon
+                const isActive = selectedEcosystem === option.name
+                const optionGroups = PERMISSION_GROUPS.filter((group) => group.ecosystem === option.name)
+                const optionKeys = optionGroups.flatMap((group) => group.keys)
+                const optionEnabled = isAdminUser ? optionKeys.length : optionKeys.filter(hasPermission).length
+                return (
+                  <button
+                    key={option.name}
+                    type="button"
+                    onClick={() => setSelectedEcosystem(option.name)}
+                    className={`flex w-full items-center gap-3 rounded-[8px] px-2.5 py-2 text-left transition-colors ${
+                      isActive
+                        ? 'bg-white text-[#26302b] shadow-[0_1px_2px_rgba(23,30,27,0.05)] dark:bg-white/[0.08] dark:text-white'
+                        : 'text-[#747b78] hover:bg-white/55 dark:text-[#969c99] dark:hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-black/[0.035] dark:bg-white/[0.05]">
+                      <Icon className={`h-3.5 w-3.5 ${DASHBOARD_MODULE_ICON_COLORS[option.color].dark} ${DASHBOARD_MODULE_ICON_COLORS[option.color].light}`} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[10px] font-medium">{option.label}</span>
+                      <span className="mt-0.5 block font-mono text-[8px] text-[#969c99]">{optionEnabled}/{optionKeys.length}</span>
+                    </span>
+                    <ChevronRight className="h-3.5 w-3.5 opacity-45" />
+                  </button>
+                )
+              })}
             </div>
-            {[
-              ['E-mail', user.email],
-              ['Nazwa', user.full_name || 'Nie ustawiono'],
-              ['Rola', user.role || 'viewer'],
-              ['Utworzono', formatDate(user.created_at)],
-            ].map(([label, value]) => (
-              <div key={label} className="border-b border-black/[0.07] py-3 dark:border-white/[0.07]">
-                <p className="text-[8px] uppercase text-[#969c99]">{label}</p>
-                <p className="mt-1 break-all text-[10px] font-medium">{value}</p>
-              </div>
-            ))}
+            <div className="mt-6 border-t border-black/[0.08] pt-4 dark:border-white/[0.08]">
+              <p className="text-[8px] uppercase text-[#969c99]">Rola bazowa</p>
+              <p className="mt-1.5 text-[10px] font-medium">{user.role || 'viewer'}</p>
+              <p className="mt-0.5 font-mono text-[8px] text-[#969c99]">{formatDate(user.created_at)}</p>
+            </div>
           </aside>
 
           <section>
             <div className="mb-4">
-              <h2 className="text-[14px] font-semibold">{ecosystemOptions.find((option) => option.name === selectedEcosystem)?.label}</h2>
-              <p className="mt-1 text-[10px] text-[#858c88]">Włączaj wyłącznie dostęp potrzebny do wykonywania zadań.</p>
+              <h2 className="text-[14px] font-semibold">{selectedEcosystemData?.label}</h2>
+              <p className="mt-1 text-[10px] text-[#858c88]">{selectedEcosystemData?.description}</p>
             </div>
             <div className="space-y-5">
                 {visibleGroups.map(group => {
@@ -356,6 +403,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                               <button
                                 type="button"
                                 onClick={() => handleBulkEnable(group.keys)}
+                                disabled={loadingPermission === 'bulk'}
                                 className="rounded-[6px] px-2 py-1 text-[9px] text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400"
                               >
                                 Wszystkie
@@ -363,6 +411,7 @@ export default function PermissionsClient({ user, canEditUsers, isAdminUser, can
                               <button
                                 type="button"
                                 onClick={() => handleBulkDisable(group.keys)}
+                                disabled={loadingPermission === 'bulk'}
                                 className="rounded-[6px] px-2 py-1 text-[9px] text-[#7d8480] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                               >
                                 Brak
