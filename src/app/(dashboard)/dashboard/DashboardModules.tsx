@@ -22,6 +22,7 @@ import {
   GripVertical,
   HardDrive,
   Info,
+  LocateFixed,
   MoveDiagonal2,
   Rocket,
   RotateCcw,
@@ -295,6 +296,10 @@ function verticalConnector(
   to: { x: number; y: number },
   laneOffset = 0
 ) {
+  if (Math.abs(to.x - from.x) < 4 && Math.abs(laneOffset) < 0.5) {
+    return `M${from.x} ${from.y} V${to.y}`
+  }
+
   const direction = to.y >= from.y ? 1 : -1
   const middleY = from.y + ((to.y - from.y) / 2) + laneOffset
   const chamfer = Math.min(12, Math.max(5, Math.abs(to.x - from.x) / 5))
@@ -409,7 +414,7 @@ export function DashboardModules({
   const panelSizeRef = useRef(panelSize)
   const modulePositionsRef = useRef(modulePositions)
   const serviceNodePositionsRef = useRef(serviceNodePositions)
-  const panRef = useRef({ x: 0, y: 0 })
+  const panRef = useRef(preferences.dashboardCenter)
   const frameRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -437,14 +442,20 @@ export function DashboardModules({
       modulePositionsRef.current = preferences.dashboardModulePositions
       serviceNodePositionsRef.current = preferences.dashboardServiceNodePositions
       panelSizeRef.current = preferences.operationsPanelSize
+      panRef.current = preferences.dashboardCenter
       setModulePositions(preferences.dashboardModulePositions)
       setServiceNodePositions(preferences.dashboardServiceNodePositions)
       setPanelSize(preferences.operationsPanelSize)
+      if (sceneRef.current) {
+        const { x, y } = preferences.dashboardCenter
+        sceneRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`
+      }
     })
     return () => cancelAnimationFrame(frame)
   }, [
     preferences.dashboardModulePositions,
     preferences.dashboardServiceNodePositions,
+    preferences.dashboardCenter,
     preferences.operationsPanelSize,
   ])
 
@@ -577,12 +588,17 @@ export function DashboardModules({
   }
 
   const resetMap = () => {
-    panRef.current = { x: 0, y: 0 }
+    panRef.current = preferences.dashboardCenter
     scheduleSceneTransform()
   }
 
+  const saveMapCenter = () => {
+    updatePreferences({ dashboardCenter: { ...panRef.current } })
+  }
+
   const resetModuleLayout = () => {
-    resetMap()
+    panRef.current = { x: 0, y: 0 }
+    scheduleSceneTransform()
     modulePositionsRef.current = {}
     serviceNodePositionsRef.current = {}
     setModulePositions({})
@@ -590,6 +606,7 @@ export function DashboardModules({
     updatePreferences({
       dashboardModulePositions: {},
       dashboardServiceNodePositions: {},
+      dashboardCenter: { x: 0, y: 0 },
     })
   }
 
@@ -797,6 +814,16 @@ export function DashboardModules({
           <RotateCcw className="h-3.5 w-3.5" />
           Wyśrodkuj
         </button>
+        {editMode && (
+          <button
+            onClick={saveMapCenter}
+            className="flex h-9 items-center gap-2 rounded-[9px] border border-black/[0.06] bg-white/80 px-3 text-xs font-medium text-[#626866] shadow-sm transition-colors hover:bg-white dark:border-white/[0.09] dark:bg-[#121413]/90 dark:text-[#aeb3b1] dark:hover:bg-[#181b1a]"
+            title="Ustaw bieżące położenie planszy jako punkt dla przycisku Wyśrodkuj"
+          >
+            <LocateFixed className="h-3.5 w-3.5" />
+            Ustaw środek
+          </button>
+        )}
         <button
           onClick={() => setEditMode((value) => !value)}
           className={`flex h-9 items-center gap-2 rounded-[9px] border px-3 text-xs font-medium shadow-sm transition-colors ${

@@ -21,6 +21,10 @@ interface UserPreferences {
     left: number
     top: number
   }>
+  dashboardCenter: {
+    x: number
+    y: number
+  }
 }
 
 interface UserPreferencesContextType {
@@ -56,6 +60,10 @@ const defaultPreferences: UserPreferences = {
   },
   dashboardModulePositions: {},
   dashboardServiceNodePositions: {},
+  dashboardCenter: {
+    x: 0,
+    y: 0,
+  },
 }
 
 function sanitizePreferences(raw: unknown): UserPreferences {
@@ -138,6 +146,21 @@ function sanitizePreferences(raw: unknown): UserPreferences {
           }]]
         })
       )
+    })(),
+    dashboardCenter: (() => {
+      if (!obj.dashboardCenter || typeof obj.dashboardCenter !== 'object') {
+        return defaultPreferences.dashboardCenter
+      }
+
+      const center = obj.dashboardCenter as Record<string, unknown>
+      if (typeof center.x !== 'number' || typeof center.y !== 'number') {
+        return defaultPreferences.dashboardCenter
+      }
+
+      return {
+        x: Math.min(1200, Math.max(-1200, Math.round(center.x))),
+        y: Math.min(1200, Math.max(-1200, Math.round(center.y))),
+      }
     })(),
   }
 }

@@ -1,16 +1,14 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Clock3, Settings, UserCog } from 'lucide-react'
-import { ProfileAvatar } from '@/components/ProfileAvatar'
+import { Clock3, UserCog } from 'lucide-react'
 import { getAuthenticatedUserPermissionState, getUserPermissions } from '@/lib/permissions'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { getDashboardStatsForLast24Hours } from '@/lib/queries/dashboard'
 import { getDashboardProfileSummary } from '@/lib/queries/profile'
 import { DashboardModules } from './DashboardModules'
+import { DashboardProfileMenu } from './DashboardProfileMenu'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
-
-type Tone = 'neutral'
 
 export default async function DashboardPage() {
   const authState = await getAuthenticatedUserPermissionState()
@@ -23,26 +21,10 @@ export default async function DashboardPage() {
     getUserPermissions(),
     getDashboardProfileSummary(user.id),
   ])
-  const dashboardStats = permissions.canAccessKonta || permissions.canAccessAudit
+  const dashboardStats = permissions.canAccessAudit
     ? await getDashboardStatsForLast24Hours()
     : null
   const errors24h = dashboardStats?.errors_24h ?? 0
-
-  const quickLinks = [
-    ...(permissions.canAccessKonta
-      ? [{ label: 'Konta', tone: 'neutral' as Tone, href: '/konta', icon: UserCog }]
-      : []),
-    ...(permissions.canAccessSettings
-      ? [{ label: 'Ustawienia', tone: 'neutral' as Tone, href: '/settings', icon: Settings }]
-      : []),
-  ]
-
-  const dotClass = {
-    ok: 'bg-emerald-500',
-    warning: 'bg-amber-400',
-    danger: 'bg-red-500',
-    neutral: 'bg-[#9ca5a3]',
-  } as const
 
   return (
     <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020] dark:bg-black dark:text-[#ededed]">
@@ -76,23 +58,6 @@ export default async function DashboardPage() {
                 </span>
               </div>
 
-              <nav className="hidden flex-1 items-center justify-center gap-0.5 lg:flex" aria-label="Główna nawigacja">
-                {quickLinks.map((link) => {
-                  const Icon = link.icon
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="group flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-[11px] font-medium text-[#69706e] transition-colors hover:bg-white/70 hover:text-[#202020] dark:text-[#949a97] dark:hover:bg-white/[0.06] dark:hover:text-white"
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      <span>{link.label}</span>
-                      <span className={`h-1 w-1 rounded-full ${dotClass[link.tone]}`} />
-                    </Link>
-                  )
-                })}
-              </nav>
-
               <div className="ml-auto flex items-center gap-1.5">
                 <ThemeToggle />
                 {permissions.canAccessAudit && (
@@ -106,19 +71,21 @@ export default async function DashboardPage() {
                     {errors24h > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-500" />}
                   </Link>
                 )}
-                <Link
-                  href="/profile"
-                  className="flex h-8 w-8 items-center justify-center rounded-[8px] ring-1 ring-black/[0.07] transition-opacity hover:opacity-80 dark:ring-white/[0.1]"
-                  aria-label="Profil"
-                  title="Profil"
-                >
-                  <ProfileAvatar
-                    url={dashboardProfile?.avatar_url}
-                    label={dashboardProfile?.full_name || user.email || 'Profil'}
-                    className="h-8 w-8 rounded-[8px]"
-                    fallbackClassName="text-[9px]"
-                  />
-                </Link>
+                {permissions.canAccessKonta && (
+                  <Link
+                    href="/konta"
+                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#69706e] transition-colors hover:bg-white hover:text-[#202020] dark:text-[#a7adaa] dark:hover:bg-white/[0.08] dark:hover:text-white"
+                    aria-label="Konta"
+                    title="Konta"
+                  >
+                    <UserCog className="h-4 w-4" />
+                  </Link>
+                )}
+                <DashboardProfileMenu
+                  avatarUrl={dashboardProfile?.avatar_url}
+                  label={dashboardProfile?.full_name || user.email || 'Profil'}
+                  canAccessSettings={permissions.canAccessSettings}
+                />
               </div>
             </header>
 

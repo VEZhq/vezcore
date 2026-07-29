@@ -79,8 +79,8 @@ function SegmentedOption({
       onClick={onClick}
       className={`flex min-h-14 min-w-0 items-center gap-3 rounded-[8px] border px-3 text-left transition-colors ${
         selected
-          ? 'border-[#82998b]/30 bg-[#e4ebe7] text-[#304238] dark:border-white/[0.13] dark:bg-white/[0.09] dark:text-white'
-          : 'border-black/[0.07] bg-white/45 text-[#646b68] hover:bg-white dark:border-white/[0.08] dark:bg-white/[0.025] dark:text-[#a2a8a5] dark:hover:bg-white/[0.055]'
+          ? 'border-[#aa9dac]/45 bg-[#efebf0] text-[#3f3a40] dark:border-white/[0.15] dark:bg-white/[0.1] dark:text-white'
+          : 'border-black/[0.08] bg-white/55 text-[#606461] hover:border-black/[0.14] hover:bg-white dark:border-white/[0.09] dark:bg-white/[0.025] dark:text-[#a2a6a3] dark:hover:border-white/[0.15] dark:hover:bg-white/[0.055]'
       }`}
     >
       {Icon && <Icon className="h-4 w-4 shrink-0" />}
@@ -145,10 +145,10 @@ export default function SettingsWorkspace({
   const selectedTimezone = timezones.find((timezone) => timezone.value === preferences.timezone)
 
   return (
-    <div className="min-h-screen bg-[#f1f3f2] text-[#252927] dark:bg-[#070807] dark:text-[#eef0ef]">
+    <div className="min-h-screen bg-[#f5f5f4] text-[#252625] dark:bg-[#080908] dark:text-[#eef0ef]">
       <MobileNav currentPath="/settings" showKonta={canAccessKonta} showSettings />
 
-      <header className="border-b border-black/[0.07] bg-white/45 dark:border-white/[0.08] dark:bg-[#090a09]">
+      <header className="border-b border-black/[0.08] bg-[#fafaf9]/95 dark:border-white/[0.09] dark:bg-[#0b0c0b]">
         <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center px-4 sm:px-6">
           <Image src="/logo/vezcore_logo_black_full.svg" alt="VEZcore" width={104} height={42} className="h-auto w-[104px] dark:hidden" priority />
           <Image src="/logo/vezcore_logo_white_full.svg" alt="VEZcore" width={104} height={42} className="hidden h-auto w-[104px] dark:block" priority />
@@ -167,8 +167,8 @@ export default function SettingsWorkspace({
         </div>
       </header>
 
-      <div className="mx-auto grid min-h-[calc(100vh-48px)] w-full max-w-[1240px] lg:grid-cols-[230px_minmax(0,1fr)]">
-        <aside className="border-b border-black/[0.08] px-4 py-6 dark:border-white/[0.08] sm:px-6 lg:border-b-0 lg:border-r lg:py-8">
+      <div className="mx-auto grid min-h-[calc(100vh-48px)] w-full max-w-[1240px] lg:grid-cols-[224px_minmax(0,1fr)]">
+        <aside className="border-b border-black/[0.08] bg-[#efefed]/55 px-4 py-6 dark:border-white/[0.08] dark:bg-[#0a0b0a] sm:px-6 lg:border-b-0 lg:border-r lg:py-8">
           <div className="mb-6 hidden lg:block">
             <p className="text-[9px] font-semibold uppercase text-[#8a918d]">VEZcore</p>
             <p className="mt-1 text-[15px] font-semibold">Ustawienia</p>
@@ -185,12 +185,12 @@ export default function SettingsWorkspace({
                   onClick={() => setActiveSection(section.id)}
                   className={`flex min-w-0 items-center gap-3 rounded-[8px] px-2.5 py-2.5 text-left transition-colors ${
                     active
-                      ? 'bg-white text-[#28312c] shadow-[0_1px_2px_rgba(25,31,29,0.05)] dark:bg-white/[0.08] dark:text-white'
+                      ? 'bg-white text-[#292829] shadow-[0_1px_2px_rgba(25,25,25,0.06)] dark:bg-white/[0.08] dark:text-white'
                       : 'text-[#747b78] hover:bg-white/55 dark:text-[#969c99] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] ${
-                    active ? 'bg-[#e4ebe7] text-[#5c7566] dark:bg-white/[0.07] dark:text-[#b8c7be]' : 'bg-black/[0.025] dark:bg-white/[0.035]'
+                    active ? 'bg-[#eee9ef] text-[#776a78] dark:bg-white/[0.08] dark:text-[#d1c8d2]' : 'bg-black/[0.025] dark:bg-white/[0.035]'
                   }`}>
                     <Icon className="h-3.5 w-3.5" />
                   </span>
@@ -214,7 +214,7 @@ export default function SettingsWorkspace({
           </div>
         </aside>
 
-        <main className="min-w-0 px-4 py-7 sm:px-8 lg:px-10 lg:py-9">
+        <main className="min-w-0 bg-[#fafaf9]/45 px-4 py-7 sm:px-8 lg:px-11 lg:py-9 dark:bg-transparent">
           {activeSection === 'appearance' && (
             <>
               <SectionHeading eyebrow="Interfejs" title="Wygląd" description="Wybierz wariant dopasowany do warunków pracy. Zmiana jest zapisywana automatycznie." />
@@ -236,16 +236,6 @@ export default function SettingsWorkspace({
                   />
                 </div>
               </SettingRow>
-              <SettingRow title="Podgląd powierzchni" description="Kolory bazowe aktualnie wybranego motywu.">
-                <div className="grid grid-cols-4 gap-2">
-                  {(theme === 'dark'
-                    ? ['#070807', '#111311', '#303633', '#8ba092']
-                    : ['#f1f3f2', '#ffffff', '#a9b2ad', '#71887a']
-                  ).map((color) => (
-                    <span key={color} className="h-12 rounded-[8px] border border-black/[0.07] dark:border-white/[0.08]" style={{ backgroundColor: color }} title={color} />
-                  ))}
-                </div>
-              </SettingRow>
             </>
           )}
 
@@ -254,11 +244,11 @@ export default function SettingsWorkspace({
               <SectionHeading eyebrow="Lokalizacja" title="Region" description="Ustawienia używane przy wyświetlaniu dat w logach, aktywności i danych kont." />
               <SettingRow title="Strefa czasowa" description="Wszystkie godziny są przeliczane do tej strefy.">
                 <label className="relative block max-w-md">
-                  <Globe2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#71877a]" />
+                  <Globe2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777a78]" />
                   <select
                     value={preferences.timezone}
                     onChange={(event) => updatePreferences({ timezone: event.target.value })}
-                    className="h-11 w-full appearance-none rounded-[8px] border border-black/[0.08] bg-white/70 pl-10 pr-10 text-[11px] outline-none focus:border-[#789083] dark:border-white/[0.09] dark:bg-white/[0.045]"
+                    className="h-11 w-full appearance-none rounded-[8px] border border-black/[0.1] bg-white/80 pl-10 pr-10 text-[11px] outline-none transition-colors focus:border-[#918493] dark:border-white/[0.1] dark:bg-white/[0.045] dark:focus:border-white/[0.28]"
                   >
                     {timezones.map((timezone) => (
                       <option key={timezone.value} value={timezone.value}>{timezone.label} ({timezone.helper})</option>
@@ -309,7 +299,7 @@ export default function SettingsWorkspace({
                     <span className="block text-[11px] font-semibold">Wyloguj po zmianie IP</span>
                     <span className="mt-1 block text-[9px] text-[#858c88]">Dodatkowa ochrona dla kont administracyjnych.</span>
                   </span>
-                  <span className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${preferences.autoLogoutOnIpChange ? 'bg-[#6f8a7a]' : 'bg-[#c6cbc8] dark:bg-[#3d423f]'}`}>
+                  <span className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${preferences.autoLogoutOnIpChange ? 'bg-[#756b76] dark:bg-[#a89daa]' : 'bg-[#c6c8c6] dark:bg-[#3d403e]'}`}>
                     <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${preferences.autoLogoutOnIpChange ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
                   </span>
                 </button>
@@ -340,7 +330,7 @@ export default function SettingsWorkspace({
                         <span className="mt-1 block text-[9px] text-[#858c88]">Backfill oraz synchronizacja wątków profili.</span>
                       </span>
                     </div>
-                    <Link href="/settings/discord" className="flex h-9 items-center gap-1.5 rounded-[8px] px-3 text-[10px] font-medium text-[#5f6d65] hover:bg-black/[0.04] dark:text-[#b6bfba] dark:hover:bg-white/[0.06]">
+                    <Link href="/settings/discord" className="flex h-9 items-center gap-1.5 rounded-[8px] px-3 text-[10px] font-medium text-[#646064] hover:bg-black/[0.04] dark:text-[#bbb7bc] dark:hover:bg-white/[0.06]">
                       Otwórz
                       <ChevronRight className="h-3.5 w-3.5" />
                     </Link>
