@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Activity, Bell, Clock3, Server, Settings, User, UserCog, Users } from 'lucide-react'
+import { Activity, Bell, Clock3, Settings, User, UserCog, Users } from 'lucide-react'
 import { getAuthenticatedUserPermissionState, getUserPermissions } from '@/lib/permissions'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { getDashboardStatsForLast24Hours } from '@/lib/queries/dashboard'
@@ -67,114 +67,83 @@ export default async function DashboardPage() {
 
   return (
     <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020]">
-      <main className="relative h-full w-full overflow-hidden bg-[#eef4f3]">
-        <div className="relative flex h-full flex-col px-5 py-4 sm:px-7 lg:px-9">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_32%_12%,rgba(255,255,255,0.75),transparent_28%),radial-gradient(circle_at_72%_78%,rgba(218,228,226,0.9),transparent_34%)]" />
+      <main className="relative h-full w-full overflow-hidden bg-[#f1f3f2]">
+        <div className="relative flex h-full flex-col px-5 py-3 sm:px-7 lg:px-8">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_8%,rgba(255,255,255,0.82),transparent_30%)]" />
 
           <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-            <header className="flex shrink-0 items-center gap-6 border-b border-[#d7e0de] pb-3">
-              <div className="flex min-w-[210px] items-center gap-4">
+            <header className="flex h-12 shrink-0 items-center gap-4 border-b border-black/[0.06] pb-2">
+              <div className="flex shrink-0 items-center gap-3">
                 <Image
                   src="/logo/vezcore_logo_black_full.svg"
                   alt="VEZcore"
-                  width={144}
+                  width={118}
                   height={48}
-                  className="h-auto w-[144px]"
+                  className="h-auto w-[118px]"
                   priority
                 />
-                <span className="hidden h-7 w-px bg-[#d1dbd9] xl:block" />
-                <span className="hidden text-xs font-medium uppercase tracking-[0.12em] text-[#78827f] xl:block">
-                  Centrum operacyjne
+                <span className="hidden h-5 w-px bg-black/[0.08] sm:block" />
+                <span className="hidden items-center gap-1.5 text-[10px] font-medium text-[#737a78] sm:flex">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Produkcja
                 </span>
               </div>
 
-              <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex" aria-label="Główna nawigacja">
+              <nav className="hidden flex-1 items-center justify-center gap-0.5 lg:flex" aria-label="Główna nawigacja">
                 {quickLinks.map((link, index) => {
                   const Icon = link.icon
                   return (
                     <Link
                       key={link.href}
                       href={link.href}
-                      className={`group flex h-9 items-center gap-2 rounded-[10px] px-3.5 text-sm font-medium transition-colors ${
+                      className={`group flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-[11px] font-medium transition-colors ${
                         index === 0
-                          ? 'bg-white/80 text-[#202020] shadow-[0_7px_18px_rgba(105,116,116,0.10)]'
-                          : 'text-[#67716f] hover:bg-white/60 hover:text-[#202020]'
+                          ? 'bg-white text-[#202020] shadow-sm'
+                          : 'text-[#69706e] hover:bg-white/70 hover:text-[#202020]'
                       }`}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-3.5 w-3.5" />
                       <span>{link.label}</span>
-                      <span className={`h-1.5 w-1.5 rounded-full ${dotClass[link.tone]}`} />
+                      <span className={`h-1 w-1 rounded-full ${dotClass[link.tone]}`} />
                     </Link>
                   )
                 })}
               </nav>
 
-              <div className="ml-auto flex items-center gap-2">
-                {permissions.canAccessAudit && (
-                  <Link
-                    href="/audit"
-                    className="relative flex h-10 w-10 items-center justify-center rounded-[11px] bg-white/45 text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]"
-                    aria-label="Powiadomienia"
-                  >
-                    <Bell className="h-5 w-5" />
-                    {errors24h > 0 && <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-red-500" />}
-                  </Link>
-                )}
-                <Link
-                  href="/profile"
-                  className="flex h-10 w-10 items-center justify-center rounded-[11px] bg-white/70 text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]"
-                  aria-label="Profil"
-                >
-                  <User className="h-5 w-5" />
-                </Link>
-              </div>
-            </header>
-
-            <section className="mt-4 grid shrink-0 gap-5 lg:grid-cols-[minmax(260px,0.8fr)_minmax(520px,1.5fr)_auto] lg:items-center">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-[11px] bg-[#dfe8e6] text-[#66716e]">
-                  <Server className="h-5 w-5" />
-                </span>
-                <div>
-                  <h1 className="text-[25px] font-semibold leading-none text-[#202020]">Ekosystem</h1>
-                  <p className="mt-1.5 text-xs text-[#707a78]">Produkcja · {user.email}</p>
-                </div>
-              </div>
-
-              <div className="hidden grid-cols-3 divide-x divide-[#d4dedc] sm:grid">
+              <div className="ml-auto hidden items-center gap-3 xl:flex">
                 {metrics.map((metric) => {
                   const Icon = metric.icon
                   return (
-                    <div key={metric.label} className="flex items-center justify-center gap-3 px-4">
-                      <Icon className="h-4 w-4 text-[#87918f]" />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-xl font-semibold leading-none text-[#202020]">{metric.value}</p>
-                          <span className={`h-1.5 w-1.5 rounded-full ${dotClass[metric.tone]}`} />
-                        </div>
-                        <p className="mt-1 text-[11px] text-[#77817f]">{metric.label}</p>
-                      </div>
+                    <div key={metric.label} className="flex items-center gap-1.5 border-l border-black/[0.06] pl-3 text-[10px] text-[#727977]">
+                      <Icon className="h-3.5 w-3.5 text-[#929895]" />
+                      <span>{metric.label}</span>
+                      <strong className="font-semibold text-[#2b2e2d]">{metric.value}</strong>
+                      <span className={`h-1 w-1 rounded-full ${dotClass[metric.tone]}`} />
                     </div>
                   )
                 })}
               </div>
 
-              <div className="flex items-center justify-end gap-2">
-                <div className="flex h-10 items-center gap-2 rounded-[11px] bg-[#e2eae8] px-3.5 text-xs font-medium text-[#626c6a]">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  Core online
-                </div>
-                {permissions.canAccessSettings && (
+              <div className="flex items-center gap-1.5">
+                {permissions.canAccessAudit && (
                   <Link
-                    href="/settings"
-                    className="flex h-10 w-10 items-center justify-center rounded-[11px] bg-white/55 text-[#5e6664] transition-colors hover:bg-white hover:text-[#202020]"
-                    aria-label="Ustawienia"
+                    href="/audit"
+                    className="relative flex h-8 w-8 items-center justify-center rounded-[8px] text-[#69706e] transition-colors hover:bg-white hover:text-[#202020]"
+                    aria-label="Powiadomienia"
                   >
-                    <Settings className="h-5 w-5" />
+                    <Bell className="h-4 w-4" />
+                    {errors24h > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-500" />}
                   </Link>
                 )}
+                <Link
+                  href="/profile"
+                  className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-white/75 text-[#69706e] transition-colors hover:bg-white hover:text-[#202020]"
+                  aria-label="Profil"
+                >
+                  <User className="h-4 w-4" />
+                </Link>
               </div>
-            </section>
+            </header>
 
             <DashboardModules
               canAccessVezVision={permissions.canAccessVezVision}

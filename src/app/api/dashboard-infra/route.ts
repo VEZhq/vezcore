@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
+import { createActionClient } from '@/lib/supabase/server'
 
 type HealthStatus = 'healthy' | 'warning' | 'error' | 'unknown'
 type DeployStatus = 'success' | 'failure' | 'pending' | 'unknown'
@@ -125,6 +126,7 @@ const HEALTH_CHECKS = [
   { key: 'labApi', label: 'Lab API', url: 'https://api.vezlabs.dev/healthz' },
   { key: 'vezcore', label: 'VEZcore', url: 'https://vezcore.vezlabs.dev/login' },
   { key: 'monitor', label: 'Monitor', url: 'https://monitor.vezlabs.dev' },
+  { key: 'minio', label: 'MinIO', url: 'https://s3-dev.vezlabs.dev/minio/health/ready' },
 ] as const
 
 async function checkEndpoint(url: string, label: string): Promise<HealthCheckResult> {
@@ -161,6 +163,31 @@ async function checkEndpoint(url: string, label: string): Promise<HealthCheckRes
     return { status: 'healthy', label, detail: 'OK', latencyMs }
   } catch {
     return { status: 'unknown', label, detail: 'Brak odpowiedzi' }
+  }
+}
+
+async function checkDatabase(): Promise<HealthCheckResult> {
+  const started = Date.now()
+
+  try {
+    const client = await createActionClient()
+    const { error } = await client
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+
+    const latencyMs = Date.now() - started
+    if (error) {
+      return { status: 'error', label: 'Core DB', detail: 'Błąd zapytania', latencyMs }
+    }
+
+    return {
+      status: latencyMs > 500 ? 'warning' : 'healthy',
+      label: 'Core DB',
+      detail: latencyMs > 500 ? 'Wysokie opóźnienie' : 'OK',
+      latencyMs,
+    }
+  } catch {
+    return { status: 'error', label: 'Core DB', detail: 'Brak połączenia' }
   }
 }
 
@@ -255,12 +282,13 @@ export async function GET() {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 })
   }
 
-  const [healthResults, deploy] = await Promise.all([
+  const [healthResults, database, deploy] = await Promise.all([
     Promise.all(HEALTH_CHECKS.map(async (check) => [check.key, await checkEndpoint(check.url, check.label)] as const)),
+    checkDatabase(),
     getLatestDeploy(),
   ])
 
-  const checks = Object.fromEntries(healthResults)
+  const checks = Object.fromEntries([...healthResults, ['database', database]])
 
   return NextResponse.json(
     {

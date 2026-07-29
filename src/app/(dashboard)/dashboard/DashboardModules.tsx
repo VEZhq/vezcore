@@ -10,16 +10,21 @@ import {
 } from 'react'
 import Link from 'next/link'
 import {
+  Activity,
   ArrowUpRight,
   Check,
   ChevronDown,
   Copy,
+  Database,
   ExternalLink,
   Eye,
   EyeOff,
   GripVertical,
+  HardDrive,
   MoveDiagonal2,
+  Rocket,
   RotateCcw,
+  Server,
   Settings2,
 } from 'lucide-react'
 import { useUserPreferences } from '@/components/providers/UserPreferencesProvider'
@@ -110,10 +115,22 @@ type InternalLink = {
   description: string
 }
 
+type ServiceNodeDefinition = {
+  id: 'prodApi' | 'database' | 'deploy' | 'labApi' | 'minio' | 'monitor'
+  label: string
+  checkKey?: string
+  deploy?: boolean
+  owner: DashboardModuleName
+  icon: typeof Server
+  left: number
+  top: number
+  width: number
+}
+
 const moduleStatusSources: Record<DashboardModuleName, { checks: string[]; deploy?: boolean }> = {
   vez: { checks: [] },
   vezVision: { checks: ['prodApi'], deploy: true },
-  vezLabs: { checks: ['labApi', 'monitor'] },
+  vezLabs: { checks: ['labApi', 'monitor', 'minio'] },
   vezRent: { checks: [] },
   vezStudio: { checks: [] },
   vezWork: { checks: [] },
@@ -147,6 +164,15 @@ const moduleLayout: Record<DashboardModuleName, { left: number; top: number; wid
   vezRent: { left: 694, top: 410, width: 196, height: 108 },
   vezStudio: { left: 990, top: 410, width: 196, height: 108 },
 }
+
+const serviceNodes: ServiceNodeDefinition[] = [
+  { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 320, top: 52, width: 126 },
+  { id: 'database', label: 'Core DB', checkKey: 'database', owner: 'vez', icon: Database, left: 386, top: 332, width: 126 },
+  { id: 'deploy', label: 'Deploy', deploy: true, owner: 'vez', icon: Rocket, left: 754, top: 190, width: 120 },
+  { id: 'labApi', label: 'Lab API', checkKey: 'labApi', owner: 'vezLabs', icon: Server, left: 770, top: 42, width: 126 },
+  { id: 'minio', label: 'MinIO', checkKey: 'minio', owner: 'vezLabs', icon: HardDrive, left: 788, top: 262, width: 126 },
+  { id: 'monitor', label: 'Monitor', checkKey: 'monitor', owner: 'vezLabs', icon: Activity, left: 1106, top: 214, width: 126 },
+]
 
 function getWorstStatus(statuses: HealthStatus[]): HealthStatus {
   if (statuses.includes('error')) return 'error'
@@ -229,6 +255,23 @@ function edgeStatusClass(status: HealthStatus) {
 function dependencyStatus(parent: HealthStatus, target: HealthStatus) {
   if (parent === 'error' || parent === 'warning') return parent
   return target
+}
+
+function getServiceNodeStatus(node: ServiceNodeDefinition, infraData: InfraData | null): HealthStatus {
+  if (!infraData) return 'checking'
+  if (node.deploy) return getDeployHealthStatus(infraData.deploy.status)
+  return infraData.checks[node.checkKey ?? '']?.status ?? 'unknown'
+}
+
+function getServiceNodeDetail(node: ServiceNodeDefinition, infraData: InfraData | null) {
+  if (!infraData) return 'Sprawdzam'
+  if (node.deploy) {
+    return infraData.deploy.shortSha ?? statusMeta[getDeployHealthStatus(infraData.deploy.status)].label
+  }
+
+  const check = infraData.checks[node.checkKey ?? '']
+  if (!check) return 'Brak danych'
+  return check.latencyMs ? `${check.detail} · ${check.latencyMs}ms` : check.detail
 }
 
 function buildInternalLinks(access: NavigationAccess): Record<DashboardModuleName, InternalLink[]> {
@@ -369,6 +412,9 @@ export function DashboardModules({
   ) as Record<DashboardModuleName, HealthStatus>
   const sceneModuleNames = new Set(sceneModules.map((item) => item.mod.name))
   const labsStatus = statusByModule.vezLabs ?? 'unknown'
+  const serviceStatusById = Object.fromEntries(
+    serviceNodes.map((node) => [node.id, getServiceNodeStatus(node, infraData)])
+  ) as Record<ServiceNodeDefinition['id'], HealthStatus>
 
   const toggleModule = (name: DashboardModuleName) => {
     const next = preferences.hiddenModules.includes(name)
@@ -481,7 +527,7 @@ export function DashboardModules({
   }
 
   return (
-    <section className="relative mt-4 min-h-0 w-full flex-1">
+    <section className="relative mt-2 min-h-0 w-full flex-1">
       <div className="absolute right-1 top-1 z-50 flex items-center gap-2">
         <button
           onClick={resetMap}
@@ -517,38 +563,50 @@ export function DashboardModules({
             <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1240 550" preserveAspectRatio="none" aria-hidden="true">
               {sceneModuleNames.has('vez') && sceneModuleNames.has('vezVision') && (
                 <path
-                  d="M510 230 C415 230 398 104 286 104"
+                  d="M510 232 H468 L448 212 V132 L420 104 H286"
                   className={`ecosystem-edge ${edgeStatusClass(statusByModule.vezVision ?? 'unknown')}`}
                 />
               )}
               {sceneModuleNames.has('vez') && sceneModuleNames.has('vezLabs') && (
                 <path
-                  d="M730 230 C825 230 842 104 932 104"
+                  d="M730 232 H798 L824 206 V136 L856 104 H932"
                   className={`ecosystem-edge ${edgeStatusClass(labsStatus)}`}
                 />
               )}
               {sceneModuleNames.has('vezLabs') && (
                 <>
-                  <path
-                    d="M1036 160 V342 H152 M1036 342 H1088"
-                    className={`ecosystem-edge ${edgeStatusClass(labsStatus)}`}
-                  />
                   {([
-                    ['nably', 152],
-                    ['vezWork', 448],
-                    ['vezRent', 792],
-                    ['vezStudio', 1088],
-                  ] as const).map(([name, x]) => {
+                    ['nably', 'M956 160 V198 H842 L816 224 V316 H674 L648 342 H152 V410'],
+                    ['vezWork', 'M996 160 V220 H864 L842 242 V322 H474 L448 348 V410'],
+                    ['vezRent', 'M1068 160 V238 H934 L910 262 V338 H818 L792 364 V410'],
+                    ['vezStudio', 'M1120 160 H1168 V292 H1134 L1088 338 V410'],
+                  ] as const).map(([name, path]) => {
                     if (!sceneModuleNames.has(name)) return null
                     const branchStatus = dependencyStatus(labsStatus, statusByModule[name] ?? 'unknown')
                     return (
                       <path
                         key={name}
-                        d={`M${x} 342 V410`}
+                        d={path}
                         className={`ecosystem-edge ${edgeStatusClass(branchStatus)}`}
                       />
                     )
                   })}
+                </>
+              )}
+              {canAccessInfrastructure && sceneModuleNames.has('vezVision') && (
+                <path d="M286 84 H304 V81 H320" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.prodApi)}`} />
+              )}
+              {canAccessInfrastructure && sceneModuleNames.has('vez') && (
+                <>
+                  <path d="M570 310 V360 H512" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.database)}`} />
+                  <path d="M730 262 H742 V219 H754" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.deploy)}`} />
+                </>
+              )}
+              {canAccessInfrastructure && sceneModuleNames.has('vezLabs') && (
+                <>
+                  <path d="M932 88 H914 V71 H896" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.labApi)}`} />
+                  <path d="M932 136 H914 V291" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.minio)}`} />
+                  <path d="M1140 110 H1200 V214" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.monitor)}`} />
                 </>
               )}
             </svg>
@@ -620,6 +678,35 @@ export function DashboardModules({
                 <div key={mod.name} className="contents">{tile}</div>
               )
             })}
+
+            {serviceNodes
+              .filter((node) => canAccessInfrastructure && sceneModuleNames.has(node.owner))
+              .map((node) => {
+                const Icon = node.icon
+                const nodeStatus = serviceStatusById[node.id]
+                const status = statusMeta[nodeStatus]
+                const detail = getServiceNodeDetail(node, infraData)
+
+                return (
+                  <div
+                    key={node.id}
+                    className="ecosystem-service-node absolute z-30 flex items-center gap-2.5"
+                    style={{ left: node.left, top: node.top, width: node.width }}
+                    title={`${node.label}: ${detail}`}
+                  >
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-[#f1f2f1] text-[#717876]">
+                      <Icon className="h-3.5 w-3.5" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-1.5">
+                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${status.dot}`} />
+                        <span className="truncate text-[10px] font-semibold text-[#303432]">{node.label}</span>
+                      </span>
+                      <span className="mt-0.5 block truncate text-[8px] text-[#858c89]">{detail}</span>
+                    </span>
+                  </div>
+                )
+              })}
           </div>
         </div>
 
