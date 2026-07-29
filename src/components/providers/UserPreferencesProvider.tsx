@@ -12,6 +12,10 @@ interface UserPreferences {
     width: number
     height: number
   }
+  dashboardModulePositions: Record<string, {
+    left: number
+    top: number
+  }>
 }
 
 interface UserPreferencesContextType {
@@ -40,6 +44,7 @@ const defaultPreferences: UserPreferences = {
     width: 300,
     height: 360,
   },
+  dashboardModulePositions: {},
 }
 
 function sanitizePreferences(raw: unknown): UserPreferences {
@@ -75,10 +80,29 @@ function sanitizePreferences(raw: unknown): UserPreferences {
         ? Math.min(520, Math.max(280, Math.round(size.width)))
         : defaultPreferences.operationsPanelSize.width
       const height = typeof size.height === 'number'
-        ? Math.min(680, Math.max(300, Math.round(size.height)))
+        ? Math.min(680, Math.max(280, Math.round(size.height)))
         : defaultPreferences.operationsPanelSize.height
 
       return { width, height }
+    })(),
+    dashboardModulePositions: (() => {
+      if (!obj.dashboardModulePositions || typeof obj.dashboardModulePositions !== 'object') {
+        return defaultPreferences.dashboardModulePositions
+      }
+
+      const positions = obj.dashboardModulePositions as Record<string, unknown>
+      return Object.fromEntries(
+        VALID_MODULE_NAMES.flatMap((name) => {
+          const position = positions[name]
+          if (!position || typeof position !== 'object') return []
+          const { left, top } = position as Record<string, unknown>
+          if (typeof left !== 'number' || typeof top !== 'number') return []
+          return [[name, {
+            left: Math.min(1320, Math.max(20, Math.round(left))),
+            top: Math.min(530, Math.max(20, Math.round(top))),
+          }]]
+        })
+      )
     })(),
   }
 }

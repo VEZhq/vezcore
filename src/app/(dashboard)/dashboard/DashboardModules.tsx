@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import Link from 'next/link'
 import {
   Activity,
   ArrowUpRight,
@@ -19,6 +18,7 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  GitBranch,
   GripVertical,
   HardDrive,
   Info,
@@ -98,6 +98,20 @@ type ResizeState = {
   originHeight: number
 }
 
+type ModuleDragState = {
+  pointerId: number
+  name: DashboardModuleName
+  startX: number
+  startY: number
+  originLeft: number
+  originTop: number
+}
+
+type ModulePosition = {
+  left: number
+  top: number
+}
+
 type ServiceNodeDefinition = {
   id: 'prodApi' | 'database' | 'deploy' | 'labApi' | 'minio' | 'monitor'
   label: string
@@ -148,6 +162,10 @@ const moduleLayout: Record<DashboardModuleName, { left: number; top: number; wid
   vezRent: { left: 690, top: 430, width: 196, height: 108 },
   vezStudio: { left: 1000, top: 430, width: 196, height: 108 },
 }
+
+const GITHUB_REPOSITORY_URL = 'https://github.com/VEZhq/vezcore'
+const SCENE_WIDTH = 1360
+const SCENE_HEIGHT = 570
 
 const serviceNodes: ServiceNodeDefinition[] = [
   { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 104, top: 210, width: 140, href: 'https://api.vezvision.com/healthz' },
@@ -229,6 +247,74 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
+function horizontalConnector(
+  from: { x: number; y: number },
+  to: { x: number; y: number }
+) {
+  if (Math.abs(to.y - from.y) < 4) return `M${from.x} ${from.y} H${to.x}`
+  const direction = to.x >= from.x ? 1 : -1
+  const middleX = from.x + ((to.x - from.x) / 2)
+  const chamfer = Math.min(12, Math.max(5, Math.abs(to.y - from.y) / 3))
+  return [
+    `M${from.x} ${from.y}`,
+    `H${middleX - (chamfer * direction)}`,
+    `L${middleX} ${from.y + (chamfer * Math.sign(to.y - from.y || 1))}`,
+    `V${to.y - (chamfer * Math.sign(to.y - from.y || 1))}`,
+    `L${middleX + (chamfer * direction)} ${to.y}`,
+    `H${to.x}`,
+  ].join(' ')
+}
+
+function verticalConnector(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  laneOffset = 0
+) {
+  const direction = to.y >= from.y ? 1 : -1
+  const middleY = from.y + ((to.y - from.y) / 2) + laneOffset
+  const chamfer = Math.min(12, Math.max(5, Math.abs(to.x - from.x) / 5))
+  return [
+    `M${from.x} ${from.y}`,
+    `V${middleY - (chamfer * direction)}`,
+    `L${from.x + (chamfer * Math.sign(to.x - from.x || 1))} ${middleY}`,
+    `H${to.x - (chamfer * Math.sign(to.x - from.x || 1))}`,
+    `L${to.x} ${middleY + (chamfer * direction)}`,
+    `V${to.y}`,
+  ].join(' ')
+}
+
+function moduleAnchor(
+  layout: { left: number; top: number; width: number; height: number },
+  side: 'left' | 'right' | 'top' | 'bottom'
+) {
+  if (side === 'left') return { x: layout.left, y: layout.top + (layout.height / 2) }
+  if (side === 'right') return { x: layout.left + layout.width, y: layout.top + (layout.height / 2) }
+  if (side === 'top') return { x: layout.left + (layout.width / 2), y: layout.top }
+  return { x: layout.left + (layout.width / 2), y: layout.top + layout.height }
+}
+
+function nodeAnchor(node: ServiceNodeDefinition) {
+  return { x: node.left + (node.width / 2), y: node.top + 24 }
+}
+
+function serviceConnector(
+  layout: { left: number; top: number; width: number; height: number },
+  node: ServiceNodeDefinition
+) {
+  const target = nodeAnchor(node)
+  const center = {
+    x: layout.left + (layout.width / 2),
+    y: layout.top + (layout.height / 2),
+  }
+  const horizontal = Math.abs(target.x - center.x) >= Math.abs(target.y - center.y)
+  if (horizontal) {
+    const from = moduleAnchor(layout, target.x < center.x ? 'left' : 'right')
+    return horizontalConnector(from, target)
+  }
+  const from = moduleAnchor(layout, target.y < center.y ? 'top' : 'bottom')
+  return verticalConnector(from, target)
+}
+
 function edgeStatusClass(status: HealthStatus) {
   if (status === 'healthy') return 'is-healthy'
   if (status === 'warning') return 'is-warning'
@@ -282,10 +368,17 @@ export function DashboardModules({
   const [revealedAliases, setRevealedAliases] = useState<string[]>([])
   const [copiedAlias, setCopiedAlias] = useState<string | null>(null)
   const [infraData, setInfraData] = useState<InfraData | null>(null)
+  const [panelSize, setPanelSize] = useState(preferences.operationsPanelSize)
+  const [modulePositions, setModulePositions] = useState<Record<string, ModulePosition>>(
+    preferences.dashboardModulePositions
+  )
   const sceneRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLElement>(null)
   const dragRef = useRef<DragState | null>(null)
+  const moduleDragRef = useRef<ModuleDragState | null>(null)
   const resizeRef = useRef<ResizeState | null>(null)
+  const panelSizeRef = useRef(panelSize)
+  const modulePositionsRef = useRef(modulePositions)
   const panRef = useRef({ x: 0, y: 0 })
   const frameRef = useRef<number | null>(null)
 
@@ -359,6 +452,48 @@ export function DashboardModules({
   const serviceStatusById = Object.fromEntries(
     serviceNodes.map((node) => [node.id, getServiceNodeStatus(node, infraData)])
   ) as Record<ServiceNodeDefinition['id'], HealthStatus>
+  const effectiveLayout = Object.fromEntries(
+    (Object.keys(moduleLayout) as DashboardModuleName[]).map((name) => [
+      name,
+      { ...moduleLayout[name], ...modulePositions[name] },
+    ])
+  ) as typeof moduleLayout
+  const projectConnections = [
+    {
+      id: 'vision-core',
+      from: 'vezVision' as const,
+      to: 'vez' as const,
+      path: horizontalConnector(
+        moduleAnchor(effectiveLayout.vezVision, 'right'),
+        moduleAnchor(effectiveLayout.vez, 'left')
+      ),
+      status: statusByModule.vezVision ?? 'unknown',
+    },
+    {
+      id: 'core-labs',
+      from: 'vez' as const,
+      to: 'vezLabs' as const,
+      path: horizontalConnector(
+        moduleAnchor(effectiveLayout.vez, 'right'),
+        moduleAnchor(effectiveLayout.vezLabs, 'left')
+      ),
+      status: labsStatus,
+    },
+    ...(['nably', 'vezWork', 'vezRent', 'vezStudio'] as const).map((name, index) => ({
+      id: `labs-${name}`,
+      from: 'vezLabs' as const,
+      to: name,
+      path: verticalConnector(
+        {
+          x: effectiveLayout.vezLabs.left + (effectiveLayout.vezLabs.width * ((index + 1) / 5)),
+          y: effectiveLayout.vezLabs.top + effectiveLayout.vezLabs.height,
+        },
+        moduleAnchor(effectiveLayout[name], 'top'),
+        (index - 1.5) * 8
+      ),
+      status: dependencyStatus(labsStatus, statusByModule[name] ?? 'unknown'),
+    })),
+  ]
 
   const toggleModule = (name: DashboardModuleName) => {
     const next = preferences.hiddenModules.includes(name)
@@ -381,6 +516,12 @@ export function DashboardModules({
   const resetMap = () => {
     panRef.current = { x: 0, y: 0 }
     scheduleSceneTransform()
+  }
+
+  const resetModuleLayout = () => {
+    modulePositionsRef.current = {}
+    setModulePositions({})
+    updatePreferences({ dashboardModulePositions: {} })
   }
 
   const startMapDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -414,6 +555,48 @@ export function DashboardModules({
     delete event.currentTarget.dataset.panning
   }
 
+  const startModuleDrag = (
+    event: ReactPointerEvent<HTMLElement>,
+    name: DashboardModuleName
+  ) => {
+    if (!editMode || (event.target as HTMLElement).closest('button, a')) return
+    event.preventDefault()
+    event.stopPropagation()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    const layout = effectiveLayout[name]
+    moduleDragRef.current = {
+      pointerId: event.pointerId,
+      name,
+      startX: event.clientX,
+      startY: event.clientY,
+      originLeft: layout.left,
+      originTop: layout.top,
+    }
+  }
+
+  const moveModuleDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    const drag = moduleDragRef.current
+    if (!drag || drag.pointerId !== event.pointerId) return
+    event.preventDefault()
+    event.stopPropagation()
+    const base = moduleLayout[drag.name]
+    const nextPosition = {
+      left: clamp(drag.originLeft + event.clientX - drag.startX, 20, SCENE_WIDTH - base.width - 20),
+      top: clamp(drag.originTop + event.clientY - drag.startY, 20, SCENE_HEIGHT - base.height - 20),
+    }
+    const next = { ...modulePositionsRef.current, [drag.name]: nextPosition }
+    modulePositionsRef.current = next
+    setModulePositions(next)
+  }
+
+  const endModuleDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    if (moduleDragRef.current?.pointerId !== event.pointerId) return
+    event.preventDefault()
+    event.stopPropagation()
+    moduleDragRef.current = null
+    updatePreferences({ dashboardModulePositions: modulePositionsRef.current })
+  }
+
   const startPanelResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
     event.preventDefault()
     event.stopPropagation()
@@ -432,24 +615,22 @@ export function DashboardModules({
 
   const movePanelResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const resize = resizeRef.current
-    const panel = panelRef.current
-    if (!resize || !panel || resize.pointerId !== event.pointerId) return
+    if (!resize || resize.pointerId !== event.pointerId) return
 
     const maxWidth = Math.min(540, window.innerWidth - 32)
     const maxHeight = Math.min(700, window.innerHeight - 190)
-    panel.style.width = `${clamp(resize.originWidth + event.clientX - resize.startX, 280, maxWidth)}px`
-    panel.style.height = `${clamp(resize.originHeight + event.clientY - resize.startY, 280, maxHeight)}px`
+    const next = {
+      width: clamp(resize.originWidth + event.clientX - resize.startX, 280, maxWidth),
+      height: clamp(resize.originHeight + event.clientY - resize.startY, 280, maxHeight),
+    }
+    panelSizeRef.current = next
+    setPanelSize(next)
   }
 
   const endPanelResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (resizeRef.current?.pointerId !== event.pointerId || !panelRef.current) return
+    if (resizeRef.current?.pointerId !== event.pointerId) return
     resizeRef.current = null
-    updatePreferences({
-      operationsPanelSize: {
-        width: panelRef.current.offsetWidth,
-        height: panelRef.current.offsetHeight,
-      },
-    })
+    updatePreferences({ operationsPanelSize: panelSizeRef.current })
   }
 
   const handleAliasClick = async (key: string, alias: string) => {
@@ -473,6 +654,16 @@ export function DashboardModules({
   return (
     <section className="relative mt-2 min-h-0 w-full flex-1">
       <div className="absolute right-1 top-1 z-50 flex items-center gap-2">
+        {editMode && (
+          <button
+            onClick={resetModuleLayout}
+            className="flex h-9 items-center gap-2 rounded-[9px] border border-black/[0.06] bg-white/80 px-3 text-xs font-medium text-[#626866] shadow-sm transition-colors hover:bg-white dark:border-white/[0.09] dark:bg-[#121413]/90 dark:text-[#aeb3b1] dark:hover:bg-[#181b1a]"
+            title="Przywróć domyślny układ kafelków"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Resetuj kafelki
+          </button>
+        )}
         <button
           onClick={resetMap}
           className="flex h-9 items-center gap-2 rounded-[9px] border border-black/[0.06] bg-white/80 px-3 text-xs font-medium text-[#626866] shadow-sm transition-colors hover:bg-white dark:border-white/[0.09] dark:bg-[#121413]/90 dark:text-[#aeb3b1] dark:hover:bg-[#181b1a]"
@@ -504,68 +695,70 @@ export function DashboardModules({
           onPointerCancel={endMapDrag}
         >
           <div ref={sceneRef} className="warehouse-map-scene absolute left-[300px] top-[8px] h-[570px] w-[1360px]">
-            <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1360 570" preserveAspectRatio="none" aria-hidden="true">
-              {sceneModuleNames.has('vez') && sceneModuleNames.has('vezVision') && (
-                <path
-                  d="M268 126 H356 V188 H438 V271 H510"
-                  className={`ecosystem-edge ${edgeStatusClass(statusByModule.vezVision ?? 'unknown')}`}
-                />
-              )}
-              {sceneModuleNames.has('vez') && sceneModuleNames.has('vezLabs') && (
-                <path
-                  d="M730 271 H814 V188 H886 V126 H970"
-                  className={`ecosystem-edge ${edgeStatusClass(labsStatus)}`}
-                />
-              )}
-              {sceneModuleNames.has('vezLabs') && (
-                <>
-                  {([
-                    ['nably', 'M1000 182 V344 H150 V430'],
-                    ['vezWork', 'M1045 182 V365 H458 V430'],
-                    ['vezRent', 'M1090 182 V386 H788 V430'],
-                    ['vezStudio', 'M1135 182 V407 H1098 V430'],
-                  ] as const).map(([name, path]) => {
-                    if (!sceneModuleNames.has(name)) return null
-                    const branchStatus = dependencyStatus(labsStatus, statusByModule[name] ?? 'unknown')
-                    return (
+            <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1360 570" preserveAspectRatio="none">
+              <title>Połączenia modułów ekosystemu</title>
+              {projectConnections.map((connection) => {
+                if (!sceneModuleNames.has(connection.from) || !sceneModuleNames.has(connection.to)) return null
+                return (
+                  <a
+                    key={connection.id}
+                    href={GITHUB_REPOSITORY_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ecosystem-edge-link"
+                    aria-label={`Otwórz repozytorium połączenia ${connection.from} i ${connection.to}`}
+                  >
+                    <path
+                      d={connection.path}
+                      className={`ecosystem-edge ${edgeStatusClass(connection.status)}`}
+                    />
+                    <path d={connection.path} className="ecosystem-edge-hit" />
+                    <title>Otwórz repozytorium VEZcore</title>
+                  </a>
+                )
+              })}
+              {serviceNodes
+                .filter((node) => canAccessInfrastructure && sceneModuleNames.has(node.owner))
+                .map((node) => {
+                  const path = serviceConnector(effectiveLayout[node.owner], node)
+                  return (
+                    <a
+                      key={`edge-${node.id}`}
+                      href={getServiceNodeHref(node, infraData) ?? GITHUB_REPOSITORY_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="ecosystem-edge-link"
+                      aria-label={`Otwórz ${node.label}`}
+                    >
                       <path
-                        key={name}
                         d={path}
-                        className={`ecosystem-edge ${edgeStatusClass(branchStatus)}`}
+                        className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById[node.id])}`}
                       />
-                    )
-                  })}
-                </>
-              )}
-              {canAccessInfrastructure && sceneModuleNames.has('vezVision') && (
-                <path d="M164 182 V210" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.prodApi)}`} />
-              )}
-              {canAccessInfrastructure && sceneModuleNames.has('vez') && (
-                <>
-                  <path d="M510 304 H474" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.database)}`} />
-                  <path d="M730 304 H746" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.deploy)}`} />
-                </>
-              )}
-              {canAccessInfrastructure && sceneModuleNames.has('vezLabs') && (
-                <>
-                  <path d="M994 70 V52 H938" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.labApi)}`} />
-                  <path d="M1018 182 V238 H963 V280" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.minio)}`} />
-                  <path d="M1178 126 H1202" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.monitor)}`} />
-                </>
-              )}
+                      <path d={path} className="ecosystem-edge-hit" />
+                      <title>{`Otwórz ${node.label}`}</title>
+                    </a>
+                  )
+                })}
             </svg>
 
             {sceneModules.map((item) => {
               const { mod, isHidden, moduleStatus, statusSummary, deployText, problemDetails } = item
               const Icon = mod.icon
               const status = statusMeta[moduleStatus]
-              const layout = moduleLayout[mod.name]
+              const layout = effectiveLayout[mod.name]
               const palette = modulePalette[mod.color]
               const showProblemTooltip = (moduleStatus === 'warning' || moduleStatus === 'error') && problemDetails.length > 0
 
               const tile = (
                 <article
-                  className={`warehouse-module-tile group absolute z-20 ${mod.name === 'vez' ? 'is-root' : ''} ${isHidden ? 'opacity-40' : ''}`}
+                  data-no-pan={editMode ? '' : undefined}
+                  data-module-tile={mod.name}
+                  onPointerDown={(event) => startModuleDrag(event, mod.name)}
+                  onPointerMove={moveModuleDrag}
+                  onPointerUp={endModuleDrag}
+                  onPointerCancel={endModuleDrag}
+                  onLostPointerCapture={endModuleDrag}
+                  className={`warehouse-module-tile group absolute z-20 ${mod.name === 'vez' ? 'is-root' : ''} ${editMode ? 'is-editing cursor-grab touch-none active:cursor-grabbing' : ''} ${isHidden ? 'opacity-40' : ''}`}
                   style={{
                     left: layout.left,
                     top: layout.top,
@@ -604,9 +797,32 @@ export function DashboardModules({
                           >
                             {isHidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                           </button>
-                        ) : mod.href ? (
-                          <ArrowUpRight className="h-4 w-4 text-[#89908e] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                        ) : null}
+                        ) : (
+                          <>
+                            {mod.href && (
+                              <a
+                                href={mod.href}
+                                className="flex h-7 w-7 items-center justify-center rounded-full text-[#8c9391] transition-colors hover:bg-black/[0.04] hover:text-[#343836] dark:hover:bg-white/[0.07] dark:hover:text-white"
+                                onClick={(event) => event.stopPropagation()}
+                                aria-label={`Otwórz ${mod.label}`}
+                                title={`Otwórz ${mod.label}`}
+                              >
+                                <ArrowUpRight className="h-3.5 w-3.5" />
+                              </a>
+                            )}
+                            <a
+                              href={GITHUB_REPOSITORY_URL}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex h-7 w-7 items-center justify-center rounded-full text-[#8c9391] transition-colors hover:bg-black/[0.04] hover:text-[#343836] dark:hover:bg-white/[0.07] dark:hover:text-white"
+                              onClick={(event) => event.stopPropagation()}
+                              aria-label={`Otwórz repozytorium ${mod.label}`}
+                              title="Otwórz repozytorium GitHub"
+                            >
+                              <GitBranch className="h-3.5 w-3.5" />
+                            </a>
+                          </>
+                        )}
                       </span>
                     </div>
 
@@ -633,11 +849,7 @@ export function DashboardModules({
                 </article>
               )
 
-              return mod.href && !editMode ? (
-                <Link key={mod.name} href={mod.href} className="contents">{tile}</Link>
-              ) : (
-                <div key={mod.name} className="contents">{tile}</div>
-              )
+              return <div key={mod.name} className="contents">{tile}</div>
             })}
 
             {serviceNodes
@@ -696,8 +908,8 @@ export function DashboardModules({
           data-no-pan
           className="operations-panel absolute left-3 top-3 z-40 flex min-h-[280px] min-w-[280px] flex-col overflow-hidden rounded-[14px]"
           style={{
-            width: preferences.operationsPanelSize.width,
-            height: preferences.operationsPanelSize.height,
+            width: panelSize.width,
+            height: panelSize.height,
             maxWidth: 'calc(100% - 24px)',
             maxHeight: 'calc(100% - 24px)',
           }}
@@ -859,6 +1071,7 @@ export function DashboardModules({
             onPointerMove={movePanelResize}
             onPointerUp={endPanelResize}
             onPointerCancel={endPanelResize}
+            onLostPointerCapture={endPanelResize}
             aria-label="Zmień rozmiar panelu"
             title="Przeciągnij, aby zmienić rozmiar"
           >

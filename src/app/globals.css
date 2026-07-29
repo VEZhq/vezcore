@@ -398,6 +398,27 @@
   stroke-width: 1.5;
 }
 
+.ecosystem-edge-link {
+  cursor: pointer;
+}
+
+.ecosystem-edge-link .ecosystem-edge {
+  pointer-events: none;
+}
+
+.ecosystem-edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 14;
+  pointer-events: stroke;
+  vector-effect: non-scaling-stroke;
+}
+
+.ecosystem-edge-link:hover .ecosystem-edge {
+  filter: drop-shadow(0 0 4px currentColor);
+  stroke-width: 2.6;
+}
+
 .ecosystem-edge.is-healthy {
   stroke: #54a86f;
   filter: drop-shadow(0 1px 2px rgba(61, 148, 91, 0.12));
@@ -416,33 +437,40 @@
 .warehouse-module-tile {
   --module-accent: #668875;
   --module-soft: #edf4ef;
-  border-radius: 13px;
-  transform: perspective(1000px) rotateX(1.6deg) rotateY(-1.2deg) translateZ(0);
+  border-radius: 15px;
+  transform: perspective(1200px) rotateX(1deg) rotateY(-0.8deg) translateZ(0);
   transform-origin: center bottom;
-  transition: transform 200ms ease;
+  transform-style: preserve-3d;
+  transition: transform 220ms ease, filter 220ms ease;
   isolation: isolate;
+  filter: drop-shadow(0 18px 24px rgba(25, 31, 29, 0.08));
 }
 
 .warehouse-module-tile::before {
   content: '';
   position: absolute;
-  inset: 5px -5px -6px 5px;
+  left: 9px;
+  right: -3px;
+  bottom: -7px;
+  height: 14px;
   border: 1px solid rgba(25, 31, 29, 0.055);
-  border-radius: 12px;
-  background: linear-gradient(145deg, #edf0ee, #dde1df);
+  border-radius: 0 0 13px 13px;
+  background: linear-gradient(180deg, #e8ebe9 0%, #dfe3e0 100%);
+  transform: translateZ(-5px) skewX(-12deg);
   z-index: -1;
 }
 
 .warehouse-module-tile::after {
   content: '';
   position: absolute;
-  left: 9%;
-  right: 4%;
-  bottom: -18px;
-  height: 24px;
+  left: 11%;
+  right: 2%;
+  bottom: -21px;
+  height: 30px;
   border-radius: 50%;
-  background: rgba(23, 29, 27, 0.13);
-  filter: blur(14px);
+  background: color-mix(in srgb, var(--module-accent) 20%, rgba(23, 29, 27, 0.16));
+  filter: blur(18px);
+  opacity: 0.58;
   z-index: -2;
 }
 
@@ -451,23 +479,28 @@
   display: flex;
   height: 100%;
   flex-direction: column;
-  border: 1px solid rgba(25, 31, 29, 0.09);
-  border-radius: 12px;
-  padding: 12px 13px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 249, 0.98));
+  overflow: hidden;
+  border: 1px solid rgba(25, 31, 29, 0.085);
+  border-radius: 14px;
+  padding: 13px 14px;
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--module-soft) 64%, transparent) 0%, transparent 44%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.99) 0%, rgba(250, 251, 250, 0.99) 58%, rgba(246, 248, 247, 0.99) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    0 1px 2px rgba(25, 31, 29, 0.035),
-    0 10px 28px rgba(25, 31, 29, 0.075);
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 rgba(25, 31, 29, 0.025),
+    0 1px 1px rgba(25, 31, 29, 0.04),
+    0 8px 18px rgba(25, 31, 29, 0.055);
+  transform: translateZ(5px);
 }
 
 .warehouse-module-tile.is-root .warehouse-module-surface {
-  border-color: rgba(25, 31, 29, 0.13);
-  background: linear-gradient(180deg, #ffffff, #f6f7f6);
+  border-color: color-mix(in srgb, var(--module-accent) 20%, rgba(25, 31, 29, 0.1));
   box-shadow:
     inset 0 1px 0 #ffffff,
-    0 1px 2px rgba(25, 31, 29, 0.04),
-    0 12px 30px rgba(25, 31, 29, 0.085);
+    inset 0 -1px 0 rgba(25, 31, 29, 0.025),
+    0 1px 1px rgba(25, 31, 29, 0.04),
+    0 10px 22px rgba(25, 31, 29, 0.065);
 }
 
 .warehouse-module-icon {
@@ -484,7 +517,13 @@
 
 .warehouse-module-tile:hover {
   z-index: 35;
-  transform: perspective(1000px) rotateX(0.6deg) rotateY(-0.3deg) translateY(-4px) translateZ(10px);
+  transform: perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(-5px) translateZ(12px);
+  filter: drop-shadow(0 23px 27px rgba(25, 31, 29, 0.11));
+}
+
+.warehouse-module-tile.is-editing {
+  outline: 1px dashed color-mix(in srgb, var(--module-accent) 56%, transparent);
+  outline-offset: 5px;
 }
 
 .ecosystem-service-node {
@@ -567,26 +606,30 @@ a.ecosystem-service-node:focus-visible {
 }
 
 .dark .warehouse-module-tile {
-  filter: none;
+  filter: drop-shadow(0 20px 26px rgba(0, 0, 0, 0.38));
 }
 
 .dark .warehouse-module-tile::before {
   border-color: rgba(255, 255, 255, 0.07);
-  background: linear-gradient(145deg, #202220, #101110);
+  background: linear-gradient(180deg, #202220, #0d0f0e);
 }
 
 .dark .warehouse-module-tile::after {
-  background: rgba(0, 0, 0, 0.5);
+  background: color-mix(in srgb, var(--module-accent) 18%, rgba(0, 0, 0, 0.72));
+  opacity: 0.75;
 }
 
 .dark .warehouse-module-surface,
 .dark .warehouse-module-tile.is-root .warehouse-module-surface {
   border-color: rgba(255, 255, 255, 0.105);
-  background: linear-gradient(180deg, #151615, #0f100f);
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--module-accent) 12%, transparent) 0%, transparent 46%),
+    linear-gradient(165deg, #171918 0%, #121413 58%, #0e100f 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.065),
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
     0 1px 2px rgba(0, 0, 0, 0.5),
-    0 13px 32px rgba(0, 0, 0, 0.38);
+    0 10px 24px rgba(0, 0, 0, 0.3);
 }
 
 .dark .warehouse-module-icon {
@@ -596,7 +639,7 @@ a.ecosystem-service-node:focus-visible {
 }
 
 .dark .warehouse-module-tile:hover {
-  filter: none;
+  filter: drop-shadow(0 25px 30px rgba(0, 0, 0, 0.52));
 }
 
 .dark .ecosystem-service-node {

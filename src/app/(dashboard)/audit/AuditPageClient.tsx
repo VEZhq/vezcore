@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import type { LucideIcon } from 'lucide-react'
 import {
   AlertTriangle,
+  ArrowRight,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -16,6 +17,7 @@ import {
   KeyRound,
   LogIn,
   LogOut,
+  SlidersHorizontal,
   Shield,
   ShieldCheck,
   User,
@@ -166,7 +168,7 @@ function DateRangeFilter({
 
   return (
     <div ref={rootRef} className="relative">
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="flex rounded-[8px] bg-black/[0.035] p-1 dark:bg-white/[0.055]">
         {[
           ['Dzisiaj', 0],
           ['7 dni', 6],
@@ -176,37 +178,41 @@ function DateRangeFilter({
             key={label}
             type="button"
             onClick={() => applyPreset(Number(days))}
-            className="h-8 border border-black/[0.08] bg-white text-[10px] text-[#68706d] transition-colors hover:border-[#789483]/45 hover:text-[#35423b] dark:border-white/[0.09] dark:bg-white/[0.045] dark:text-[#a0a6a3] dark:hover:border-[#789483] dark:hover:text-white"
+            className="h-7 flex-1 rounded-[6px] text-[10px] font-medium text-[#747b78] transition-colors hover:bg-white/80 hover:text-[#343936] dark:text-[#9da39f] dark:hover:bg-white/[0.07] dark:hover:text-white"
           >
             {label}
           </button>
         ))}
       </div>
 
-      <div className="mt-2 grid grid-cols-2 gap-2">
+      <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center rounded-[9px] border border-black/[0.09] bg-white p-1.5 shadow-[0_1px_2px_rgba(25,31,29,0.025)] dark:border-white/[0.09] dark:bg-white/[0.035]">
         {([
           ['start', 'Od', startDate],
           ['end', 'Do', endDate],
-        ] as const).map(([field, label, value]) => (
-          <button
-            key={field}
-            type="button"
-            onClick={() => openCalendar(field)}
-            className={`flex min-w-0 items-center gap-2 border bg-white px-2.5 py-2 text-left transition-colors dark:bg-[#121413] ${
-              activeField === field ? 'border-[#789483]' : 'border-black/[0.12] hover:border-black/[0.22] dark:border-white/[0.11] dark:hover:border-white/[0.24]'
-            }`}
-          >
-            <CalendarDays className="h-3.5 w-3.5 shrink-0 text-[#789483]" />
-            <span className="min-w-0">
-              <span className="block text-[8px] uppercase text-[#979d9a]">{label}</span>
-              <span className="block truncate text-[10px] font-medium text-[#3d4340] dark:text-[#d7dad8]">{formatFilterDate(value)}</span>
-            </span>
-          </button>
+        ] as const).map(([field, label, value], index) => (
+          <div key={field} className="contents">
+            {index === 1 && <ArrowRight className="h-3.5 w-3.5 text-[#b0b5b2]" />}
+            <button
+              type="button"
+              onClick={() => openCalendar(field)}
+              className={`flex min-w-0 items-center gap-2 rounded-[7px] px-2 py-2 text-left transition-colors ${
+                activeField === field
+                  ? 'bg-[#edf2ef] dark:bg-white/[0.08]'
+                  : 'hover:bg-black/[0.025] dark:hover:bg-white/[0.05]'
+              }`}
+            >
+              <CalendarDays className="h-3.5 w-3.5 shrink-0 text-[#789483]" />
+              <span className="min-w-0">
+                <span className="block text-[8px] uppercase text-[#979d9a]">{label}</span>
+                <span className="block truncate text-[10px] font-medium text-[#3d4340] dark:text-[#d7dad8]">{formatFilterDate(value)}</span>
+              </span>
+            </button>
+          </div>
         ))}
       </div>
 
       {activeField && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 border border-black/[0.12] bg-white p-3 shadow-[0_18px_45px_rgba(29,36,32,0.16)] dark:border-white/[0.1] dark:bg-[#131614] dark:shadow-[0_18px_45px_rgba(0,0,0,0.55)]">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-[10px] border border-black/[0.10] bg-white p-3 shadow-[0_18px_45px_rgba(29,36,32,0.16)] dark:border-white/[0.1] dark:bg-[#131614] dark:shadow-[0_18px_45px_rgba(0,0,0,0.55)]">
           <div className="flex items-center justify-between">
             <button
               type="button"
@@ -294,7 +300,7 @@ function EventTypeFilter({
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="flex h-10 w-full items-center justify-between border border-black/[0.12] bg-white px-3 text-left text-[11px] text-[#414744] hover:border-black/[0.22] dark:border-white/[0.11] dark:bg-[#121413] dark:text-[#d3d6d4] dark:hover:border-white/[0.24]"
+        className="flex h-10 w-full items-center justify-between rounded-[9px] border border-black/[0.09] bg-white px-3 text-left text-[11px] text-[#414744] shadow-[0_1px_2px_rgba(25,31,29,0.025)] hover:border-black/[0.18] dark:border-white/[0.09] dark:bg-white/[0.035] dark:text-[#d3d6d4] dark:hover:border-white/[0.18]"
       >
         <span className="flex min-w-0 items-center gap-2">
           <span className={`h-2 w-2 shrink-0 rounded-full ${value ? getMeta(value).dot : 'bg-[#a9afad]'}`} />
@@ -303,7 +309,7 @@ function EventTypeFilter({
         <ChevronDown className={`h-3.5 w-3.5 text-[#8d9491] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-72 overflow-y-auto border border-black/[0.12] bg-white py-1 shadow-[0_16px_38px_rgba(29,36,32,0.14)] dark:border-white/[0.1] dark:bg-[#131614] dark:shadow-[0_16px_38px_rgba(0,0,0,0.5)]">
+        <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-72 overflow-y-auto rounded-[9px] border border-black/[0.10] bg-white py-1 shadow-[0_16px_38px_rgba(29,36,32,0.14)] dark:border-white/[0.1] dark:bg-[#131614] dark:shadow-[0_16px_38px_rgba(0,0,0,0.5)]">
           {[['', 'Wszystkie zdarzenia'], ...actions.map((action) => [action, getMeta(action).label])].map(([action, label]) => (
             <button
               key={action || 'all'}
@@ -344,6 +350,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
   const limit = 20
   const totalPages = Math.ceil(total / limit)
   const hasFilters = Boolean(actionFilter || userFilter || startDate || endDate)
+  const activeFilterCount = [actionFilter, userFilter, startDate || endDate].filter(Boolean).length
   const users = useMemo(() => {
     const unique = new Map<string, string>()
     for (const log of logs) {
@@ -435,7 +442,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
     <div className="min-h-screen bg-white text-[#242725] dark:bg-[#070807] dark:text-[#eceeed] xl:h-screen xl:overflow-hidden">
       <MobileNav currentPath="/audit" showKonta={canAccessKonta} showAudit showSettings={canAccessSettings} />
 
-      <div className="mx-auto grid min-h-screen w-full max-w-[1540px] xl:h-screen xl:min-h-0 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="mx-auto grid min-h-screen w-full max-w-[1540px] xl:h-screen xl:min-h-0 xl:grid-cols-[minmax(0,1fr)_360px]">
         <main className="min-w-0 px-5 py-8 sm:px-10 lg:px-14 xl:flex xl:min-h-0 xl:flex-col xl:overflow-hidden">
           <header className="flex shrink-0 items-end justify-between border-b border-black/[0.12] pb-7 dark:border-white/[0.1]">
             <div>
@@ -575,41 +582,42 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
           </section>
         </main>
 
-        <aside className="border-l border-black/[0.12] bg-[#f5f7f6] px-7 py-8 dark:border-white/[0.09] dark:bg-[#0b0c0b] xl:h-screen">
-          <div>
-            <div className="flex items-start justify-between">
-              <h2 className="text-[28px] font-semibold leading-none">Filters</h2>
-              {hasFilters && (
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="flex h-8 w-8 items-center justify-center text-[#777e7b] hover:bg-white hover:text-[#b45656] dark:hover:bg-white/[0.07]"
-                  aria-label="Wyczyść filtry"
-                  title="Wyczyść filtry"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
+        <aside className="border-l border-black/[0.10] bg-[#f7f8f7] px-6 py-7 dark:border-white/[0.09] dark:bg-[#0c0d0c] xl:flex xl:h-screen xl:flex-col xl:overflow-visible">
+          <div className="flex items-center justify-between border-b border-black/[0.09] pb-5 dark:border-white/[0.08]">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[9px] border border-black/[0.07] bg-white text-[#68716d] shadow-[0_1px_2px_rgba(25,31,29,0.04)] dark:border-white/[0.08] dark:bg-white/[0.045] dark:text-[#a8aeaa]">
+                <SlidersHorizontal className="h-4 w-4" />
+              </span>
+              <div>
+                <h2 className="text-[20px] font-semibold leading-none">Filtry</h2>
+                <p className="mt-1 text-[9px] text-[#8d9491]">
+                  {hasFilters ? 'Widok zawężony' : 'Wszystkie zdarzenia'}
+                </p>
+              </div>
             </div>
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="flex h-8 items-center gap-1.5 rounded-[7px] px-2 text-[9px] text-[#777e7b] transition-colors hover:bg-white hover:text-[#a65353] dark:hover:bg-white/[0.06]"
+              >
+                <X className="h-3.5 w-3.5" />
+                Wyczyść
+              </button>
+            )}
+          </div>
 
-            <section className="mt-7 border-t border-black/[0.10] pt-5 dark:border-white/[0.09]">
-              <div className="mb-3 flex items-end justify-between gap-3">
+          <div className="space-y-6 pt-5">
+            <section>
+              <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <h3 className="text-[15px] font-semibold">Filter by time</h3>
-                  <p className="mt-0.5 text-[9px] text-[#929896]">Zakres aktualizuje oś automatycznie</p>
+                  <h3 className="text-[12px] font-semibold">Zakres czasu</h3>
+                  <p className="mt-0.5 text-[9px] text-[#929896]">Wybierz przedział na osi zdarzeń</p>
                 </div>
                 {(startDate || endDate) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStartDate('')
-                      setEndDate('')
-                      setPage(1)
-                    }}
-                    className="text-[9px] text-[#789483] hover:text-[#43564a]"
-                  >
-                    Wyczyść
-                  </button>
+                  <span className="rounded-full bg-[#e9efeb] px-2 py-1 text-[8px] font-medium text-[#58705f] dark:bg-white/[0.07] dark:text-[#a9b9ae]">
+                    Aktywny
+                  </span>
                 )}
               </div>
               <DateRangeFilter
@@ -626,49 +634,32 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
               />
             </section>
 
-            <section className="mt-7 border-t border-black/[0.10] pt-5 dark:border-white/[0.09]">
-              <h3 className="text-[15px] font-semibold">Filter by users</h3>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUserFilter('')
+            <section className="border-t border-black/[0.08] pt-5 dark:border-white/[0.07]">
+              <label htmlFor="audit-user-filter" className="text-[12px] font-semibold">Użytkownik</label>
+              <p className="mt-0.5 text-[9px] text-[#929896]">Pokaż aktywność wybranego konta</p>
+              <div className="relative mt-3">
+                <Users className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#789483]" />
+                <select
+                  id="audit-user-filter"
+                  value={userFilter}
+                  onChange={(event) => {
+                    setUserFilter(event.target.value)
                     setPage(1)
                   }}
-                  className={`inline-flex h-8 items-center gap-1.5 border px-2.5 text-[10px] ${
-                    userFilter === ''
-                      ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a] dark:border-white/[0.16] dark:bg-white/[0.08] dark:text-[#eceeed]'
-                      : 'border-black/[0.08] bg-white text-[#747b78] hover:border-black/[0.18] dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-[#a1a7a4] dark:hover:border-white/[0.2]'
-                  }`}
+                  className="h-10 w-full appearance-none rounded-[9px] border border-black/[0.09] bg-white pl-9 pr-9 text-[10px] text-[#414744] shadow-[0_1px_2px_rgba(25,31,29,0.025)] outline-none transition-colors hover:border-black/[0.18] focus:border-[#789483] dark:border-white/[0.09] dark:bg-white/[0.035] dark:text-[#d3d6d4]"
                 >
-                  <Users className="h-3 w-3" />
-                  Wszyscy
-                </button>
-                {users.map((user) => (
-                  <button
-                    key={user.id}
-                    type="button"
-                    onClick={() => {
-                      setUserFilter(user.id)
-                      setPage(1)
-                    }}
-                    className={`inline-flex h-8 max-w-full items-center gap-1.5 border px-2.5 text-[10px] ${
-                      userFilter === user.id
-                        ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a] dark:border-white/[0.16] dark:bg-white/[0.08] dark:text-[#eceeed]'
-                        : 'border-black/[0.08] bg-white text-[#747b78] hover:border-black/[0.18] dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-[#a1a7a4] dark:hover:border-white/[0.2]'
-                    }`}
-                  >
-                    <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#edf1ef] text-[8px] font-semibold text-[#668976]">
-                      {user.label.slice(0, 1).toUpperCase()}
-                    </span>
-                    <span className="truncate">{user.label}</span>
-                  </button>
-                ))}
+                  <option value="">Wszyscy użytkownicy</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>{user.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8d9491]" />
               </div>
             </section>
 
-            <section className="mt-7 border-t border-black/[0.10] pt-5 dark:border-white/[0.09]">
-              <h3 className="mb-3 text-[15px] font-semibold">Filter by event type</h3>
+            <section className="border-t border-black/[0.08] pt-5 dark:border-white/[0.07]">
+              <h3 className="text-[12px] font-semibold">Typ zdarzenia</h3>
+              <p className="mb-3 mt-0.5 text-[9px] text-[#929896]">Logowania, konta i operacje bezpieczeństwa</p>
               <EventTypeFilter
                 actions={actions}
                 value={actionFilter}
@@ -678,17 +669,19 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                 }}
               />
             </section>
+          </div>
 
-            {hasFilters && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="mt-7 flex h-9 w-full items-center justify-center gap-2 border border-black/[0.10] bg-white text-[10px] text-[#626966] hover:border-[#b56b6b]/35 hover:text-[#a44f4f] dark:border-white/[0.1] dark:bg-white/[0.045] dark:text-[#a7adaa]"
-              >
-                <X className="h-3.5 w-3.5" />
-                Wyczyść wszystkie filtry
-              </button>
-            )}
+          <div className="mt-auto border-t border-black/[0.08] pt-5 dark:border-white/[0.07]">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[9px] uppercase text-[#929896]">Znaleziono</p>
+                <p className="mt-1 text-[20px] font-semibold leading-none">{total}</p>
+              </div>
+              <div className="border-l border-black/[0.08] pl-4 dark:border-white/[0.07]">
+                <p className="text-[9px] uppercase text-[#929896]">Aktywne filtry</p>
+                <p className="mt-1 text-[20px] font-semibold leading-none">{activeFilterCount}</p>
+              </div>
+            </div>
           </div>
         </aside>
       </div>
