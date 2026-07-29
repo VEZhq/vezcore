@@ -432,6 +432,22 @@ export function DashboardModules({
     if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
   }, [])
 
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      modulePositionsRef.current = preferences.dashboardModulePositions
+      serviceNodePositionsRef.current = preferences.dashboardServiceNodePositions
+      panelSizeRef.current = preferences.operationsPanelSize
+      setModulePositions(preferences.dashboardModulePositions)
+      setServiceNodePositions(preferences.dashboardServiceNodePositions)
+      setPanelSize(preferences.operationsPanelSize)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [
+    preferences.dashboardModulePositions,
+    preferences.dashboardServiceNodePositions,
+    preferences.operationsPanelSize,
+  ])
+
   const permissionFilteredModules = useMemo(
     () => DASHBOARD_MODULES.filter((mod) => mod.name !== 'vezVision' || canAccessVezVision),
     [canAccessVezVision]
@@ -566,6 +582,7 @@ export function DashboardModules({
   }
 
   const resetModuleLayout = () => {
+    resetMap()
     modulePositionsRef.current = {}
     serviceNodePositionsRef.current = {}
     setModulePositions({})
@@ -765,16 +782,14 @@ export function DashboardModules({
   return (
     <section className="relative mt-2 min-h-0 w-full flex-1">
       <div className="absolute right-1 top-1 z-50 flex items-center gap-2">
-        {editMode && (
-          <button
-            onClick={resetModuleLayout}
-            className="flex h-9 items-center gap-2 rounded-[9px] border border-black/[0.06] bg-white/80 px-3 text-xs font-medium text-[#626866] shadow-sm transition-colors hover:bg-white dark:border-white/[0.09] dark:bg-[#121413]/90 dark:text-[#aeb3b1] dark:hover:bg-[#181b1a]"
-            title="Przywróć domyślny układ kafelków"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Resetuj kafelki
-          </button>
-        )}
+        <button
+          onClick={resetModuleLayout}
+          className="flex h-9 items-center gap-2 rounded-[9px] border border-black/[0.06] bg-white/80 px-3 text-xs font-medium text-[#626866] shadow-sm transition-colors hover:bg-white dark:border-white/[0.09] dark:bg-[#121413]/90 dark:text-[#aeb3b1] dark:hover:bg-[#181b1a]"
+          title="Przywróć domyślny układ kafelków i połączeń"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Resetuj układ
+        </button>
         <button
           onClick={resetMap}
           className="flex h-9 items-center gap-2 rounded-[9px] border border-black/[0.06] bg-white/80 px-3 text-xs font-medium text-[#626866] shadow-sm transition-colors hover:bg-white dark:border-white/[0.09] dark:bg-[#121413]/90 dark:text-[#aeb3b1] dark:hover:bg-[#181b1a]"

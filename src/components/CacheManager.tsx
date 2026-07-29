@@ -64,19 +64,22 @@ export function CacheManager() {
   }
 
   return (
-    <div className="border border-white/[0.06] light:border-black/[0.06] bg-[#0a0a0a]/70 light:bg-[#fffdfa]/[0.84] transition-colors duration-300">
-      <div className="p-6 border-b border-white/[0.06] light:border-black/[0.06]">
+    <section className="border-y border-black/[0.09] bg-white/35 dark:border-white/[0.09] dark:bg-white/[0.018]">
+      <div className="border-b border-black/[0.065] px-5 py-4 dark:border-white/[0.065]">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Database className="h-4 w-4 text-[#444444] light:text-[#888888]" />
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
-              Zarządzanie cache
-            </p>
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[#eee8f0] text-[#806a82] dark:bg-white/[0.055] dark:text-[#c7b6c9]">
+              <Database className="h-4 w-4" />
+            </span>
+            <div>
+              <p className="text-[13px] font-semibold">Cache aplikacji</p>
+              <p className="mt-0.5 text-[10px] text-[#7d8480] dark:text-[#959b98]">Odśwież dane wybranej części panelu.</p>
+            </div>
           </div>
-            <button
-              onClick={handleClearAll}
-              disabled={clearing}
-            className="flex items-center gap-2 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-red-400 light:text-red-600 border border-red-500/20 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+          <button
+            onClick={handleClearAll}
+            disabled={clearing}
+            className="flex h-8 items-center gap-1.5 rounded-[7px] px-2.5 text-[9px] text-red-600 transition-colors hover:bg-red-500/[0.07] disabled:opacity-50 dark:text-red-300"
           >
             <Trash2 className="h-3 w-3" />
             Wyczyść wszystko
@@ -85,38 +88,38 @@ export function CacheManager() {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-500/10 border-b border-red-500/20">
-          <p className="text-xs text-red-400">{error}</p>
+        <div className="border-b border-red-500/20 bg-red-500/[0.06] px-5 py-3">
+          <p className="text-[10px] text-red-600 dark:text-red-300">{error}</p>
         </div>
       )}
 
-      <div className="divide-y divide-white/[0.04] light:divide-black/[0.04]">
-
+      <div className="divide-y divide-black/[0.06] px-5 dark:divide-white/[0.06]">
         {paths.map(({ path, label }) => (
-          <div key={path} className="p-4 flex items-center justify-between">
+          <div key={path} className="flex items-center justify-between py-3">
             <div>
-              <p className="text-sm text-white light:text-black">{label}</p>
-              <p className="text-[10px] text-[#444444] light:text-[#888888] font-mono">{path}</p>
+              <p className="text-[11px] font-medium">{label}</p>
+              <p className="mt-0.5 font-mono text-[9px] text-[#8c9390]">{path}</p>
             </div>
             <button
               onClick={() => handleClearPath(path)}
               disabled={clearing}
-              className="p-2 text-[#666666] light:text-[#999999] hover:text-white light:hover:text-black disabled:opacity-50 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-[7px] text-[#7c837f] transition-colors hover:bg-black/[0.04] hover:text-black disabled:opacity-50 dark:hover:bg-white/[0.06] dark:hover:text-white"
+              aria-label={`Wyczyść cache: ${label}`}
             >
-              <RefreshCw className={`h-4 w-4 ${clearing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3.5 w-3.5 ${clearing ? 'animate-spin' : ''}`} />
             </button>
           </div>
         ))}
       </div>
 
       {lastCleared && (
-        <div className="p-4 border-t border-white/[0.06] light:border-black/[0.06]">
-          <p className="text-[10px] text-[#444444] light:text-[#888888]">
+        <div className="border-t border-black/[0.06] px-5 py-3 dark:border-white/[0.06]">
+          <p className="text-[9px] text-[#8c9390]">
             Ostatnie czyszczenie: {formatDate(lastCleared)}
           </p>
         </div>
       )}
-    </div>
+    </section>
   )
 }
 
