@@ -7,6 +7,7 @@ import { NeuralBackground } from '@/components/NeuralBackground'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 import { isAdminRole } from '@/lib/roles'
 import { enforceRequiredMfaLevel } from '@/lib/queries/auth'
+import { RolePreviewBanner } from '@/components/RolePreviewBanner'
 
 export default async function DashboardLayout({
 	children,
@@ -29,6 +30,7 @@ export default async function DashboardLayout({
 					<div className="relative min-h-screen overflow-hidden bg-[#08080b] light:bg-[#f6f7fb]">
 						<NeuralBackground />
 						<DashboardVisitTracker userId={authState.userId} />
+						{authState.previewRole && <RolePreviewBanner role={authState.previewRole} />}
 						<div className="relative z-10 min-h-screen">
 							{children}
 						</div>

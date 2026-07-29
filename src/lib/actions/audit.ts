@@ -37,6 +37,10 @@ const ALLOWED_ACTIONS = [
   'session_revoke', 'all_sessions_revoked',
   'permission_grant', 'permission_revoke',
   'vezvision_folder_acl_grant', 'vezvision_folder_acl_revoke', 'vezvision_folder_acl_update',
+  'operations_incident_acknowledge',
+  'operations_maintenance_create', 'operations_maintenance_status',
+  'operations_snapshot_create', 'operations_shortcut_reveal',
+  'role_preview_start', 'role_preview_end',
 ]
 
 export async function getAuditLogs(filters: AuditLogFilters = {}) {
@@ -163,5 +167,4 @@ export async function getAuditLogActions() {
 
   return ALLOWED_ACTIONS
 }
-
 

@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Clock3, UserCog } from 'lucide-react'
+import { Bell, Clock3, UserCog } from 'lucide-react'
 import { getAuthenticatedUserPermissionState, getUserPermissions } from '@/lib/permissions'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { getDashboardStatsForLast24Hours } from '@/lib/queries/dashboard'
@@ -9,6 +9,7 @@ import { getDashboardProfileSummary } from '@/lib/queries/profile'
 import { DashboardModules } from './DashboardModules'
 import { DashboardProfileMenu } from './DashboardProfileMenu'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { getOperationsNotificationSummary } from '@/lib/operations/queries'
 
 export default async function DashboardPage() {
   const authState = await getAuthenticatedUserPermissionState()
@@ -21,9 +22,12 @@ export default async function DashboardPage() {
     getUserPermissions(),
     getDashboardProfileSummary(user.id),
   ])
-  const dashboardStats = permissions.canAccessAudit
-    ? await getDashboardStatsForLast24Hours()
-    : null
+  const [dashboardStats, notificationSummary] = await Promise.all([
+    permissions.canAccessAudit ? getDashboardStatsForLast24Hours() : null,
+    permissions.canAccessOperations
+      ? getOperationsNotificationSummary(user.id)
+      : null,
+  ])
   const errors24h = dashboardStats?.errors_24h ?? 0
 
   return (
@@ -60,6 +64,23 @@ export default async function DashboardPage() {
 
               <div className="ml-auto flex items-center gap-1.5">
                 <ThemeToggle />
+                {permissions.canAccessOperations && (
+                  <Link
+                    href="/operations"
+                    className="relative flex h-8 w-8 items-center justify-center rounded-[8px] text-[#69706e] transition-colors hover:bg-white hover:text-[#202020] dark:text-[#a7adaa] dark:hover:bg-white/[0.08] dark:hover:text-white"
+                    aria-label="Centrum operacji"
+                    title="Centrum operacji"
+                  >
+                    <Bell className="h-4 w-4" />
+                    {(notificationSummary?.unreadCount ?? 0) > 0 && (
+                      <span className={`absolute right-1 top-1 flex min-w-3.5 items-center justify-center rounded-full px-1 text-[7px] font-bold text-white ${
+                        notificationSummary?.hasError ? 'bg-[#d65f59]' : 'bg-[#b48a3d]'
+                      }`}>
+                        {Math.min(notificationSummary?.unreadCount ?? 0, 99)}
+                      </span>
+                    )}
+                  </Link>
+                )}
                 {permissions.canAccessAudit && (
                   <Link
                     href="/audit"

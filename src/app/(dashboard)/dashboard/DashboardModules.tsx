@@ -11,9 +11,7 @@ import {
 import {
   Activity,
   ArrowUpRight,
-  Check,
   ChevronDown,
-  Copy,
   Database,
   ExternalLink,
   Eye,
@@ -45,8 +43,6 @@ type InfrastructureResource = {
   label: string
   href: string
   description: string
-  alias: string
-  aliasType: 'prod' | 'lab' | 'tunnel' | 'router'
 }
 
 type InfraData = {
@@ -395,8 +391,6 @@ export function DashboardModules({
   const [editMode, setEditMode] = useState(false)
   const [panelFilter, setPanelFilter] = useState<PanelFilter>('all')
   const [openModule, setOpenModule] = useState<DashboardModuleName | null>(null)
-  const [revealedAliases, setRevealedAliases] = useState<string[]>([])
-  const [copiedAlias, setCopiedAlias] = useState<string | null>(null)
   const [infraData, setInfraData] = useState<InfraData | null>(null)
   const [panelSize, setPanelSize] = useState(preferences.operationsPanelSize)
   const [modulePositions, setModulePositions] = useState<Record<string, ModulePosition>>(
@@ -421,16 +415,24 @@ export function DashboardModules({
     if (!canAccessInfrastructure) return
 
     let cancelled = false
-    fetch('/api/dashboard-infra', { cache: 'no-store' })
-      .then((response) => response.ok ? response.json() : null)
-      .then((data: InfraData | null) => {
-        if (!cancelled) setInfraData(data)
-      })
-      .catch(() => {
-        if (!cancelled) setInfraData(null)
-      })
+    const loadInfrastructure = () => {
+      if (document.visibilityState === 'hidden') return
+      fetch('/api/dashboard-infra', { cache: 'no-store' })
+        .then((response) => response.ok ? response.json() : null)
+        .then((data: InfraData | null) => {
+          if (!cancelled) setInfraData(data)
+        })
+        .catch(() => {
+          if (!cancelled) setInfraData(null)
+        })
+    }
+    loadInfrastructure()
+    const timer = window.setInterval(loadInfrastructure, 60_000)
 
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
   }, [canAccessInfrastructure])
 
   useEffect(() => () => {
@@ -781,24 +783,6 @@ export function DashboardModules({
     if (resizeRef.current?.pointerId !== event.pointerId) return
     resizeRef.current = null
     updatePreferences({ operationsPanelSize: panelSizeRef.current })
-  }
-
-  const handleAliasClick = async (key: string, alias: string) => {
-    const supportsHover = window.matchMedia('(hover: hover)').matches
-    const isRevealed = revealedAliases.includes(key)
-
-    if (!supportsHover && !isRevealed) {
-      setRevealedAliases((current) => [...current, key])
-      return
-    }
-
-    try {
-      await navigator.clipboard.writeText(alias)
-      setCopiedAlias(key)
-      window.setTimeout(() => setCopiedAlias(null), 1400)
-    } catch {
-      setCopiedAlias(null)
-    }
   }
 
   return (
@@ -1246,45 +1230,32 @@ export function DashboardModules({
                           <div className="space-y-1">
                             {resources.map((resource) => {
                               const resourceKey = `${mod.name}-${resource.label}`
-                              const isRevealed = revealedAliases.includes(resourceKey)
-                              const isCopied = copiedAlias === resourceKey
 
                               return (
-                                <div key={resourceKey} className="rounded-[7px] bg-[#f7f8f7] px-2 py-1.5 dark:bg-black/20">
-                                  <a
-                                    href={resource.href}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="group/resource flex items-center gap-2"
-                                  >
-                                    <span className="min-w-0 flex-1 truncate text-[10px] font-medium text-[#454a48] dark:text-[#c8ccca]">{resource.label}</span>
-                                    <ExternalLink className="h-3 w-3 shrink-0 text-[#a1a7a5] group-hover/resource:text-[#4f5654]" />
-                                  </a>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleAliasClick(resourceKey, resource.alias)}
-                                    className="group/alias mt-1.5 flex h-7 w-full items-center justify-between gap-2 rounded-[5px] bg-white px-2 font-mono text-[9px] text-[#6f7774] transition-colors hover:bg-[#fdfdfd] dark:bg-white/[0.055] dark:text-[#a7adaa] dark:hover:bg-white/[0.08]"
-                                    title="Najedź, aby odsłonić. Kliknij, aby skopiować."
-                                  >
-                                    <span className="flex min-w-0 items-center gap-1.5">
-                                      {isCopied ? (
-                                        <Check className="h-2.5 w-2.5 shrink-0 text-emerald-600" />
-                                      ) : isRevealed ? (
-                                        <Copy className="h-2.5 w-2.5 shrink-0" />
-                                      ) : (
-                                        <Eye className="h-2.5 w-2.5 shrink-0" />
-                                      )}
-                                      <span className={isRevealed ? 'hidden' : 'truncate group-hover/alias:hidden'}>••••••••••••</span>
-                                      <span className={isRevealed ? 'truncate' : 'hidden truncate group-hover/alias:inline'}>{resource.alias}</span>
-                                    </span>
-                                    <span className="shrink-0 font-sans text-[7px] text-[#a0a6a4]">
-                                      {isCopied ? 'Skopiowano' : 'Kopiuj'}
-                                    </span>
-                                  </button>
-                                </div>
+                                <a
+                                  key={resourceKey}
+                                  href={resource.href}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="group/resource flex min-h-10 items-center gap-2 rounded-[7px] bg-[#f7f8f7] px-2 py-1.5 transition-colors hover:bg-[#f1f3f2] dark:bg-black/20 dark:hover:bg-white/[0.055]"
+                                  title={resource.description}
+                                >
+                                  <span className="min-w-0 flex-1">
+                                    <span className="block truncate text-[10px] font-medium text-[#454a48] dark:text-[#c8ccca]">{resource.label}</span>
+                                    <span className="mt-0.5 block truncate text-[8px] text-[#949a97] dark:text-[#7f8682]">{resource.description}</span>
+                                  </span>
+                                  <ExternalLink className="h-3 w-3 shrink-0 text-[#a1a7a5] group-hover/resource:text-[#4f5654] dark:group-hover/resource:text-[#d4d8d6]" />
+                                </a>
                               )
                             })}
                           </div>
+                          <a
+                            href="/operations?section=shortcuts"
+                            className="mt-2 flex h-7 items-center justify-between border-t border-black/[0.05] pt-2 text-[8px] font-medium text-[#777e7a] hover:text-[#242725] dark:border-white/[0.07] dark:text-[#989e9a] dark:hover:text-white"
+                          >
+                            Bezpieczne skróty i aliasy
+                            <ArrowUpRight className="h-3 w-3" />
+                          </a>
                         </div>
                       )}
 

@@ -62,7 +62,14 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     label: 'Infrastruktura',
     icon: <HardDrive className="h-4 w-4" />,
     ecosystem: 'core',
-    keys: ['infrastructure.access'],
+    keys: [
+      'infrastructure.access',
+      'operations.view',
+      'operations.manage',
+      'operations.shortcuts',
+      'security.report.view',
+      'roles.preview',
+    ],
   },
   {
     id: 'vezvision-access',

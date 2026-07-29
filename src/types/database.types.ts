@@ -45,6 +45,342 @@ export type Database = {
         }
         Relationships: []
       }
+      operations_dependencies: {
+        Row: {
+          child_key: string
+          created_at: string
+          description: string
+          id: string
+          parent_key: string
+          relation: string
+        }
+        Insert: {
+          child_key: string
+          created_at?: string
+          description?: string
+          id?: string
+          parent_key: string
+          relation?: string
+        }
+        Update: {
+          child_key?: string
+          created_at?: string
+          description?: string
+          id?: string
+          parent_key?: string
+          relation?: string
+        }
+        Relationships: []
+      }
+      operations_deployments: {
+        Row: {
+          deployed_at: string | null
+          id: string
+          message: string
+          module_key: string
+          recorded_at: string
+          sha: string
+          short_sha: string
+          status: string
+          url: string | null
+        }
+        Insert: {
+          deployed_at?: string | null
+          id?: string
+          message: string
+          module_key: string
+          recorded_at?: string
+          sha: string
+          short_sha: string
+          status: string
+          url?: string | null
+        }
+        Update: {
+          deployed_at?: string | null
+          id?: string
+          message?: string
+          module_key?: string
+          recorded_at?: string
+          sha?: string
+          short_sha?: string
+          status?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      operations_incidents: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string
+          detail: string
+          id: string
+          last_seen_at: string
+          metadata: Json
+          module_key: string
+          resolved_at: string | null
+          service_key: string
+          severity: string
+          source: string
+          started_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          detail: string
+          id?: string
+          last_seen_at?: string
+          metadata?: Json
+          module_key: string
+          resolved_at?: string | null
+          service_key: string
+          severity: string
+          source?: string
+          started_at?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          detail?: string
+          id?: string
+          last_seen_at?: string
+          metadata?: Json
+          module_key?: string
+          resolved_at?: string | null
+          service_key?: string
+          severity?: string
+          source?: string
+          started_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      operations_maintenance_windows: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          ended_at: string | null
+          id: string
+          module_key: string
+          reason: string
+          scheduled_end: string
+          scheduled_start: string
+          started_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          id?: string
+          module_key: string
+          reason: string
+          scheduled_end: string
+          scheduled_start: string
+          started_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          id?: string
+          module_key?: string
+          reason?: string
+          scheduled_end?: string
+          scheduled_start?: string
+          started_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      operations_notification_reads: {
+        Row: {
+          notification_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          notification_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          notification_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      operations_notifications: {
+        Row: {
+          body: string
+          created_at: string
+          dedupe_key: string | null
+          href: string | null
+          id: string
+          kind: string
+          module_key: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          dedupe_key?: string | null
+          href?: string | null
+          id?: string
+          kind: string
+          module_key?: string | null
+          severity: string
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          dedupe_key?: string | null
+          href?: string | null
+          id?: string
+          kind?: string
+          module_key?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      operations_shortcuts: {
+        Row: {
+          alias_key: string
+          created_at: string
+          description: string
+          enabled: boolean
+          href: string | null
+          id: string
+          label: string
+          module_key: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          alias_key: string
+          created_at?: string
+          description: string
+          enabled?: boolean
+          href?: string | null
+          id?: string
+          label: string
+          module_key: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          alias_key?: string
+          created_at?: string
+          description?: string
+          enabled?: boolean
+          href?: string | null
+          id?: string
+          label?: string
+          module_key?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      operations_snapshots: {
+        Row: {
+          captured_by: string | null
+          created_at: string
+          data: Json
+          id: string
+          name: string
+        }
+        Insert: {
+          captured_by?: string | null
+          created_at?: string
+          data: Json
+          id?: string
+          name: string
+        }
+        Update: {
+          captured_by?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      operations_status_samples: {
+        Row: {
+          checked_at: string
+          detail: string
+          id: number
+          latency_ms: number | null
+          module_key: string
+          service_key: string
+          status: string
+        }
+        Insert: {
+          checked_at?: string
+          detail: string
+          id?: never
+          latency_ms?: number | null
+          module_key: string
+          service_key: string
+          status: string
+        }
+        Update: {
+          checked_at?: string
+          detail?: string
+          id?: never
+          latency_ms?: number | null
+          module_key?: string
+          service_key?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          preferences: Json
+          revision: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          preferences?: Json
+          revision?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          preferences?: Json
+          revision?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ip_lists: {
         Row: {
           created_at: string
@@ -262,6 +598,26 @@ export type Database = {
           errors_24h: number
           recent_logins: number
           total_users: number
+        }[]
+      }
+      get_operations_uptime: {
+        Args: { p_since: string }
+        Returns: {
+          healthy_count: number
+          last_checked_at: string
+          service_key: string
+          total_count: number
+        }[]
+      }
+      get_security_account_report_data: {
+        Args: never
+        Returns: {
+          active_sessions: number
+          email: string
+          email_verified: boolean
+          last_sign_in_at: string | null
+          two_factor_enabled: boolean
+          user_id: string
         }[]
       }
       get_my_role: { Args: never; Returns: string }

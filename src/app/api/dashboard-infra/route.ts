@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 import { createActionClient } from '@/lib/supabase/server'
+import { recordOperationsState } from '@/lib/operations/record'
+import { logError } from '@/lib/logger'
 
 type HealthStatus = 'healthy' | 'warning' | 'error' | 'unknown'
 type DeployStatus = 'success' | 'failure' | 'pending' | 'unknown'
@@ -26,8 +28,6 @@ type InfrastructureResource = {
   label: string
   href: string
   description: string
-  alias: string
-  aliasType: 'prod' | 'lab' | 'tunnel' | 'router'
 }
 
 const INFRASTRUCTURE_RESOURCES: InfrastructureResource[] = [
@@ -36,80 +36,60 @@ const INFRASTRUCTURE_RESOURCES: InfrastructureResource[] = [
     label: 'VEZcore',
     href: 'https://vezcore.vezlabs.dev',
     description: 'Dashboard produkcyjny',
-    alias: 'ssh vezlabs-coolify',
-    aliasType: 'lab',
   },
   {
     module: 'vezVision',
     label: 'Hetzner Cloud',
     href: 'https://console.hetzner.cloud/projects',
     description: 'Panel produkcyjnej chmury',
-    alias: 'ssh vez-prod',
-    aliasType: 'prod',
   },
   {
     module: 'vezVision',
     label: 'API health',
     href: 'https://api.vezvision.com/healthz',
     description: 'Status API produkcji',
-    alias: 'ssh vez-prod',
-    aliasType: 'prod',
   },
   {
     module: 'vezVision',
     label: 'DB tunnel',
     href: 'https://api.vezvision.com/healthz',
     description: 'Tunel do bazy PostgreSQL',
-    alias: 'ssh -N vezvision-db-tunnel',
-    aliasType: 'tunnel',
   },
   {
     module: 'vezLabs',
     label: 'Proxmox',
     href: 'https://10.77.40.2:8006/',
     description: 'Maszyny wirtualne',
-    alias: 'ssh vezlabs-pve',
-    aliasType: 'lab',
   },
   {
     module: 'vezLabs',
     label: 'Coolify',
     href: 'https://10.77.30.35:8000/',
     description: 'Deploy i aplikacje',
-    alias: 'ssh vezlabs-coolify',
-    aliasType: 'lab',
   },
   {
     module: 'vezLabs',
     label: 'Router',
     href: 'https://192.168.2.1/',
     description: 'Sieć i VLAN',
-    alias: 'ssh vezlabs-router',
-    aliasType: 'router',
   },
   {
     module: 'vezLabs',
     label: 'Monitor',
     href: 'https://monitor.vezlabs.dev',
     description: 'Panel monitoringu',
-    alias: 'ssh vezlabs-coolify',
-    aliasType: 'lab',
   },
   {
     module: 'vezLabs',
     label: 'MinIO',
     href: 'https://s3-dev.vezlabs.dev',
     description: 'Storage obiektowy',
-    alias: 'ssh vezlabs-coolify',
-    aliasType: 'lab',
   },
   {
     module: 'vezLabs',
     label: 'Lab API health',
     href: 'https://api.vezlabs.dev/healthz',
     description: 'Status API labu',
-    alias: 'ssh vezlabs-coolify',
-    aliasType: 'lab',
   },
 ]
 
@@ -183,7 +163,10 @@ async function checkDatabase(): Promise<HealthCheckResult> {
   }
 }
 
-async function getLatestDeploy(): Promise<DeployInfo> {
+async function getLatestDeploy(
+  repository: string,
+  workflow?: string
+): Promise<DeployInfo> {
   const headers: HeadersInit = {
     accept: 'application/vnd.github+json',
     'user-agent': 'vezcore-dashboard',
@@ -193,8 +176,9 @@ async function getLatestDeploy(): Promise<DeployInfo> {
   }
 
   try {
+    const workflowPath = workflow ? `/workflows/${workflow}` : ''
     const response = await fetch(
-      'https://api.github.com/repos/VEZhq/vezcore/actions/workflows/deploy-coolify.yml/runs?branch=main&per_page=1',
+      `https://api.github.com/repos/${repository}/actions${workflowPath}/runs?branch=main&per_page=1`,
       { cache: 'no-store', signal: AbortSignal.timeout(5000), headers }
     )
 
@@ -274,20 +258,30 @@ export async function GET() {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 })
   }
 
-  const [healthResults, database, deploy] = await Promise.all([
+  const [healthResults, database, coreDeploy, visionDeploy] = await Promise.all([
     Promise.all(HEALTH_CHECKS.map(async (check) => [check.key, await checkEndpoint(check.url, check.label)] as const)),
     checkDatabase(),
-    getLatestDeploy(),
+    getLatestDeploy('VEZhq/vezcore', 'deploy-coolify.yml'),
+    getLatestDeploy('VEZvision/vezvision.com'),
   ])
 
   const checks = Object.fromEntries([...healthResults, ['database', database]])
+  const checkedAt = new Date().toISOString()
+
+  await recordOperationsState(checks, [
+    { moduleKey: 'vez', deploy: coreDeploy },
+    { moduleKey: 'vezVision', deploy: visionDeploy },
+  ], checkedAt).catch((error) => {
+    logError('dashboard-infra.record-operations-state', error)
+  })
 
   return NextResponse.json(
     {
-      checkedAt: new Date().toISOString(),
+      checkedAt,
       checks,
-      deploy,
-      incidents: buildIncidents(checks, deploy),
+      deploy: visionDeploy,
+      coreDeploy,
+      incidents: buildIncidents(checks, visionDeploy),
       resources: INFRASTRUCTURE_RESOURCES,
     },
     { headers: { 'Cache-Control': 'no-store' } }

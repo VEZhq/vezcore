@@ -4,12 +4,19 @@ import { cache } from 'react'
 import { createActionClient } from '@/lib/supabase/server'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { isAdminRole } from '@/lib/roles'
+import { cookies } from 'next/headers'
+import { applyRolePreview, isRolePreview, ROLE_PREVIEW_COOKIE, type RolePreview } from '@/lib/role-preview'
 
 export interface UserPermissions {
   canAccessKonta: boolean
   canAccessAudit: boolean
   canAccessSettings: boolean
   canAccessInfrastructure: boolean
+  canAccessOperations: boolean
+  canManageOperations: boolean
+  canRevealOperationsShortcuts: boolean
+  canViewSecurityReport: boolean
+  canPreviewRoles: boolean
   canAccessProfile: boolean
   canAddUsers: boolean
   canDeleteUsers: boolean
@@ -46,6 +53,11 @@ type PermissionKey =
   | 'audit.view'
   | 'settings.view'
   | 'infrastructure.access'
+  | 'operations.view'
+  | 'operations.manage'
+  | 'operations.shortcuts'
+  | 'security.report.view'
+  | 'roles.preview'
   | 'vezvision.access'
   | 'vezvision.blog.view'
   | 'vezvision.blog.manage'
@@ -73,6 +85,8 @@ interface PermissionKeyRow {
 interface AuthenticatedPermissionState {
   userId: string
   permissions: UserPermissions
+  previewRole: RolePreview | null
+  actualRole: string | null
 }
 
 const EMPTY_PERMISSIONS: UserPermissions = {
@@ -80,6 +94,11 @@ const EMPTY_PERMISSIONS: UserPermissions = {
   canAccessAudit: false,
   canAccessSettings: false,
   canAccessInfrastructure: false,
+  canAccessOperations: false,
+  canManageOperations: false,
+  canRevealOperationsShortcuts: false,
+  canViewSecurityReport: false,
+  canPreviewRoles: false,
   canAccessProfile: false,
   canAddUsers: false,
   canDeleteUsers: false,
@@ -112,6 +131,11 @@ const FIELD_TO_PERMISSION: Record<Exclude<keyof UserPermissions, 'canAccessProfi
   canAccessAudit: 'audit.view',
   canAccessSettings: 'settings.view',
   canAccessInfrastructure: 'infrastructure.access',
+  canAccessOperations: 'operations.view',
+  canManageOperations: 'operations.manage',
+  canRevealOperationsShortcuts: 'operations.shortcuts',
+  canViewSecurityReport: 'security.report.view',
+  canPreviewRoles: 'roles.preview',
   canAddUsers: 'konta.create',
   canDeleteUsers: 'konta.delete',
   canEditUsers: 'konta.edit',
@@ -164,6 +188,13 @@ async function buildUserPermissions(userId: string, role: string | null): Promis
     canAccessAudit: hasPermission(FIELD_TO_PERMISSION.canAccessAudit),
     canAccessSettings: hasPermission(FIELD_TO_PERMISSION.canAccessSettings),
     canAccessInfrastructure: hasPermission(FIELD_TO_PERMISSION.canAccessInfrastructure),
+    canAccessOperations:
+      hasPermission(FIELD_TO_PERMISSION.canAccessOperations) ||
+      hasPermission(FIELD_TO_PERMISSION.canAccessInfrastructure),
+    canManageOperations: hasPermission(FIELD_TO_PERMISSION.canManageOperations),
+    canRevealOperationsShortcuts: hasPermission(FIELD_TO_PERMISSION.canRevealOperationsShortcuts),
+    canViewSecurityReport: hasPermission(FIELD_TO_PERMISSION.canViewSecurityReport),
+    canPreviewRoles: hasPermission(FIELD_TO_PERMISSION.canPreviewRoles),
     canAccessProfile: true,
     canAddUsers: hasPermission(FIELD_TO_PERMISSION.canAddUsers),
     canDeleteUsers: hasPermission(FIELD_TO_PERMISSION.canDeleteUsers),
@@ -210,9 +241,17 @@ export const getAuthenticatedUserPermissionState = cache(async (): Promise<Authe
     .eq('id', user.id)
     .single()
 
+  const permissions = await buildUserPermissions(user.id, profile?.role || null)
+  const previewValue = (await cookies()).get(ROLE_PREVIEW_COOKIE)?.value
+  const previewRole = permissions.canPreviewRoles && isRolePreview(previewValue)
+    ? previewValue
+    : null
+
   return {
     userId: user.id,
-    permissions: await buildUserPermissions(user.id, profile?.role || null),
+    permissions: previewRole ? applyRolePreview(permissions, previewRole) : permissions,
+    previewRole,
+    actualRole: profile?.role || null,
   }
 })
 
@@ -224,4 +263,3 @@ const getUserPermissionState = cache(async (): Promise<UserPermissions> => {
 export async function getUserPermissions(): Promise<UserPermissions> {
   return getUserPermissionState()
 }
-
