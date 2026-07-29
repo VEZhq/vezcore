@@ -177,6 +177,14 @@ const moduleRepositories: Partial<Record<DashboardModuleName, string>> = {
   vez: GITHUB_REPOSITORY_URL,
   vezVision: 'https://github.com/VEZvision/vezvision.com',
 }
+const serviceNodeDescriptions: Record<ServiceNodeDefinition['id'], string> = {
+  prodApi: 'Produkcyjny endpoint API obsługujący VEZvision.',
+  database: 'Główna baza danych używana przez VEZcore.',
+  deploy: 'Ostatni wdrożony commit aplikacji VEZcore.',
+  labApi: 'API środowiska testowego i usług VEZlabs.',
+  minio: 'Magazyn obiektowy dla plików środowiska Labs.',
+  monitor: 'Monitoring dostępności usług ekosystemu.',
+}
 const SCENE_WIDTH = 1360
 const SCENE_HEIGHT = 570
 
@@ -589,7 +597,7 @@ export function DashboardModules({
     event: ReactPointerEvent<HTMLElement>,
     name: DashboardModuleName
   ) => {
-    if (!editMode || (event.target as HTMLElement).closest('button, a')) return
+    if (!editMode || (event.target as HTMLElement).closest('button, a, [role="button"]')) return
     event.preventDefault()
     event.stopPropagation()
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -631,7 +639,7 @@ export function DashboardModules({
     event: ReactPointerEvent<HTMLElement>,
     node: ServiceNodeDefinition
   ) => {
-    if (!editMode) return
+    if (!editMode || (event.target as HTMLElement).closest('[role="button"]')) return
     event.preventDefault()
     event.stopPropagation()
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -835,6 +843,7 @@ export function DashboardModules({
               const layout = effectiveLayout[mod.name]
               const palette = modulePalette[mod.color]
               const repository = moduleRepositories[mod.name]
+              const showInfoBelow = layout.top < 180
               const showProblemTooltip = (moduleStatus === 'warning' || moduleStatus === 'error') && problemDetails.length > 0
 
               const tile = (
@@ -865,15 +874,17 @@ export function DashboardModules({
                         <span
                           role="button"
                           tabIndex={0}
-                          className="group/info relative flex h-7 w-7 items-center justify-center rounded-full text-[#8c9391] transition-colors hover:bg-black/[0.04] hover:text-[#343836] focus:bg-black/[0.04] focus:outline-none dark:text-[#8c9391] dark:hover:bg-white/[0.07] dark:hover:text-white dark:focus:bg-white/[0.07]"
+                          className="group/info relative flex h-6 w-6 items-center justify-center rounded-full border border-black/[0.07] bg-white/70 text-[#7f8784] shadow-[0_1px_2px_rgba(25,31,29,0.04)] transition-colors hover:border-black/[0.13] hover:bg-white hover:text-[#343836] focus:border-black/[0.13] focus:bg-white focus:outline-none dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-[#979d9a] dark:hover:bg-white/[0.08] dark:hover:text-white"
                           onClick={(event) => {
                             event.preventDefault()
                             event.stopPropagation()
                           }}
                           aria-label={`Informacje o ${mod.label}`}
                         >
-                          <Info className="h-3.5 w-3.5" />
-                          <span className="pointer-events-none absolute right-0 top-9 z-50 hidden w-52 rounded-[8px] bg-[#242725] px-3 py-2 text-left text-[10px] font-normal leading-relaxed text-white shadow-xl group-hover/info:block group-focus/info:block">
+                          <Info className="h-3.5 w-3.5" strokeWidth={1.8} />
+                          <span className={`pointer-events-none absolute right-0 z-50 hidden w-52 rounded-[8px] border border-white/10 bg-[#252825]/95 px-3 py-2 text-left text-[10px] font-normal leading-relaxed text-white shadow-[0_8px_22px_rgba(20,24,22,0.2)] backdrop-blur-md group-hover/info:block group-focus/info:block ${
+                            showInfoBelow ? 'top-8' : 'bottom-8'
+                          }`}>
                             {mod.description}
                           </span>
                         </span>
@@ -950,6 +961,7 @@ export function DashboardModules({
                 const status = statusMeta[nodeStatus]
                 const detail = getServiceNodeDetail(node, infraData)
                 const href = getServiceNodeHref(node, infraData)
+                const showNodeInfoAbove = node.top > 390
 
                 const nodeContent = (
                   <>
@@ -963,7 +975,24 @@ export function DashboardModules({
                       </span>
                       <span className="mt-0.5 block truncate text-[8px] text-[#858c89] dark:text-[#858b88]">{detail}</span>
                     </span>
-                    {href && <ArrowUpRight className="h-3 w-3 shrink-0 text-[#9aa19e] transition-transform group-hover/service:-translate-y-0.5 group-hover/service:translate-x-0.5" />}
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      className="group/nodeinfo relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-black/[0.07] bg-white/70 text-[#89918e] transition-colors hover:border-black/[0.14] hover:text-[#39403d] focus:border-black/[0.14] focus:outline-none dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-[#929895] dark:hover:text-white"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                      }}
+                      aria-label={`Informacje o ${node.label}`}
+                    >
+                      <Info className="h-3 w-3" strokeWidth={1.8} />
+                      <span className={`pointer-events-none absolute right-0 z-50 hidden w-48 rounded-[8px] border border-white/10 bg-[#252825]/95 px-3 py-2 text-left text-[9px] font-normal leading-relaxed text-white shadow-[0_8px_22px_rgba(20,24,22,0.2)] backdrop-blur-md group-hover/nodeinfo:block group-focus/nodeinfo:block ${
+                        showNodeInfoAbove ? 'bottom-7' : 'top-7'
+                      }`}>
+                        <span className="block font-medium">{serviceNodeDescriptions[node.id]}</span>
+                        <span className="mt-1 block text-white/65">{detail}</span>
+                      </span>
+                    </span>
                   </>
                 )
 

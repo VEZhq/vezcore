@@ -441,37 +441,26 @@
   transform: perspective(1200px) rotateX(1deg) rotateY(-0.8deg) translateZ(0);
   transform-origin: center bottom;
   transform-style: preserve-3d;
-  transition: transform 220ms ease, filter 220ms ease;
+  transition: transform 220ms ease;
   isolation: isolate;
-  filter: drop-shadow(0 18px 24px rgba(25, 31, 29, 0.08));
 }
 
 .warehouse-module-tile::before {
   content: '';
   position: absolute;
-  left: 9px;
-  right: -3px;
-  bottom: -7px;
-  height: 14px;
-  border: 1px solid rgba(25, 31, 29, 0.055);
+  left: 7px;
+  right: -2px;
+  bottom: -5px;
+  height: 10px;
+  border: 1px solid rgba(25, 31, 29, 0.045);
   border-radius: 0 0 13px 13px;
-  background: linear-gradient(180deg, #e8ebe9 0%, #dfe3e0 100%);
-  transform: translateZ(-5px) skewX(-12deg);
+  background: linear-gradient(180deg, #ecefed 0%, #e2e6e3 100%);
+  transform: translateZ(-4px) skewX(-9deg);
   z-index: -1;
 }
 
 .warehouse-module-tile::after {
-  content: '';
-  position: absolute;
-  left: 11%;
-  right: 2%;
-  bottom: -21px;
-  height: 30px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--module-accent) 20%, rgba(23, 29, 27, 0.16));
-  filter: blur(18px);
-  opacity: 0.58;
-  z-index: -2;
+  content: none;
 }
 
 .warehouse-module-surface {
@@ -479,7 +468,7 @@
   display: flex;
   height: 100%;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid rgba(25, 31, 29, 0.085);
   border-radius: 14px;
   padding: 13px 14px;
@@ -489,8 +478,8 @@
   box-shadow:
     inset 0 1px 0 #ffffff,
     inset 0 -1px 0 rgba(25, 31, 29, 0.025),
-    0 1px 1px rgba(25, 31, 29, 0.04),
-    0 8px 18px rgba(25, 31, 29, 0.055);
+    0 1px 2px rgba(25, 31, 29, 0.04),
+    0 7px 16px rgba(25, 31, 29, 0.07);
   transform: translateZ(5px);
 }
 
@@ -499,8 +488,8 @@
   box-shadow:
     inset 0 1px 0 #ffffff,
     inset 0 -1px 0 rgba(25, 31, 29, 0.025),
-    0 1px 1px rgba(25, 31, 29, 0.04),
-    0 10px 22px rgba(25, 31, 29, 0.065);
+    0 1px 2px rgba(25, 31, 29, 0.045),
+    0 8px 18px rgba(25, 31, 29, 0.075);
 }
 
 .warehouse-module-icon {
@@ -518,7 +507,6 @@
 .warehouse-module-tile:hover {
   z-index: 35;
   transform: perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(-5px) translateZ(12px);
-  filter: drop-shadow(0 23px 27px rgba(25, 31, 29, 0.11));
 }
 
 .warehouse-module-tile.is-editing {
@@ -533,8 +521,8 @@
   background: rgba(255, 255, 255, 0.96);
   padding: 7px 9px;
   box-shadow:
-    0 8px 16px rgba(25, 31, 29, 0.08),
-    0 3px 0 #dfe2e0,
+    0 5px 12px rgba(25, 31, 29, 0.07),
+    0 2px 0 #e2e5e3,
     inset 0 1px 0 #ffffff;
   transform: perspective(700px) rotateX(1.5deg);
   transition: transform 160ms ease, box-shadow 160ms ease;
@@ -553,8 +541,8 @@ a.ecosystem-service-node:focus-visible {
 .ecosystem-service-node:hover {
   transform: perspective(700px) rotateX(0deg) translateY(-2px);
   box-shadow:
-    0 11px 20px rgba(25, 31, 29, 0.10),
-    0 3px 0 #dfe2e0,
+    0 8px 16px rgba(25, 31, 29, 0.09),
+    0 2px 0 #e2e5e3,
     inset 0 1px 0 #ffffff;
 }
 
@@ -611,17 +599,12 @@ a.ecosystem-service-node:focus-visible {
 }
 
 .dark .warehouse-module-tile {
-  filter: drop-shadow(0 20px 26px rgba(0, 0, 0, 0.38));
+  filter: none;
 }
 
 .dark .warehouse-module-tile::before {
   border-color: rgba(255, 255, 255, 0.07);
   background: linear-gradient(180deg, #202220, #0d0f0e);
-}
-
-.dark .warehouse-module-tile::after {
-  background: color-mix(in srgb, var(--module-accent) 18%, rgba(0, 0, 0, 0.72));
-  opacity: 0.75;
 }
 
 .dark .warehouse-module-surface,
@@ -634,7 +617,7 @@ a.ecosystem-service-node:focus-visible {
     inset 0 1px 0 rgba(255, 255, 255, 0.075),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35),
     0 1px 2px rgba(0, 0, 0, 0.5),
-    0 10px 24px rgba(0, 0, 0, 0.3);
+    0 8px 18px rgba(0, 0, 0, 0.34);
 }
 
 .dark .warehouse-module-icon {
@@ -643,23 +626,19 @@ a.ecosystem-service-node:focus-visible {
   color: color-mix(in srgb, var(--module-accent) 68%, white);
 }
 
-.dark .warehouse-module-tile:hover {
-  filter: drop-shadow(0 25px 30px rgba(0, 0, 0, 0.52));
-}
-
 .dark .ecosystem-service-node {
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(17, 18, 17, 0.985);
   box-shadow:
-    0 9px 18px rgba(0, 0, 0, 0.38),
-    0 3px 0 #060706,
+    0 6px 14px rgba(0, 0, 0, 0.34),
+    0 2px 0 #060706,
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
 .dark .ecosystem-service-node:hover {
   box-shadow:
-    0 12px 22px rgba(0, 0, 0, 0.48),
-    0 3px 0 #060706,
+    0 9px 18px rgba(0, 0, 0, 0.44),
+    0 2px 0 #060706,
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
