@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import { MobileNav } from '@/components/MobileNav'
 import { useUserPreferences } from '@/components/providers/UserPreferencesProvider'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { getAuditLogs, getAuditLogActions, type AuditLog } from '@/lib/actions/audit'
 
@@ -175,7 +176,7 @@ function DateRangeFilter({
             key={label}
             type="button"
             onClick={() => applyPreset(Number(days))}
-            className="h-8 border border-black/[0.08] bg-white text-[10px] text-[#68706d] transition-colors hover:border-[#789483]/45 hover:text-[#35423b]"
+            className="h-8 border border-black/[0.08] bg-white text-[10px] text-[#68706d] transition-colors hover:border-[#789483]/45 hover:text-[#35423b] dark:border-white/[0.09] dark:bg-white/[0.045] dark:text-[#a0a6a3] dark:hover:border-[#789483] dark:hover:text-white"
           >
             {label}
           </button>
@@ -191,26 +192,26 @@ function DateRangeFilter({
             key={field}
             type="button"
             onClick={() => openCalendar(field)}
-            className={`flex min-w-0 items-center gap-2 border bg-white px-2.5 py-2 text-left transition-colors ${
-              activeField === field ? 'border-[#789483]' : 'border-black/[0.12] hover:border-black/[0.22]'
+            className={`flex min-w-0 items-center gap-2 border bg-white px-2.5 py-2 text-left transition-colors dark:bg-[#121413] ${
+              activeField === field ? 'border-[#789483]' : 'border-black/[0.12] hover:border-black/[0.22] dark:border-white/[0.11] dark:hover:border-white/[0.24]'
             }`}
           >
             <CalendarDays className="h-3.5 w-3.5 shrink-0 text-[#789483]" />
             <span className="min-w-0">
               <span className="block text-[8px] uppercase text-[#979d9a]">{label}</span>
-              <span className="block truncate text-[10px] font-medium text-[#3d4340]">{formatFilterDate(value)}</span>
+              <span className="block truncate text-[10px] font-medium text-[#3d4340] dark:text-[#d7dad8]">{formatFilterDate(value)}</span>
             </span>
           </button>
         ))}
       </div>
 
       {activeField && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 border border-black/[0.12] bg-white p-3 shadow-[0_18px_45px_rgba(29,36,32,0.16)]">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 border border-black/[0.12] bg-white p-3 shadow-[0_18px_45px_rgba(29,36,32,0.16)] dark:border-white/[0.1] dark:bg-[#131614] dark:shadow-[0_18px_45px_rgba(0,0,0,0.55)]">
           <div className="flex items-center justify-between">
             <button
               type="button"
               onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1))}
-              className="flex h-8 w-8 items-center justify-center text-[#717976] hover:bg-[#f2f4f3]"
+              className="flex h-8 w-8 items-center justify-center text-[#717976] hover:bg-[#f2f4f3] dark:text-[#a0a6a3] dark:hover:bg-white/[0.07]"
               aria-label="Poprzedni miesiąc"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -224,7 +225,7 @@ function DateRangeFilter({
             <button
               type="button"
               onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1))}
-              className="flex h-8 w-8 items-center justify-center text-[#717976] hover:bg-[#f2f4f3]"
+              className="flex h-8 w-8 items-center justify-center text-[#717976] hover:bg-[#f2f4f3] dark:text-[#a0a6a3] dark:hover:bg-white/[0.07]"
               aria-label="Następny miesiąc"
             >
               <ChevronRight className="h-4 w-4" />
@@ -253,8 +254,8 @@ function DateRangeFilter({
                       : inRange
                         ? 'bg-[#edf3ef] text-[#405449] hover:bg-[#e1ebe4]'
                         : inMonth
-                          ? 'text-[#333936] hover:bg-[#f0f3f1]'
-                          : 'text-[#c0c5c2] hover:bg-[#f6f7f6]'
+                          ? 'text-[#333936] hover:bg-[#f0f3f1] dark:text-[#d2d6d3] dark:hover:bg-white/[0.07]'
+                          : 'text-[#c0c5c2] hover:bg-[#f6f7f6] dark:text-[#4f5652] dark:hover:bg-white/[0.035]'
                   } ${value === today && !selected ? 'font-semibold ring-1 ring-inset ring-[#8ca494]' : ''}`}
                 >
                   {date.getDate()}
@@ -293,7 +294,7 @@ function EventTypeFilter({
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="flex h-10 w-full items-center justify-between border border-black/[0.12] bg-white px-3 text-left text-[11px] text-[#414744] hover:border-black/[0.22]"
+        className="flex h-10 w-full items-center justify-between border border-black/[0.12] bg-white px-3 text-left text-[11px] text-[#414744] hover:border-black/[0.22] dark:border-white/[0.11] dark:bg-[#121413] dark:text-[#d3d6d4] dark:hover:border-white/[0.24]"
       >
         <span className="flex min-w-0 items-center gap-2">
           <span className={`h-2 w-2 shrink-0 rounded-full ${value ? getMeta(value).dot : 'bg-[#a9afad]'}`} />
@@ -302,7 +303,7 @@ function EventTypeFilter({
         <ChevronDown className={`h-3.5 w-3.5 text-[#8d9491] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-72 overflow-y-auto border border-black/[0.12] bg-white py-1 shadow-[0_16px_38px_rgba(29,36,32,0.14)]">
+        <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-72 overflow-y-auto border border-black/[0.12] bg-white py-1 shadow-[0_16px_38px_rgba(29,36,32,0.14)] dark:border-white/[0.1] dark:bg-[#131614] dark:shadow-[0_16px_38px_rgba(0,0,0,0.5)]">
           {[['', 'Wszystkie zdarzenia'], ...actions.map((action) => [action, getMeta(action).label])].map(([action, label]) => (
             <button
               key={action || 'all'}
@@ -311,7 +312,7 @@ function EventTypeFilter({
                 onChange(action)
                 setOpen(false)
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[10px] text-[#626966] hover:bg-[#f2f4f3]"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[10px] text-[#626966] hover:bg-[#f2f4f3] dark:text-[#aab0ad] dark:hover:bg-white/[0.07]"
             >
               <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${action ? getMeta(action).dot : 'bg-[#a9afad]'}`} />
               <span className="min-w-0 flex-1 truncate">{label}</span>
@@ -431,20 +432,23 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#242725]">
+    <div className="min-h-screen bg-white text-[#242725] dark:bg-[#090a0a] dark:text-[#eceeed]">
       <MobileNav currentPath="/audit" showKonta={canAccessKonta} showAudit showSettings={canAccessSettings} />
 
       <div className="mx-auto grid min-h-screen w-full max-w-[1540px] xl:grid-cols-[minmax(0,1fr)_340px]">
         <main className="min-w-0 px-5 py-8 sm:px-10 lg:px-14">
-          <header className="border-b border-black/[0.12] pb-7">
-            <Link
-              href="/dashboard"
-              className="text-[10px] font-semibold uppercase text-[#68706d] hover:text-black"
-              title="Wróć do dashboardu"
-            >
-              Admin
-            </Link>
-            <h1 className="mt-1 text-[34px] font-semibold leading-none text-[#232624]">Audit Log</h1>
+          <header className="flex items-end justify-between border-b border-black/[0.12] pb-7 dark:border-white/[0.1]">
+            <div>
+              <Link
+                href="/dashboard"
+                className="text-[10px] font-semibold uppercase text-[#68706d] hover:text-black dark:text-[#929895] dark:hover:text-white"
+                title="Wróć do dashboardu"
+              >
+                Admin
+              </Link>
+              <h1 className="mt-1 text-[34px] font-semibold leading-none text-[#232624] dark:text-[#f1f2f1]">Audit Log</h1>
+            </div>
+            <ThemeToggle />
           </header>
 
           <section className="pt-8">
@@ -489,11 +493,11 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                         <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-3 py-2">
                           <span />
                           <div className="flex items-center">
-                            <span className="h-px flex-1 bg-black/[0.12]" />
-                            <span className="rounded-full border border-black/[0.14] bg-white px-3 py-1 text-[10px] font-semibold shadow-sm">
+                            <span className="h-px flex-1 bg-black/[0.12] dark:bg-white/[0.1]" />
+                            <span className="rounded-full border border-black/[0.14] bg-white px-3 py-1 text-[10px] font-semibold shadow-sm dark:border-white/[0.12] dark:bg-[#101211]">
                               {dateLabel}
                             </span>
-                            <span className="h-px flex-1 bg-black/[0.12]" />
+                            <span className="h-px flex-1 bg-black/[0.12] dark:bg-white/[0.1]" />
                           </div>
                         </div>
                       )}
@@ -503,21 +507,21 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                           {eventTime(log.created_at)}
                         </time>
                         <div className="relative flex justify-center">
-                          <span className="absolute bottom-0 top-0 w-px bg-black/[0.12]" />
-                          <span className={`relative mt-[15px] flex h-5 w-5 items-center justify-center rounded-full ring-4 ring-white ${meta.iconStyle}`}>
+                          <span className="absolute bottom-0 top-0 w-px bg-black/[0.12] dark:bg-white/[0.1]" />
+                          <span className={`relative mt-[15px] flex h-5 w-5 items-center justify-center rounded-full ring-4 ring-white dark:ring-[#090a0a] ${meta.iconStyle}`}>
                             <Icon className="h-2.5 w-2.5" />
                           </span>
                         </div>
                         <div className="min-w-0 py-3 pb-7">
                           <p className="text-[13px] leading-6">
                             <strong className="font-semibold text-[#668976]">{log.user_email || 'system'}</strong>{' '}
-                            <strong className="font-semibold text-[#292d2b]">{meta.label}</strong>
+                            <strong className="font-semibold text-[#292d2b] dark:text-[#e5e7e6]">{meta.label}</strong>
                             {log.entity_type && (
-                              <span className="text-[#353a38]"> na {log.entity_type}</span>
+                              <span className="text-[#353a38] dark:text-[#c2c6c3]"> na {log.entity_type}</span>
                             )}
                           </p>
                           {(log.entity_id || details.length > 0) && (
-                            <div className="mt-1 space-y-1 text-[11px] leading-5 text-[#555c59]">
+                            <div className="mt-1 space-y-1 text-[11px] leading-5 text-[#555c59] dark:text-[#a0a6a3]">
                               {log.entity_id && (
                                 <p>
                                   <b className="font-medium">Obiekt:</b>{' '}
@@ -541,7 +545,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
             )}
 
             {totalPages > 1 && (
-              <div className="ml-[84px] mt-4 flex items-center justify-between border-t border-black/[0.10] py-5">
+              <div className="ml-[84px] mt-4 flex items-center justify-between border-t border-black/[0.10] py-5 dark:border-white/[0.09]">
                 <span className="text-[10px] text-[#777e7b]">
                   {((page - 1) * limit) + 1}-{Math.min(page * limit, total)} z {total}
                 </span>
@@ -550,7 +554,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                     type="button"
                     onClick={() => setPage((current) => Math.max(1, current - 1))}
                     disabled={page === 1}
-                    className="flex h-8 w-8 items-center justify-center border border-black/[0.12] text-[#646b68] disabled:opacity-30"
+                    className="flex h-8 w-8 items-center justify-center border border-black/[0.12] text-[#646b68] disabled:opacity-30 dark:border-white/[0.1] dark:text-[#a3a9a6]"
                     aria-label="Poprzednia strona"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -560,7 +564,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                     type="button"
                     onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                     disabled={page === totalPages}
-                    className="flex h-8 w-8 items-center justify-center border border-black/[0.12] text-[#646b68] disabled:opacity-30"
+                    className="flex h-8 w-8 items-center justify-center border border-black/[0.12] text-[#646b68] disabled:opacity-30 dark:border-white/[0.1] dark:text-[#a3a9a6]"
                     aria-label="Następna strona"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -571,7 +575,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
           </section>
         </main>
 
-        <aside className="border-l border-black/[0.12] bg-[#f5f7f6] px-7 py-8">
+        <aside className="border-l border-black/[0.12] bg-[#f5f7f6] px-7 py-8 dark:border-white/[0.1] dark:bg-[#0d0f0e]">
           <div className="sticky top-8">
             <div className="flex items-start justify-between">
               <h2 className="text-[28px] font-semibold leading-none">Filters</h2>
@@ -579,7 +583,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="flex h-8 w-8 items-center justify-center text-[#777e7b] hover:bg-white hover:text-[#b45656]"
+                  className="flex h-8 w-8 items-center justify-center text-[#777e7b] hover:bg-white hover:text-[#b45656] dark:hover:bg-white/[0.07]"
                   aria-label="Wyczyść filtry"
                   title="Wyczyść filtry"
                 >
@@ -588,7 +592,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
               )}
             </div>
 
-            <section className="mt-7 border-t border-black/[0.10] pt-5">
+            <section className="mt-7 border-t border-black/[0.10] pt-5 dark:border-white/[0.09]">
               <div className="mb-3 flex items-end justify-between gap-3">
                 <div>
                   <h3 className="text-[15px] font-semibold">Filter by time</h3>
@@ -622,7 +626,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
               />
             </section>
 
-            <section className="mt-7 border-t border-black/[0.10] pt-5">
+            <section className="mt-7 border-t border-black/[0.10] pt-5 dark:border-white/[0.09]">
               <h3 className="text-[15px] font-semibold">Filter by users</h3>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 <button
@@ -633,8 +637,8 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                   }}
                   className={`inline-flex h-8 items-center gap-1.5 border px-2.5 text-[10px] ${
                     userFilter === ''
-                      ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a]'
-                      : 'border-black/[0.08] bg-white text-[#747b78] hover:border-black/[0.18]'
+                      ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a] dark:bg-[#26352d] dark:text-[#c9d6ce]'
+                      : 'border-black/[0.08] bg-white text-[#747b78] hover:border-black/[0.18] dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-[#a1a7a4] dark:hover:border-white/[0.2]'
                   }`}
                 >
                   <Users className="h-3 w-3" />
@@ -650,8 +654,8 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                     }}
                     className={`inline-flex h-8 max-w-full items-center gap-1.5 border px-2.5 text-[10px] ${
                       userFilter === user.id
-                        ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a]'
-                        : 'border-black/[0.08] bg-white text-[#747b78] hover:border-black/[0.18]'
+                        ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a] dark:bg-[#26352d] dark:text-[#c9d6ce]'
+                        : 'border-black/[0.08] bg-white text-[#747b78] hover:border-black/[0.18] dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-[#a1a7a4] dark:hover:border-white/[0.2]'
                     }`}
                   >
                     <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#edf1ef] text-[8px] font-semibold text-[#668976]">
@@ -663,7 +667,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
               </div>
             </section>
 
-            <section className="mt-7 border-t border-black/[0.10] pt-5">
+            <section className="mt-7 border-t border-black/[0.10] pt-5 dark:border-white/[0.09]">
               <h3 className="mb-3 text-[15px] font-semibold">Filter by event type</h3>
               <EventTypeFilter
                 actions={actions}
@@ -679,7 +683,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
               <button
                 type="button"
                 onClick={clearFilters}
-                className="mt-7 flex h-9 w-full items-center justify-center gap-2 border border-black/[0.10] bg-white text-[10px] text-[#626966] hover:border-[#b56b6b]/35 hover:text-[#a44f4f]"
+                className="mt-7 flex h-9 w-full items-center justify-center gap-2 border border-black/[0.10] bg-white text-[10px] text-[#626966] hover:border-[#b56b6b]/35 hover:text-[#a44f4f] dark:border-white/[0.1] dark:bg-white/[0.045] dark:text-[#a7adaa]"
               >
                 <X className="h-3.5 w-3.5" />
                 Wyczyść wszystkie filtry

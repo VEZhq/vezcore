@@ -24,7 +24,7 @@ export function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={isLoggingOut}
-      className="w-full flex items-center justify-center gap-2 px-4 py-3 text-[10px] uppercase tracking-[0.3em] text-red-400 light:text-red-600 bg-red-500/[0.05] light:bg-red-500/[0.08] border border-red-500/20 light:border-red-500/30 rounded-md hover:bg-red-500/10 light:hover:bg-red-500/15 hover:text-red-300 light:hover:text-red-500 transition-all duration-300 disabled:opacity-50"
+      className="flex h-9 w-full items-center justify-center gap-2 rounded-[7px] border border-red-500/20 bg-red-500/[0.04] px-4 text-[9px] font-medium text-red-600 transition-colors hover:bg-red-500/[0.08] dark:text-red-400 dark:hover:bg-red-500/[0.1] disabled:opacity-50"
     >
       <LogOut className="h-4 w-4" />
       {isLoggingOut ? 'Wylogowywanie...' : 'Wyloguj się'}

@@ -530,6 +530,96 @@
   scrollbar-color: rgba(105, 119, 115, 0.28) transparent;
 }
 
+.dark .ecosystem-board-warehouse {
+  border-color: rgba(255, 255, 255, 0.065);
+  background: #0d0f0e;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 1px 2px rgba(0, 0, 0, 0.38);
+}
+
+.dark .warehouse-floor-lines {
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.dark .ecosystem-edge {
+  stroke: #4b514e;
+}
+
+.dark .ecosystem-edge.is-healthy {
+  stroke: #4e9d68;
+  filter: none;
+}
+
+.dark .ecosystem-edge.is-warning {
+  stroke: #c99435;
+  filter: none;
+}
+
+.dark .ecosystem-edge.is-error {
+  stroke: #c95555;
+  filter: none;
+}
+
+.dark .warehouse-module-tile {
+  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.42));
+}
+
+.dark .warehouse-module-tile::before {
+  border-color: rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, #1d211f, #151816);
+}
+
+.dark .warehouse-module-tile::after {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.dark .warehouse-module-surface,
+.dark .warehouse-module-tile.is-root .warehouse-module-surface {
+  border-color: rgba(255, 255, 255, 0.095);
+  background: linear-gradient(180deg, #171a18, #111312);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.dark .warehouse-module-icon {
+  border-color: color-mix(in srgb, var(--module-accent) 28%, transparent);
+  background: color-mix(in srgb, var(--module-accent) 17%, #121413);
+  color: color-mix(in srgb, var(--module-accent) 72%, white);
+}
+
+.dark .warehouse-module-tile:hover {
+  filter: drop-shadow(0 20px 22px rgba(0, 0, 0, 0.52));
+}
+
+.dark .ecosystem-service-node {
+  border-color: rgba(255, 255, 255, 0.085);
+  background: rgba(18, 21, 19, 0.98);
+  box-shadow:
+    0 9px 18px rgba(0, 0, 0, 0.38),
+    0 3px 0 #090a09,
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.dark .ecosystem-service-node:hover {
+  box-shadow:
+    0 12px 22px rgba(0, 0, 0, 0.48),
+    0 3px 0 #090a09,
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.dark .operations-panel {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(15, 17, 16, 0.97);
+  box-shadow:
+    0 22px 55px rgba(0, 0, 0, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
 @media (max-width: 1023px) {
   .warehouse-map-scene {
     left: 190px;

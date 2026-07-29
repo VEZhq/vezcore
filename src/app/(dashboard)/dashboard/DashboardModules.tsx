@@ -462,7 +462,7 @@ export function DashboardModules({
       <div className="absolute right-1 top-1 z-50 flex items-center gap-2">
         <button
           onClick={resetMap}
-          className="flex h-9 items-center gap-2 rounded-[9px] border border-black/[0.06] bg-white/80 px-3 text-xs font-medium text-[#626866] shadow-sm transition-colors hover:bg-white"
+          className="flex h-9 items-center gap-2 rounded-[9px] border border-black/[0.06] bg-white/80 px-3 text-xs font-medium text-[#626866] shadow-sm transition-colors hover:bg-white dark:border-white/[0.09] dark:bg-[#121413]/90 dark:text-[#aeb3b1] dark:hover:bg-[#181b1a]"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           Wyśrodkuj
@@ -471,8 +471,8 @@ export function DashboardModules({
           onClick={() => setEditMode((value) => !value)}
           className={`flex h-9 items-center gap-2 rounded-[9px] border px-3 text-xs font-medium shadow-sm transition-colors ${
             editMode
-              ? 'border-[#202020] bg-[#202020] text-white'
-              : 'border-black/[0.06] bg-white/80 text-[#626866] hover:bg-white'
+              ? 'border-[#202020] bg-[#202020] text-white dark:border-white/70 dark:bg-white dark:text-black'
+              : 'border-black/[0.06] bg-white/80 text-[#626866] hover:bg-white dark:border-white/[0.09] dark:bg-[#121413]/90 dark:text-[#aeb3b1] dark:hover:bg-[#181b1a]'
           }`}
         >
           <Settings2 className="h-3.5 w-3.5" />
@@ -494,23 +494,23 @@ export function DashboardModules({
             <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1360 570" preserveAspectRatio="none" aria-hidden="true">
               {sceneModuleNames.has('vez') && sceneModuleNames.has('vezVision') && (
                 <path
-                  d="M268 126 H360 L384 150 V220 L408 244 H510"
+                  d="M268 126 H356 V188 H438 V271 H510"
                   className={`ecosystem-edge ${edgeStatusClass(statusByModule.vezVision ?? 'unknown')}`}
                 />
               )}
               {sceneModuleNames.has('vez') && sceneModuleNames.has('vezLabs') && (
                 <path
-                  d="M730 244 H810 L834 220 V150 L858 126 H970"
+                  d="M730 271 H814 V188 H886 V126 H970"
                   className={`ecosystem-edge ${edgeStatusClass(labsStatus)}`}
                 />
               )}
               {sceneModuleNames.has('vezLabs') && (
                 <>
                   {([
-                    ['nably', 'M1040 182 V328 L1018 350 H150 V430'],
-                    ['vezWork', 'M1080 182 V350 L1060 370 H458 V430'],
-                    ['vezRent', 'M1120 182 V370 L1100 390 H788 V430'],
-                    ['vezStudio', 'M1160 182 V390 L1140 410 H1098 V430'],
+                    ['nably', 'M1000 182 V344 H150 V430'],
+                    ['vezWork', 'M1045 182 V365 H458 V430'],
+                    ['vezRent', 'M1090 182 V386 H788 V430'],
+                    ['vezStudio', 'M1135 182 V407 H1098 V430'],
                   ] as const).map(([name, path]) => {
                     if (!sceneModuleNames.has(name)) return null
                     const branchStatus = dependencyStatus(labsStatus, statusByModule[name] ?? 'unknown')
@@ -525,18 +525,18 @@ export function DashboardModules({
                 </>
               )}
               {canAccessInfrastructure && sceneModuleNames.has('vezVision') && (
-                <path d="M164 182 V196 H174 V210" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.prodApi)}`} />
+                <path d="M164 182 V210" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.prodApi)}`} />
               )}
               {canAccessInfrastructure && sceneModuleNames.has('vez') && (
                 <>
-                  <path d="M510 304 H492 L474 304" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.database)}`} />
+                  <path d="M510 304 H474" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.database)}`} />
                   <path d="M730 304 H746" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.deploy)}`} />
                 </>
               )}
               {canAccessInfrastructure && sceneModuleNames.has('vezLabs') && (
                 <>
                   <path d="M994 70 V52 H938" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.labApi)}`} />
-                  <path d="M994 182 V252 L1026 280" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.minio)}`} />
+                  <path d="M1018 182 V238 H963 V280" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.minio)}`} />
                   <path d="M1178 126 H1202" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.monitor)}`} />
                 </>
               )}
@@ -571,7 +571,7 @@ export function DashboardModules({
                         <span
                           role="button"
                           tabIndex={0}
-                          className="group/info relative flex h-7 w-7 items-center justify-center rounded-full text-[#8c9391] transition-colors hover:bg-black/[0.04] hover:text-[#343836] focus:bg-black/[0.04] focus:outline-none"
+                          className="group/info relative flex h-7 w-7 items-center justify-center rounded-full text-[#8c9391] transition-colors hover:bg-black/[0.04] hover:text-[#343836] focus:bg-black/[0.04] focus:outline-none dark:text-[#8c9391] dark:hover:bg-white/[0.07] dark:hover:text-white dark:focus:bg-white/[0.07]"
                           onClick={(event) => {
                             event.preventDefault()
                             event.stopPropagation()
@@ -586,7 +586,7 @@ export function DashboardModules({
                         {editMode ? (
                           <button
                             onClick={() => toggleModule(mod.name)}
-                            className="rounded-[8px] border border-black/[0.05] bg-white/80 p-1.5 text-[#69706e] transition-colors hover:bg-white"
+                            className="rounded-[8px] border border-black/[0.05] bg-white/80 p-1.5 text-[#69706e] transition-colors hover:bg-white dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#a7adaa] dark:hover:bg-white/[0.1]"
                             title={isHidden ? 'Pokaż moduł' : 'Ukryj moduł'}
                           >
                             {isHidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
@@ -600,11 +600,11 @@ export function DashboardModules({
                     <div className="mt-auto">
                       <div className="flex items-center gap-2">
                         <span className={`h-2 w-2 rounded-full ${status.dot}`} />
-                        <h3 className="text-[15px] font-semibold text-[#242826]">{mod.label}</h3>
+                        <h3 className="text-[15px] font-semibold text-[#242826] dark:text-[#f0f1f0]">{mod.label}</h3>
                       </div>
-                      <p className="mt-1 truncate text-[10px] text-[#69716e]">{statusSummary}</p>
+                      <p className="mt-1 truncate text-[10px] text-[#69716e] dark:text-[#a0a5a2]">{statusSummary}</p>
                       {mod.name === 'vezVision' && (
-                        <p className="mt-0.5 truncate text-[9px] text-[#929896]">Deploy: {deployText}</p>
+                        <p className="mt-0.5 truncate text-[9px] text-[#929896] dark:text-[#747b78]">Deploy: {deployText}</p>
                       )}
                     </div>
                   </div>
@@ -642,15 +642,15 @@ export function DashboardModules({
                     style={{ left: node.left, top: node.top, width: node.width }}
                     title={`${node.label}: ${detail}`}
                   >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-[#f1f2f1] text-[#717876]">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-[#f1f2f1] text-[#717876] dark:bg-white/[0.07] dark:text-[#a8aeab]">
                       <Icon className="h-3.5 w-3.5" />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-1.5">
                         <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${status.dot}`} />
-                        <span className="truncate text-[10px] font-semibold text-[#303432]">{node.label}</span>
+                        <span className="truncate text-[10px] font-semibold text-[#303432] dark:text-[#e5e7e6]">{node.label}</span>
                       </span>
-                      <span className="mt-0.5 block truncate text-[8px] text-[#858c89]">{detail}</span>
+                      <span className="mt-0.5 block truncate text-[8px] text-[#858c89] dark:text-[#858b88]">{detail}</span>
                     </span>
                   </div>
                 )
@@ -671,15 +671,15 @@ export function DashboardModules({
         >
           <div className="flex shrink-0 items-center justify-between px-3.5 pb-2 pt-3">
             <div>
-              <p className="text-[13px] font-semibold text-[#242725]">Report operations</p>
-              <p className="mt-0.5 text-[10px] text-[#8a918f]">
+              <p className="text-[13px] font-semibold text-[#242725] dark:text-[#eef0ef]">Report operations</p>
+              <p className="mt-0.5 text-[10px] text-[#8a918f] dark:text-[#858c88]">
                 {healthyModuleCount} działa · {alertModuleCount} alertów
               </p>
             </div>
             <GripVertical className="h-4 w-4 text-[#a2a8a6]" />
           </div>
 
-          <div className="flex shrink-0 gap-1 border-y border-black/[0.05] px-3 py-1.5">
+          <div className="flex shrink-0 gap-1 border-y border-black/[0.05] px-3 py-1.5 dark:border-white/[0.07]">
             {([
               ['all', 'Wszystkie'],
               ['alert', `Alerty ${alertModuleCount}`],
@@ -689,8 +689,8 @@ export function DashboardModules({
                 onClick={() => setPanelFilter(value)}
                 className={`h-6 rounded-[6px] px-2 text-[9px] font-medium transition-colors ${
                   panelFilter === value
-                    ? 'bg-[#f0f1f0] text-[#242725]'
-                    : 'text-[#747b79] hover:bg-[#f5f6f5]'
+                    ? 'bg-[#f0f1f0] text-[#242725] dark:bg-white/[0.09] dark:text-white'
+                    : 'text-[#747b79] hover:bg-[#f5f6f5] dark:text-[#8f9692] dark:hover:bg-white/[0.055]'
                 }`}
               >
                 {label}
@@ -713,7 +713,9 @@ export function DashboardModules({
                 <div
                   key={mod.name}
                   className={`mb-1 overflow-hidden rounded-[10px] border transition-colors ${
-                    isOpen ? 'border-black/[0.08] bg-white' : 'border-transparent bg-[#fafafa] hover:bg-white'
+                    isOpen
+                      ? 'border-black/[0.08] bg-white dark:border-white/[0.09] dark:bg-white/[0.055]'
+                      : 'border-transparent bg-[#fafafa] hover:bg-white dark:bg-white/[0.025] dark:hover:bg-white/[0.05]'
                   } ${isHidden ? 'opacity-45' : ''}`}
                 >
                   <button
@@ -730,12 +732,12 @@ export function DashboardModules({
                     >
                       <Icon className="h-3.5 w-3.5" />
                     </span>
-                    <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-[#272a29]">
+                    <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-[#272a29] dark:text-[#e5e7e6]">
                       {mod.label}
                     </span>
                     <span className="flex shrink-0 items-center gap-1.5">
                       <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-                      <span className="text-[9px] text-[#7e8583]">{status.label}</span>
+                      <span className="text-[9px] text-[#7e8583] dark:text-[#969c99]">{status.label}</span>
                       {resources.length > 0 && (
                         <ChevronDown className={`h-3 w-3 text-[#9ca2a0] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                       )}
@@ -743,7 +745,7 @@ export function DashboardModules({
                   </button>
 
                   {isOpen && (
-                    <div className="border-t border-black/[0.05] px-2.5 pb-2.5 pt-2">
+                    <div className="border-t border-black/[0.05] px-2.5 pb-2.5 pt-2 dark:border-white/[0.07]">
                       <div className="flex items-center justify-between gap-3 text-[8px]">
                         <span className={`inline-flex items-center gap-1.5 font-medium ${status.text}`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
@@ -764,20 +766,20 @@ export function DashboardModules({
                               const isCopied = copiedAlias === resourceKey
 
                               return (
-                                <div key={resourceKey} className="rounded-[7px] bg-[#f7f8f7] px-2 py-1.5">
+                                <div key={resourceKey} className="rounded-[7px] bg-[#f7f8f7] px-2 py-1.5 dark:bg-black/20">
                                   <a
                                     href={resource.href}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="group/resource flex items-center gap-2"
                                   >
-                                    <span className="min-w-0 flex-1 truncate text-[10px] font-medium text-[#454a48]">{resource.label}</span>
+                                    <span className="min-w-0 flex-1 truncate text-[10px] font-medium text-[#454a48] dark:text-[#c8ccca]">{resource.label}</span>
                                     <ExternalLink className="h-3 w-3 shrink-0 text-[#a1a7a5] group-hover/resource:text-[#4f5654]" />
                                   </a>
                                   <button
                                     type="button"
                                     onClick={() => handleAliasClick(resourceKey, resource.alias)}
-                                    className="group/alias mt-1.5 flex h-7 w-full items-center justify-between gap-2 rounded-[5px] bg-white px-2 font-mono text-[9px] text-[#6f7774] transition-colors hover:bg-[#fdfdfd]"
+                                    className="group/alias mt-1.5 flex h-7 w-full items-center justify-between gap-2 rounded-[5px] bg-white px-2 font-mono text-[9px] text-[#6f7774] transition-colors hover:bg-[#fdfdfd] dark:bg-white/[0.055] dark:text-[#a7adaa] dark:hover:bg-white/[0.08]"
                                     title="Najedź, aby odsłonić. Kliknij, aby skopiować."
                                   >
                                     <span className="flex min-w-0 items-center gap-1.5">

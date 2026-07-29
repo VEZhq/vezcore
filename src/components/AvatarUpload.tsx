@@ -87,16 +87,16 @@ export function AvatarUpload({ currentAvatarUrl, userId }: AvatarUploadProps) {
             alt="Awatar"
             width={64}
             height={64}
-            className="w-16 h-16 rounded-lg object-cover"
+            className="h-20 w-20 rounded-[12px] object-cover ring-1 ring-black/[0.08] dark:ring-white/[0.1]"
           />
         ) : (
-          <div className="w-16 h-16 rounded-lg bg-white/[0.05] light:bg-black/[0.05] flex items-center justify-center">
-            <Camera className="h-6 w-6 text-[#444444] light:text-[#888888]" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-[12px] bg-black/[0.04] ring-1 ring-black/[0.06] dark:bg-white/[0.055] dark:ring-white/[0.08]">
+            <Camera className="h-6 w-6 text-[#888f8c]" />
           </div>
         )}
         
         {uploading && (
-          <div className="absolute inset-0 rounded-lg bg-black/50 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center rounded-[12px] bg-black/50">
             <RefreshCw className="h-5 w-5 text-white animate-spin" />
           </div>
         )}
@@ -115,7 +115,7 @@ export function AvatarUpload({ currentAvatarUrl, userId }: AvatarUploadProps) {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[#666666] light:text-[#999999] border border-white/[0.06] light:border-black/[0.06] hover:bg-white/[0.02] light:hover:bg-black/[0.02] disabled:opacity-50 transition-colors"
+            className="flex h-8 items-center gap-2 rounded-[7px] border border-black/[0.09] bg-white/60 px-3 text-[9px] font-medium text-[#606764] transition-colors hover:bg-white disabled:opacity-50 dark:border-white/[0.09] dark:bg-white/[0.045] dark:text-[#a5aaa7] dark:hover:bg-white/[0.08]"
           >
             <Upload className="h-3 w-3" />
             {uploading ? 'Przesyłanie...' : 'Zmień awatar'}
@@ -125,7 +125,8 @@ export function AvatarUpload({ currentAvatarUrl, userId }: AvatarUploadProps) {
             <button
               onClick={handleRemove}
               disabled={uploading}
-              className="p-2 text-[#666666] light:text-[#999999] hover:text-red-400 light:hover:text-red-600 disabled:opacity-50 transition-colors"
+              className="p-2 text-[#8a918e] transition-colors hover:text-red-500 disabled:opacity-50"
+              aria-label="Usuń awatar"
             >
               <X className="h-4 w-4" />
             </button>
@@ -136,7 +137,7 @@ export function AvatarUpload({ currentAvatarUrl, userId }: AvatarUploadProps) {
           <p className="text-[10px] text-red-400">{error}</p>
         )}
         
-        <p className="text-[10px] text-[#444444] light:text-[#888888]">
+        <p className="text-[9px] text-[#969c99]">
           JPG, PNG lub GIF. Max 5MB.
         </p>
       </div>

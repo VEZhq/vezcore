@@ -6,6 +6,7 @@ import { getAuthenticatedUserPermissionState, getUserPermissions } from '@/lib/p
 import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { getDashboardStatsForLast24Hours } from '@/lib/queries/dashboard'
 import { DashboardModules } from './DashboardModules'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 type Tone = 'ok' | 'warning' | 'danger' | 'neutral'
 
@@ -63,24 +64,32 @@ export default async function DashboardPage() {
   ]
 
   return (
-    <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020]">
-      <main className="relative h-full w-full overflow-hidden bg-[#f1f3f2]">
+    <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020] dark:bg-black dark:text-[#ededed]">
+      <main className="relative h-full w-full overflow-hidden bg-[#f1f3f2] dark:bg-[#090a0a]">
         <div className="relative flex h-full flex-col px-5 py-3 sm:px-7 lg:px-8">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_8%,rgba(255,255,255,0.82),transparent_30%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_8%,rgba(255,255,255,0.82),transparent_30%)] dark:bg-[radial-gradient(circle_at_30%_8%,rgba(255,255,255,0.035),transparent_32%)]" />
 
           <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-            <header className="flex h-12 shrink-0 items-center gap-4 border-b border-black/[0.06] pb-2">
+            <header className="flex h-12 shrink-0 items-center gap-4 border-b border-black/[0.06] pb-2 dark:border-white/[0.08]">
               <div className="flex shrink-0 items-center gap-3">
                 <Image
                   src="/logo/vezcore_logo_black_full.svg"
                   alt="VEZcore"
                   width={118}
                   height={48}
-                  className="h-auto w-[118px]"
+                  className="h-auto w-[118px] dark:hidden"
                   priority
                 />
-                <span className="hidden h-5 w-px bg-black/[0.08] sm:block" />
-                <span className="hidden items-center gap-1.5 text-[10px] font-medium text-[#737a78] sm:flex">
+                <Image
+                  src="/logo/vezcore_logo_white_full.svg"
+                  alt="VEZcore"
+                  width={118}
+                  height={48}
+                  className="hidden h-auto w-[118px] dark:block"
+                  priority
+                />
+                <span className="hidden h-5 w-px bg-black/[0.08] sm:block dark:bg-white/[0.09]" />
+                <span className="hidden items-center gap-1.5 text-[10px] font-medium text-[#737a78] sm:flex dark:text-[#929895]">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   Produkcja
                 </span>
@@ -95,8 +104,8 @@ export default async function DashboardPage() {
                       href={link.href}
                       className={`group flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-[11px] font-medium transition-colors ${
                         index === 0
-                          ? 'bg-white text-[#202020] shadow-sm'
-                          : 'text-[#69706e] hover:bg-white/70 hover:text-[#202020]'
+                          ? 'bg-white text-[#202020] shadow-sm dark:bg-white/[0.09] dark:text-white'
+                          : 'text-[#69706e] hover:bg-white/70 hover:text-[#202020] dark:text-[#949a97] dark:hover:bg-white/[0.06] dark:hover:text-white'
                       }`}
                     >
                       <Icon className="h-3.5 w-3.5" />
@@ -111,10 +120,10 @@ export default async function DashboardPage() {
                 {metrics.map((metric) => {
                   const Icon = metric.icon
                   return (
-                    <div key={metric.label} className="flex items-center gap-1.5 border-l border-black/[0.06] pl-3 text-[10px] text-[#727977]">
+                    <div key={metric.label} className="flex items-center gap-1.5 border-l border-black/[0.06] pl-3 text-[10px] text-[#727977] dark:border-white/[0.08] dark:text-[#8e9491]">
                       <Icon className="h-3.5 w-3.5 text-[#929895]" />
                       <span>{metric.label}</span>
-                      <strong className="font-semibold text-[#2b2e2d]">{metric.value}</strong>
+                      <strong className="font-semibold text-[#2b2e2d] dark:text-[#e5e7e6]">{metric.value}</strong>
                       <span className={`h-1 w-1 rounded-full ${dotClass[metric.tone]}`} />
                     </div>
                   )
@@ -122,10 +131,11 @@ export default async function DashboardPage() {
               </div>
 
               <div className="flex items-center gap-1.5">
+                <ThemeToggle />
                 {permissions.canAccessAudit && (
                   <Link
                     href="/audit"
-                    className="relative flex h-8 w-8 items-center justify-center rounded-[8px] text-[#69706e] transition-colors hover:bg-white hover:text-[#202020]"
+                    className="relative flex h-8 w-8 items-center justify-center rounded-[8px] text-[#69706e] transition-colors hover:bg-white hover:text-[#202020] dark:text-[#a7adaa] dark:hover:bg-white/[0.08] dark:hover:text-white"
                     aria-label="Aktywność"
                     title="Aktywność"
                   >
@@ -135,7 +145,7 @@ export default async function DashboardPage() {
                 )}
                 <Link
                   href="/profile"
-                  className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-white/75 text-[#69706e] transition-colors hover:bg-white hover:text-[#202020]"
+                  className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-white/75 text-[#69706e] transition-colors hover:bg-white hover:text-[#202020] dark:bg-white/[0.05] dark:text-[#a7adaa] dark:hover:bg-white/[0.09] dark:hover:text-white"
                   aria-label="Profil"
                 >
                   <User className="h-4 w-4" />

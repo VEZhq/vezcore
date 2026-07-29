@@ -124,7 +124,7 @@ export function SessionsManager() {
 
 	if (loading) {
 		return (
-			<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] p-6">
+			<div className="py-5">
 				<div className="flex items-center gap-2 mb-4">
 					<Shield className="h-4 w-4 text-[#444444] light:text-[#888888]" />
 					<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
@@ -139,13 +139,13 @@ export function SessionsManager() {
 	}
 
 	return (
-		<div className="border border-white/[0.06] light:border-black/[0.06] bg-[#141310]/[0.66] light:bg-[#fffdfa]/[0.84] transition-colors duration-300">
-			<div className="p-6 border-b border-white/[0.06] light:border-black/[0.06]">
+		<div className="border-y border-black/[0.08] transition-colors dark:border-white/[0.08]">
+			<div className="border-b border-black/[0.08] px-1 py-4 dark:border-white/[0.08]">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<Shield className="h-4 w-4 text-[#444444] light:text-[#888888]" />
-						<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
-							Aktywne sesje
+							<p className="text-[10px] font-medium text-[#68706d] dark:text-[#9da3a0]">
+								{sessions.length} {sessions.length === 1 ? 'aktywna sesja' : 'aktywne sesje'}
 						</p>
 					</div>
 					{sessions.length > 1 && (
@@ -168,7 +168,7 @@ export function SessionsManager() {
 				</div>
 			)}
 
-			<div className="divide-y divide-white/[0.04] light:divide-black/[0.04]">
+			<div className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
 				{sessions.length === 0 ? (
 					<div className="p-8 text-center">
 						<p className="text-[10px] uppercase tracking-[0.3em] text-[#444444] light:text-[#888888]">
@@ -184,7 +184,7 @@ export function SessionsManager() {
 						return (
 							<div
 								key={session.id}
-								className="p-4 hover:bg-white/[0.02] light:hover:bg-black/[0.02] transition-colors"
+								className="px-1 py-4 transition-colors hover:bg-black/[0.015] dark:hover:bg-white/[0.025]"
 							>
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
