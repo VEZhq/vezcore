@@ -381,7 +381,8 @@
   transform: translate3d(0, 0, 0);
   transform-origin: center;
   will-change: transform;
-  contain: layout paint style;
+  contain: layout style;
+  overflow: visible;
 }
 
 .ecosystem-edge {

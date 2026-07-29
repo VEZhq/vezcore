@@ -188,6 +188,9 @@ const serviceNodeDescriptions: Record<ServiceNodeDefinition['id'], string> = {
 const SCENE_WIDTH = 1360
 const SCENE_HEIGHT = 570
 const PAN_LIMIT = 1200
+const LAYOUT_MARGIN = PAN_LIMIT
+const DRAWING_WIDTH = SCENE_WIDTH + (LAYOUT_MARGIN * 2)
+const DRAWING_HEIGHT = SCENE_HEIGHT + (LAYOUT_MARGIN * 2)
 
 const serviceNodes: ServiceNodeDefinition[] = [
   { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 104, top: 210, width: 140, href: 'https://api.vezvision.com/healthz' },
@@ -630,8 +633,16 @@ export function DashboardModules({
     event.stopPropagation()
     const base = moduleLayout[drag.name]
     const nextPosition = {
-      left: clamp(drag.originLeft + event.clientX - drag.startX, 20, SCENE_WIDTH - base.width - 20),
-      top: clamp(drag.originTop + event.clientY - drag.startY, 20, SCENE_HEIGHT - base.height - 20),
+      left: clamp(
+        drag.originLeft + event.clientX - drag.startX,
+        -LAYOUT_MARGIN,
+        SCENE_WIDTH + LAYOUT_MARGIN - base.width
+      ),
+      top: clamp(
+        drag.originTop + event.clientY - drag.startY,
+        -LAYOUT_MARGIN,
+        SCENE_HEIGHT + LAYOUT_MARGIN - base.height
+      ),
     }
     const next = { ...modulePositionsRef.current, [drag.name]: nextPosition }
     modulePositionsRef.current = next
@@ -673,8 +684,16 @@ export function DashboardModules({
     const node = serviceNodes.find((item) => item.id === drag.id)
     if (!node) return
     const nextPosition = {
-      left: clamp(drag.originLeft + event.clientX - drag.startX, 20, SCENE_WIDTH - node.width - 20),
-      top: clamp(drag.originTop + event.clientY - drag.startY, 20, SCENE_HEIGHT - 68),
+      left: clamp(
+        drag.originLeft + event.clientX - drag.startX,
+        -LAYOUT_MARGIN,
+        SCENE_WIDTH + LAYOUT_MARGIN - node.width
+      ),
+      top: clamp(
+        drag.originTop + event.clientY - drag.startY,
+        -LAYOUT_MARGIN,
+        SCENE_HEIGHT + LAYOUT_MARGIN - 48
+      ),
     }
     const next = { ...serviceNodePositionsRef.current, [drag.id]: nextPosition }
     serviceNodePositionsRef.current = next
@@ -794,7 +813,17 @@ export function DashboardModules({
               top: 'calc(50% - 285px)',
             }}
           >
-            <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1360 570" preserveAspectRatio="none">
+            <svg
+              className="absolute overflow-visible"
+              style={{
+                left: -LAYOUT_MARGIN,
+                top: -LAYOUT_MARGIN,
+                width: DRAWING_WIDTH,
+                height: DRAWING_HEIGHT,
+              }}
+              viewBox={`${-LAYOUT_MARGIN} ${-LAYOUT_MARGIN} ${DRAWING_WIDTH} ${DRAWING_HEIGHT}`}
+              preserveAspectRatio="none"
+            >
               <title>Połączenia modułów ekosystemu</title>
               {projectConnections.map((connection) => {
                 if (!sceneModuleNames.has(connection.from) || !sceneModuleNames.has(connection.to)) return null

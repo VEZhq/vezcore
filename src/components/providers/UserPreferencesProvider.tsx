@@ -39,6 +39,9 @@ const VALID_SESSION_TIMEOUTS = [15, 30, 60, 120]
 
 const VALID_MODULE_NAMES = ['vez', 'vezVision', 'vezLabs', 'vezRent', 'vezStudio', 'vezWork', 'nably']
 const VALID_SERVICE_NODE_NAMES = ['prodApi', 'database', 'deploy', 'labApi', 'minio', 'monitor']
+const DASHBOARD_POSITION_MIN = -1200
+const DASHBOARD_POSITION_MAX_LEFT = 2560
+const DASHBOARD_POSITION_MAX_TOP = 1770
 
 const defaultPreferences: UserPreferences = {
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Warsaw',
@@ -111,8 +114,8 @@ function sanitizePreferences(raw: unknown): UserPreferences {
           const { left, top } = position as Record<string, unknown>
           if (typeof left !== 'number' || typeof top !== 'number') return []
           return [[name, {
-            left: Math.min(1320, Math.max(20, Math.round(left))),
-            top: Math.min(530, Math.max(20, Math.round(top))),
+            left: Math.min(DASHBOARD_POSITION_MAX_LEFT, Math.max(DASHBOARD_POSITION_MIN, Math.round(left))),
+            top: Math.min(DASHBOARD_POSITION_MAX_TOP, Math.max(DASHBOARD_POSITION_MIN, Math.round(top))),
           }]]
         })
       )
@@ -130,8 +133,8 @@ function sanitizePreferences(raw: unknown): UserPreferences {
           const { left, top } = position as Record<string, unknown>
           if (typeof left !== 'number' || typeof top !== 'number') return []
           return [[name, {
-            left: Math.min(1320, Math.max(20, Math.round(left))),
-            top: Math.min(530, Math.max(20, Math.round(top))),
+            left: Math.min(DASHBOARD_POSITION_MAX_LEFT, Math.max(DASHBOARD_POSITION_MIN, Math.round(left))),
+            top: Math.min(DASHBOARD_POSITION_MAX_TOP, Math.max(DASHBOARD_POSITION_MIN, Math.round(top))),
           }]]
         })
       )
