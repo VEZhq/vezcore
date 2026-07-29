@@ -16,6 +16,10 @@ interface UserPreferences {
     left: number
     top: number
   }>
+  dashboardServiceNodePositions: Record<string, {
+    left: number
+    top: number
+  }>
 }
 
 interface UserPreferencesContextType {
@@ -33,6 +37,7 @@ const VALID_DATE_FORMATS = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'] as const
 const VALID_SESSION_TIMEOUTS = [15, 30, 60, 120]
 
 const VALID_MODULE_NAMES = ['vez', 'vezVision', 'vezLabs', 'vezRent', 'vezStudio', 'vezWork', 'nably']
+const VALID_SERVICE_NODE_NAMES = ['prodApi', 'database', 'deploy', 'labApi', 'minio', 'monitor']
 
 const defaultPreferences: UserPreferences = {
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Warsaw',
@@ -45,6 +50,7 @@ const defaultPreferences: UserPreferences = {
     height: 360,
   },
   dashboardModulePositions: {},
+  dashboardServiceNodePositions: {},
 }
 
 function sanitizePreferences(raw: unknown): UserPreferences {
@@ -93,6 +99,25 @@ function sanitizePreferences(raw: unknown): UserPreferences {
       const positions = obj.dashboardModulePositions as Record<string, unknown>
       return Object.fromEntries(
         VALID_MODULE_NAMES.flatMap((name) => {
+          const position = positions[name]
+          if (!position || typeof position !== 'object') return []
+          const { left, top } = position as Record<string, unknown>
+          if (typeof left !== 'number' || typeof top !== 'number') return []
+          return [[name, {
+            left: Math.min(1320, Math.max(20, Math.round(left))),
+            top: Math.min(530, Math.max(20, Math.round(top))),
+          }]]
+        })
+      )
+    })(),
+    dashboardServiceNodePositions: (() => {
+      if (!obj.dashboardServiceNodePositions || typeof obj.dashboardServiceNodePositions !== 'object') {
+        return defaultPreferences.dashboardServiceNodePositions
+      }
+
+      const positions = obj.dashboardServiceNodePositions as Record<string, unknown>
+      return Object.fromEntries(
+        VALID_SERVICE_NODE_NAMES.flatMap((name) => {
           const position = positions[name]
           if (!position || typeof position !== 'object') return []
           const { left, top } = position as Record<string, unknown>

@@ -558,6 +558,11 @@ a.ecosystem-service-node:focus-visible {
     inset 0 1px 0 #ffffff;
 }
 
+.ecosystem-service-node.is-editing {
+  outline: 1px dashed rgba(104, 125, 115, 0.48);
+  outline-offset: 4px;
+}
+
 .operations-panel {
   resize: none;
   border: 1px solid rgba(25, 31, 29, 0.075);
