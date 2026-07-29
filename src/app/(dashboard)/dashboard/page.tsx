@@ -65,9 +65,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020] dark:bg-black dark:text-[#ededed]">
-      <main className="relative h-full w-full overflow-hidden bg-[#f1f3f2] dark:bg-[#090a0a]">
+      <main className="relative h-full w-full overflow-hidden bg-[#f1f3f2] dark:bg-[#070807]">
         <div className="relative flex h-full flex-col px-5 py-3 sm:px-7 lg:px-8">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_8%,rgba(255,255,255,0.82),transparent_30%)] dark:bg-[radial-gradient(circle_at_30%_8%,rgba(255,255,255,0.035),transparent_32%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_8%,rgba(255,255,255,0.82),transparent_30%)] dark:bg-none" />
 
           <div className="relative z-10 flex min-h-0 flex-1 flex-col">
             <header className="flex h-12 shrink-0 items-center gap-4 border-b border-black/[0.06] pb-2 dark:border-white/[0.08]">

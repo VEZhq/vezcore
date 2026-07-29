@@ -85,8 +85,8 @@ export default async function ProfilePage() {
   const has2FA = twoFactors.length > 0
 
   return (
-    <div className="min-h-screen bg-[#f1f3f2] text-[#242725] dark:bg-[#090a0a] dark:text-[#eceeed]">
-      <header className="border-b border-black/[0.08] bg-white/60 dark:border-white/[0.08] dark:bg-[#0d0f0e]/90">
+    <div className="min-h-screen bg-[#f1f3f2] text-[#242725] dark:bg-[#070807] dark:text-[#eceeed]">
+      <header className="border-b border-black/[0.08] bg-white/60 dark:border-white/[0.08] dark:bg-[#0b0c0b]/95">
         <div className="mx-auto flex h-14 w-full max-w-[1320px] items-center px-5 sm:px-8">
           <Image
             src="/logo/vezcore_logo_black_full.svg"

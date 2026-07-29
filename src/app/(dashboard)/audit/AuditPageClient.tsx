@@ -432,7 +432,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#242725] dark:bg-[#090a0a] dark:text-[#eceeed]">
+    <div className="min-h-screen bg-white text-[#242725] dark:bg-[#070807] dark:text-[#eceeed]">
       <MobileNav currentPath="/audit" showKonta={canAccessKonta} showAudit showSettings={canAccessSettings} />
 
       <div className="mx-auto grid min-h-screen w-full max-w-[1540px] xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -508,7 +508,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                         </time>
                         <div className="relative flex justify-center">
                           <span className="absolute bottom-0 top-0 w-px bg-black/[0.12] dark:bg-white/[0.1]" />
-                          <span className={`relative mt-[15px] flex h-5 w-5 items-center justify-center rounded-full ring-4 ring-white dark:ring-[#090a0a] ${meta.iconStyle}`}>
+                          <span className={`relative mt-[15px] flex h-5 w-5 items-center justify-center rounded-full ring-4 ring-white dark:ring-[#070807] ${meta.iconStyle}`}>
                             <Icon className="h-2.5 w-2.5" />
                           </span>
                         </div>
@@ -575,7 +575,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
           </section>
         </main>
 
-        <aside className="border-l border-black/[0.12] bg-[#f5f7f6] px-7 py-8 dark:border-white/[0.1] dark:bg-[#0d0f0e]">
+        <aside className="border-l border-black/[0.12] bg-[#f5f7f6] px-7 py-8 dark:border-white/[0.09] dark:bg-[#0b0c0b]">
           <div className="sticky top-8">
             <div className="flex items-start justify-between">
               <h2 className="text-[28px] font-semibold leading-none">Filters</h2>
@@ -637,7 +637,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                   }}
                   className={`inline-flex h-8 items-center gap-1.5 border px-2.5 text-[10px] ${
                     userFilter === ''
-                      ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a] dark:bg-[#26352d] dark:text-[#c9d6ce]'
+                      ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a] dark:border-white/[0.16] dark:bg-white/[0.08] dark:text-[#eceeed]'
                       : 'border-black/[0.08] bg-white text-[#747b78] hover:border-black/[0.18] dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-[#a1a7a4] dark:hover:border-white/[0.2]'
                   }`}
                 >
@@ -654,7 +654,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
                     }}
                     className={`inline-flex h-8 max-w-full items-center gap-1.5 border px-2.5 text-[10px] ${
                       userFilter === user.id
-                        ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a] dark:bg-[#26352d] dark:text-[#c9d6ce]'
+                        ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a] dark:border-white/[0.16] dark:bg-white/[0.08] dark:text-[#eceeed]'
                         : 'border-black/[0.08] bg-white text-[#747b78] hover:border-black/[0.18] dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-[#a1a7a4] dark:hover:border-white/[0.2]'
                     }`}
                   >

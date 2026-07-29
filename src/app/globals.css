@@ -115,36 +115,36 @@
 }
 
 .dark {
-  --background: oklch(0.13 0 0);
-  --foreground: oklch(0.97 0 0);
-  --card: oklch(0.16 0 0);
+  --background: oklch(0.095 0 0);
+  --foreground: oklch(0.94 0 0);
+  --card: oklch(0.135 0 0);
   --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.16 0 0);
+  --popover: oklch(0.14 0 0);
   --popover-foreground: oklch(0.97 0 0);
   --primary: oklch(0.72 0.19 155);
   --primary-foreground: oklch(0.13 0 0);
-  --secondary: oklch(0.22 0 0);
+  --secondary: oklch(0.18 0 0);
   --secondary-foreground: oklch(0.97 0 0);
-  --muted: oklch(0.22 0 0);
-  --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.22 0 0);
+  --muted: oklch(0.18 0 0);
+  --muted-foreground: oklch(0.61 0 0);
+  --accent: oklch(0.19 0 0);
   --accent-foreground: oklch(0.97 0 0);
   --destructive: oklch(0.65 0.22 25);
-  --border: oklch(0.29 0 0);
-  --input: oklch(0.22 0 0);
+  --border: oklch(0.24 0 0);
+  --input: oklch(0.18 0 0);
   --ring: oklch(0.72 0.19 155);
   --chart-1: oklch(0.72 0.19 155);
   --chart-2: oklch(0.65 0.18 280);
   --chart-3: oklch(0.70 0.16 190);
   --chart-4: oklch(0.75 0.14 60);
   --chart-5: oklch(0.68 0.20 330);
-  --sidebar: oklch(0.11 0 0);
+  --sidebar: oklch(0.085 0 0);
   --sidebar-foreground: oklch(0.97 0 0);
   --sidebar-primary: oklch(0.72 0.19 155);
   --sidebar-primary-foreground: oklch(0.13 0 0);
-  --sidebar-accent: oklch(0.18 0 0);
+  --sidebar-accent: oklch(0.15 0 0);
   --sidebar-accent-foreground: oklch(0.97 0 0);
-  --sidebar-border: oklch(0.25 0 0);
+  --sidebar-border: oklch(0.21 0 0);
   --sidebar-ring: oklch(0.72 0.19 155);
 }
 
@@ -362,10 +362,9 @@
 }
 
 .warehouse-floor-lines {
-  background-image:
-    linear-gradient(90deg, rgba(46, 54, 51, 0.045) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(46, 54, 51, 0.04) 1px, transparent 1px);
-  background-size: 84px 84px;
+  background-image: radial-gradient(circle, rgba(46, 54, 51, 0.13) 1px, transparent 1.2px);
+  background-position: 0 0;
+  background-size: 28px 28px;
   mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
 }
 
@@ -531,21 +530,19 @@
 }
 
 .dark .ecosystem-board-warehouse {
-  border-color: rgba(255, 255, 255, 0.065);
-  background: #0d0f0e;
+  border-color: rgba(255, 255, 255, 0.075);
+  background: #0a0b0a;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.035),
-    0 1px 2px rgba(0, 0, 0, 0.38);
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .dark .warehouse-floor-lines {
-  background-image:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.085) 1px, transparent 1.25px);
 }
 
 .dark .ecosystem-edge {
-  stroke: #4b514e;
+  stroke: #454946;
 }
 
 .dark .ecosystem-edge.is-healthy {
@@ -568,8 +565,8 @@
 }
 
 .dark .warehouse-module-tile::before {
-  border-color: rgba(255, 255, 255, 0.06);
-  background: linear-gradient(180deg, #1d211f, #151816);
+  border-color: rgba(255, 255, 255, 0.07);
+  background: linear-gradient(180deg, #1b1c1b, #111211);
 }
 
 .dark .warehouse-module-tile::after {
@@ -578,17 +575,17 @@
 
 .dark .warehouse-module-surface,
 .dark .warehouse-module-tile.is-root .warehouse-module-surface {
-  border-color: rgba(255, 255, 255, 0.095);
-  background: linear-gradient(180deg, #171a18, #111312);
+  border-color: rgba(255, 255, 255, 0.105);
+  background: linear-gradient(180deg, #151615, #0f100f);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.065),
     0 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .dark .warehouse-module-icon {
-  border-color: color-mix(in srgb, var(--module-accent) 28%, transparent);
-  background: color-mix(in srgb, var(--module-accent) 17%, #121413);
-  color: color-mix(in srgb, var(--module-accent) 72%, white);
+  border-color: color-mix(in srgb, var(--module-accent) 32%, transparent);
+  background: color-mix(in srgb, var(--module-accent) 20%, #111111);
+  color: color-mix(in srgb, var(--module-accent) 68%, white);
 }
 
 .dark .warehouse-module-tile:hover {
@@ -596,28 +593,39 @@
 }
 
 .dark .ecosystem-service-node {
-  border-color: rgba(255, 255, 255, 0.085);
-  background: rgba(18, 21, 19, 0.98);
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(17, 18, 17, 0.985);
   box-shadow:
     0 9px 18px rgba(0, 0, 0, 0.38),
-    0 3px 0 #090a09,
-    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    0 3px 0 #060706,
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
 .dark .ecosystem-service-node:hover {
   box-shadow:
     0 12px 22px rgba(0, 0, 0, 0.48),
-    0 3px 0 #090a09,
+    0 3px 0 #060706,
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
 .dark .operations-panel {
-  border-color: rgba(255, 255, 255, 0.09);
-  background: rgba(15, 17, 16, 0.97);
+  border-color: rgba(255, 255, 255, 0.105);
+  background: rgba(13, 14, 13, 0.975);
   box-shadow:
     0 22px 55px rgba(0, 0, 0, 0.5),
     0 2px 8px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.operations-module-icon {
+  background: var(--module-soft);
+  color: var(--module-accent);
+}
+
+.dark .operations-module-icon {
+  border: 1px solid color-mix(in srgb, var(--module-accent) 25%, transparent);
+  background: color-mix(in srgb, var(--module-accent) 17%, #111111);
+  color: color-mix(in srgb, var(--module-accent) 66%, white);
 }
 
 @media (max-width: 1023px) {

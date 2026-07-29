@@ -119,11 +119,11 @@ const moduleStatusSources: Record<DashboardModuleName, { checks: string[]; deplo
 }
 
 const statusMeta: Record<HealthStatus, { label: string; dot: string; text: string }> = {
-  checking: { label: 'Sprawdzam', dot: 'bg-[#8c9492]', text: 'text-[#717976]' },
-  healthy: { label: 'Działa', dot: 'bg-emerald-500', text: 'text-emerald-700' },
-  warning: { label: 'Uwaga', dot: 'bg-amber-400', text: 'text-amber-700' },
-  error: { label: 'Nie działa', dot: 'bg-red-500', text: 'text-red-700' },
-  unknown: { label: 'Brak monitoringu', dot: 'bg-[#a0a7a5]', text: 'text-[#717976]' },
+  checking: { label: 'Sprawdzam', dot: 'bg-[#8c9492]', text: 'text-[#717976] dark:text-[#a0a6a3]' },
+  healthy: { label: 'Działa', dot: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-400' },
+  warning: { label: 'Uwaga', dot: 'bg-amber-400', text: 'text-amber-700 dark:text-amber-300' },
+  error: { label: 'Nie działa', dot: 'bg-red-500', text: 'text-red-700 dark:text-red-400' },
+  unknown: { label: 'Brak monitoringu', dot: 'bg-[#a0a7a5]', text: 'text-[#717976] dark:text-[#a0a6a3]' },
 }
 
 const modulePalette: Record<DashboardModuleDefinition['color'], { accent: string; soft: string }> = {
@@ -727,8 +727,11 @@ export function DashboardModules({
                     aria-expanded={resources.length > 0 ? isOpen : undefined}
                   >
                     <span
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px]"
-                      style={{ backgroundColor: palette.soft, color: palette.accent }}
+                      className="operations-module-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px]"
+                      style={{
+                        '--module-accent': palette.accent,
+                        '--module-soft': palette.soft,
+                      } as CSSProperties}
                     >
                       <Icon className="h-3.5 w-3.5" />
                     </span>
