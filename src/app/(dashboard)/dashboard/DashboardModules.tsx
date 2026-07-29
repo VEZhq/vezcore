@@ -61,6 +61,14 @@ type InfraData = {
     completedAt: string | null
     url: string | null
   }
+  coreDeploy?: {
+    status: DeployStatus
+    sha: string | null
+    shortSha: string | null
+    message: string
+    completedAt: string | null
+    url: string | null
+  }
   resources?: InfrastructureResource[]
 }
 
@@ -355,14 +363,15 @@ function dependencyStatus(parent: HealthStatus, target: HealthStatus) {
 
 function getServiceNodeStatus(node: ServiceNodeDefinition, infraData: InfraData | null): HealthStatus {
   if (!infraData) return 'checking'
-  if (node.deploy) return getDeployHealthStatus(infraData.deploy.status)
+  if (node.deploy) return getDeployHealthStatus((infraData.coreDeploy ?? infraData.deploy).status)
   return infraData.checks[node.checkKey ?? '']?.status ?? 'unknown'
 }
 
 function getServiceNodeDetail(node: ServiceNodeDefinition, infraData: InfraData | null) {
   if (!infraData) return 'Sprawdzam'
   if (node.deploy) {
-    return infraData.deploy.shortSha ?? statusMeta[getDeployHealthStatus(infraData.deploy.status)].label
+    const deploy = infraData.coreDeploy ?? infraData.deploy
+    return deploy.shortSha ?? statusMeta[getDeployHealthStatus(deploy.status)].label
   }
 
   const check = infraData.checks[node.checkKey ?? '']
@@ -372,10 +381,11 @@ function getServiceNodeDetail(node: ServiceNodeDefinition, infraData: InfraData 
 
 function getServiceNodeHref(node: ServiceNodeDefinition, infraData: InfraData | null) {
   if (node.id === 'deploy') {
-    if (infraData?.deploy.sha) {
-      return `https://github.com/VEZhq/vezcore/commit/${infraData.deploy.sha}`
+    const deploy = infraData?.coreDeploy ?? infraData?.deploy
+    if (deploy?.sha) {
+      return `https://github.com/VEZhq/vezcore/commit/${deploy.sha}`
     }
-    return infraData?.deploy.url ?? undefined
+    return deploy?.url ?? undefined
   }
   return node.href
 }
