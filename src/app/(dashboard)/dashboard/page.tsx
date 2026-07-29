@@ -1,7 +1,7 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Bell, Clock3, UserCog } from 'lucide-react'
+import Link from 'next/link'
+import { Clock3, UserCog } from 'lucide-react'
 import { getAuthenticatedUserPermissionState, getUserPermissions } from '@/lib/permissions'
 import { getDashboardAuthUser } from '@/lib/queries/auth'
 import { getDashboardStatsForLast24Hours } from '@/lib/queries/dashboard'
@@ -10,6 +10,7 @@ import { DashboardModules } from './DashboardModules'
 import { DashboardProfileMenu } from './DashboardProfileMenu'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { getOperationsNotificationSummary } from '@/lib/operations/queries'
+import { DashboardNotifications } from './DashboardNotifications'
 
 export default async function DashboardPage() {
   const authState = await getAuthenticatedUserPermissionState()
@@ -31,7 +32,7 @@ export default async function DashboardPage() {
   const errors24h = dashboardStats?.errors_24h ?? 0
 
   return (
-    <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020] dark:bg-black dark:text-[#ededed]">
+    <div className="vezcore-readable h-screen overflow-hidden bg-[#c8d0cf] text-[#202020] dark:bg-black dark:text-[#ededed]">
       <main className="relative h-full w-full overflow-hidden bg-[#f1f3f2] dark:bg-[#070807]">
         <div className="relative flex h-full flex-col px-2.5 py-2 sm:px-3.5">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_8%,rgba(255,255,255,0.82),transparent_30%)] dark:bg-none" />
@@ -65,21 +66,12 @@ export default async function DashboardPage() {
               <div className="ml-auto flex items-center gap-1.5">
                 <ThemeToggle />
                 {permissions.canAccessOperations && (
-                  <Link
-                    href="/operations"
-                    className="relative flex h-8 w-8 items-center justify-center rounded-[8px] text-[#69706e] transition-colors hover:bg-white hover:text-[#202020] dark:text-[#a7adaa] dark:hover:bg-white/[0.08] dark:hover:text-white"
-                    aria-label="Centrum operacji"
-                    title="Centrum operacji"
-                  >
-                    <Bell className="h-4 w-4" />
-                    {(notificationSummary?.unreadCount ?? 0) > 0 && (
-                      <span className={`absolute right-1 top-1 flex min-w-3.5 items-center justify-center rounded-full px-1 text-[7px] font-bold text-white ${
-                        notificationSummary?.hasError ? 'bg-[#d65f59]' : 'bg-[#b48a3d]'
-                      }`}>
-                        {Math.min(notificationSummary?.unreadCount ?? 0, 99)}
-                      </span>
-                    )}
-                  </Link>
+                  <DashboardNotifications
+                    unreadCount={notificationSummary?.unreadCount ?? 0}
+                    hasError={notificationSummary?.hasError ?? false}
+                    items={notificationSummary?.items ?? []}
+                    canManage={permissions.canManageOperations}
+                  />
                 )}
                 {permissions.canAccessAudit && (
                   <Link

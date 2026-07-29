@@ -41,6 +41,7 @@ const ALLOWED_ACTIONS = [
   'operations_maintenance_create', 'operations_maintenance_status',
   'operations_snapshot_create', 'operations_shortcut_reveal',
   'role_preview_start', 'role_preview_end',
+  'user_preview_start', 'user_preview_end',
 ]
 
 export async function getAuditLogs(filters: AuditLogFilters = {}) {
@@ -167,4 +168,3 @@ export async function getAuditLogActions() {
 
   return ALLOWED_ACTIONS
 }
-

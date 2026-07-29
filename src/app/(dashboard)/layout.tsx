@@ -30,7 +30,9 @@ export default async function DashboardLayout({
 					<div className="relative min-h-screen overflow-hidden bg-[#08080b] light:bg-[#f6f7fb]">
 						<NeuralBackground />
 						<DashboardVisitTracker userId={authState.userId} />
-						{authState.previewRole && <RolePreviewBanner role={authState.previewRole} />}
+						{(authState.previewRole || authState.previewUserId) && (
+							<RolePreviewBanner role={authState.previewRole} userLabel={authState.previewLabel} />
+						)}
 						<div className="relative z-10 min-h-screen">
 							{children}
 						</div>

@@ -168,6 +168,10 @@
 }
 
 @layer utilities {
+  .vezcore-readable {
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-feature-settings: normal;
+  }
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;

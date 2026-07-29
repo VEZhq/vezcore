@@ -17,6 +17,10 @@ test('preferences sanitizer rejects unsupported values and unknown dashboard nod
       vezVision: { left: 101.4, top: 202.8 },
       unknown: { left: 1, top: 2 },
     },
+    dashboardModuleSizes: {
+      vezVision: { width: 250.4, height: 130.8 },
+      unknown: { width: 200, height: 100 },
+    },
   })
 
   assert.equal(result.timezone, defaultUserPreferences.timezone)
@@ -28,22 +32,35 @@ test('preferences sanitizer rejects unsupported values and unknown dashboard nod
   assert.deepEqual(result.dashboardModulePositions, {
     vezVision: { left: 101, top: 203 },
   })
+  assert.deepEqual(result.dashboardModuleSizes, {
+    vezVision: { width: 250, height: 131 },
+  })
 })
 
 test('preferences sanitizer clamps movable and resizable dashboard values', () => {
   const result = sanitizeUserPreferences({
     operationsPanelSize: { width: 10_000, height: -10 },
+    operationsPanelPosition: { left: -50, top: 50_000 },
+    operationsPanelHidden: true,
     dashboardCenter: { x: -50_000, y: 50_000 },
     dashboardServiceNodePositions: {
       prodApi: { left: -50_000, top: 50_000 },
       database: { left: Number.NaN, top: 0 },
     },
+    dashboardServiceNodeSizes: {
+      prodApi: { width: 10_000, height: -100 },
+    },
   })
 
   assert.deepEqual(result.operationsPanelSize, { width: 520, height: 280 })
+  assert.deepEqual(result.operationsPanelPosition, { left: 0, top: 1770 })
+  assert.equal(result.operationsPanelHidden, true)
   assert.deepEqual(result.dashboardCenter, { x: -1200, y: 1200 })
   assert.deepEqual(result.dashboardServiceNodePositions, {
     prodApi: { left: -1200, top: 1770 },
+  })
+  assert.deepEqual(result.dashboardServiceNodeSizes, {
+    prodApi: { width: 280, height: 44 },
   })
 })
 

@@ -1,6 +1,7 @@
 import type { UserPermissions } from '@/lib/permissions'
 
 export const ROLE_PREVIEW_COOKIE = '__vez_role_preview'
+export const USER_PREVIEW_COOKIE = '__vez_user_preview'
 export const ROLE_PREVIEW_VALUES = ['client', 'operator'] as const
 export type RolePreview = typeof ROLE_PREVIEW_VALUES[number]
 

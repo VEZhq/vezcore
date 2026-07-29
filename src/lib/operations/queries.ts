@@ -100,7 +100,7 @@ export async function getOperationsNotificationSummary(userId: string) {
   const [{ data: notifications }, { data: reads }] = await Promise.all([
     admin
       .from('operations_notifications')
-      .select('id, severity')
+      .select('id, severity, title, body, href, created_at')
       .order('created_at', { ascending: false })
       .limit(100),
     admin
@@ -113,7 +113,59 @@ export async function getOperationsNotificationSummary(userId: string) {
   return {
     unreadCount: unread.length,
     hasError: unread.some((notification) => notification.severity === 'error'),
+    items: (notifications ?? []).slice(0, 4).map((notification) => ({
+      ...notification,
+      read: readIds.has(notification.id),
+    })),
   }
+}
+
+export type PreviewableUser = {
+  id: string
+  label: string
+  email: string
+  role: string
+}
+
+export async function getPreviewableUsers(
+  callerUserId: string,
+  callerRole: string | null
+): Promise<PreviewableUser[]> {
+  const client = await createActionClient()
+  const admin = getAdminClient()
+  const { data: callerProfile } = await client
+    .from('profiles')
+    .select('tenant_id')
+    .eq('id', callerUserId)
+    .single()
+
+  let profileQuery = admin
+    .from('profiles')
+    .select('id, full_name, role, tenant_id')
+    .is('deleted_at', null)
+    .order('full_name')
+    .limit(150)
+
+  if (callerRole !== 'super_admin') {
+    if (!callerProfile?.tenant_id) return []
+    profileQuery = profileQuery.eq('tenant_id', callerProfile.tenant_id)
+  }
+
+  const [{ data: profiles }, { data: authUsers }] = await Promise.all([
+    profileQuery,
+    admin.auth.admin.listUsers(),
+  ])
+  const emailMap = new Map((authUsers?.users ?? []).map((user) => [user.id, user.email ?? '']))
+
+  return (profiles ?? []).map((profile) => {
+    const email = emailMap.get(profile.id) ?? ''
+    return {
+      id: profile.id,
+      label: profile.full_name || email || profile.id.slice(0, 8),
+      email,
+      role: profile.role ?? 'client',
+    }
+  })
 }
 
 export type SecurityAccountFinding = {

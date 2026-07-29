@@ -9,13 +9,26 @@ export interface UserPreferences {
     width: number
     height: number
   }
+  operationsPanelPosition: {
+    left: number
+    top: number
+  }
+  operationsPanelHidden: boolean
   dashboardModulePositions: Record<string, {
     left: number
     top: number
   }>
+  dashboardModuleSizes: Record<string, {
+    width: number
+    height: number
+  }>
   dashboardServiceNodePositions: Record<string, {
     left: number
     top: number
+  }>
+  dashboardServiceNodeSizes: Record<string, {
+    width: number
+    height: number
   }>
   dashboardCenter: {
     x: number
@@ -43,8 +56,12 @@ export const defaultUserPreferences: UserPreferences = {
   hiddenModules: [],
   hiddenServiceNodes: [],
   operationsPanelSize: { width: 300, height: 360 },
+  operationsPanelPosition: { left: 12, top: 12 },
+  operationsPanelHidden: false,
   dashboardModulePositions: {},
+  dashboardModuleSizes: {},
   dashboardServiceNodePositions: {},
+  dashboardServiceNodeSizes: {},
   dashboardCenter: { x: 0, y: 0 },
 }
 
@@ -69,6 +86,28 @@ function sanitizePositions(
   )
 }
 
+function sanitizeSizes(
+  raw: unknown,
+  validNames: string[],
+  bounds: { minWidth: number; maxWidth: number; minHeight: number; maxHeight: number }
+): Record<string, { width: number; height: number }> {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
+
+  const sizes = raw as Record<string, unknown>
+  return Object.fromEntries(
+    validNames.flatMap((name) => {
+      const size = sizes[name]
+      if (!size || typeof size !== 'object' || Array.isArray(size)) return []
+      const { width, height } = size as Record<string, unknown>
+      if (!Number.isFinite(width) || !Number.isFinite(height)) return []
+      return [[name, {
+        width: Math.min(bounds.maxWidth, Math.max(bounds.minWidth, Math.round(width as number))),
+        height: Math.min(bounds.maxHeight, Math.max(bounds.minHeight, Math.round(height as number))),
+      }]]
+    })
+  )
+}
+
 export function sanitizeUserPreferences(raw: unknown): UserPreferences {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     return {
@@ -76,8 +115,12 @@ export function sanitizeUserPreferences(raw: unknown): UserPreferences {
       hiddenModules: [],
       hiddenServiceNodes: [],
       operationsPanelSize: { ...defaultUserPreferences.operationsPanelSize },
+      operationsPanelPosition: { ...defaultUserPreferences.operationsPanelPosition },
+      operationsPanelHidden: defaultUserPreferences.operationsPanelHidden,
       dashboardModulePositions: {},
+      dashboardModuleSizes: {},
       dashboardServiceNodePositions: {},
+      dashboardServiceNodeSizes: {},
       dashboardCenter: { ...defaultUserPreferences.dashboardCenter },
     }
   }
@@ -88,6 +131,9 @@ export function sanitizeUserPreferences(raw: unknown): UserPreferences {
     : {}
   const center = obj.dashboardCenter && typeof obj.dashboardCenter === 'object'
     ? obj.dashboardCenter as Record<string, unknown>
+    : {}
+  const panelPosition = obj.operationsPanelPosition && typeof obj.operationsPanelPosition === 'object'
+    ? obj.operationsPanelPosition as Record<string, unknown>
     : {}
 
   return {
@@ -121,8 +167,31 @@ export function sanitizeUserPreferences(raw: unknown): UserPreferences {
         ? Math.min(680, Math.max(280, Math.round(panel.height as number)))
         : defaultUserPreferences.operationsPanelSize.height,
     },
+    operationsPanelPosition: {
+      left: Number.isFinite(panelPosition.left)
+        ? Math.min(2560, Math.max(0, Math.round(panelPosition.left as number)))
+        : defaultUserPreferences.operationsPanelPosition.left,
+      top: Number.isFinite(panelPosition.top)
+        ? Math.min(1770, Math.max(0, Math.round(panelPosition.top as number)))
+        : defaultUserPreferences.operationsPanelPosition.top,
+    },
+    operationsPanelHidden: typeof obj.operationsPanelHidden === 'boolean'
+      ? obj.operationsPanelHidden
+      : defaultUserPreferences.operationsPanelHidden,
     dashboardModulePositions: sanitizePositions(obj.dashboardModulePositions, VALID_MODULE_NAMES),
+    dashboardModuleSizes: sanitizeSizes(obj.dashboardModuleSizes, VALID_MODULE_NAMES, {
+      minWidth: 170,
+      maxWidth: 380,
+      minHeight: 92,
+      maxHeight: 220,
+    }),
     dashboardServiceNodePositions: sanitizePositions(obj.dashboardServiceNodePositions, VALID_SERVICE_NODE_NAMES),
+    dashboardServiceNodeSizes: sanitizeSizes(obj.dashboardServiceNodeSizes, VALID_SERVICE_NODE_NAMES, {
+      minWidth: 108,
+      maxWidth: 280,
+      minHeight: 44,
+      maxHeight: 96,
+    }),
     dashboardCenter: {
       x: Number.isFinite(center.x)
         ? Math.min(1200, Math.max(-1200, Math.round(center.x as number)))

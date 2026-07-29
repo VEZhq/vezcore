@@ -50,7 +50,7 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
     ])
       .then(async ([preferencesResponse, csrfResponse]) => {
         const preferencesPayload = preferencesResponse.ok
-          ? await preferencesResponse.json() as { preferences?: unknown }
+          ? await preferencesResponse.json() as { preferences?: unknown; readOnly?: boolean }
           : null
         const csrfPayload = csrfResponse.ok
           ? await csrfResponse.json() as { token?: string }
@@ -63,7 +63,7 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
         if (preferencesPayload?.preferences) {
           setPreferences(sanitizeUserPreferences(preferencesPayload.preferences))
         }
-        setAccountSyncReady(Boolean(preferencesPayload && csrfToken))
+        setAccountSyncReady(Boolean(preferencesPayload && csrfToken && !preferencesPayload.readOnly))
       })
       .catch(() => {
         if (!cancelled) setAccountSyncReady(false)

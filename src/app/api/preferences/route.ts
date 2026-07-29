@@ -3,6 +3,7 @@ import { validateCSRFToken } from '@/lib/actions/csrf'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { createActionClient } from '@/lib/supabase/server'
 import { sanitizeUserPreferences } from '@/lib/preferences'
+import { getAuthenticatedUserPermissionState } from '@/lib/permissions'
 import type { Json } from '@/types/database.types'
 
 async function getAuthenticatedUser() {
@@ -14,12 +15,14 @@ async function getAuthenticatedUser() {
 export async function GET() {
   const user = await getAuthenticatedUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const authState = await getAuthenticatedUserPermissionState()
+  const preferencesUserId = authState?.previewUserId ?? user.id
 
   const admin = getAdminClient()
   const { data, error } = await admin
     .from('user_preferences')
     .select('preferences, revision, updated_at')
-    .eq('user_id', user.id)
+    .eq('user_id', preferencesUserId)
     .maybeSingle()
 
   if (error) return NextResponse.json({ error: 'query_failed' }, { status: 500 })
@@ -29,6 +32,7 @@ export async function GET() {
       preferences: data ? sanitizeUserPreferences(data.preferences) : null,
       revision: data?.revision ?? 0,
       updatedAt: data?.updated_at ?? null,
+      readOnly: Boolean(authState?.previewUserId),
     },
     { headers: { 'Cache-Control': 'no-store' } }
   )
@@ -42,6 +46,10 @@ export async function PUT(request: Request) {
 
   const user = await getAuthenticatedUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const authState = await getAuthenticatedUserPermissionState()
+  if (authState?.previewUserId) {
+    return NextResponse.json({ error: 'preview_read_only' }, { status: 403 })
+  }
 
   let body: unknown
   try {

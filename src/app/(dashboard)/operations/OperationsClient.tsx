@@ -33,9 +33,9 @@ import {
   revealOperationsShortcut,
   updateMaintenanceStatus,
 } from '@/lib/actions/operations'
-import { setRolePreview } from '@/lib/actions/role-preview'
+import { setRolePreview, setUserPreview } from '@/lib/actions/role-preview'
 import type { OperationsOverview } from '@/lib/operations/types'
-import type { SecurityAccountFinding } from '@/lib/operations/queries'
+import type { PreviewableUser, SecurityAccountFinding } from '@/lib/operations/queries'
 
 type Section = 'overview' | 'incidents' | 'deployments' | 'maintenance' | 'shortcuts' | 'snapshots' | 'security'
 
@@ -101,12 +101,14 @@ export default function OperationsClient({
   canManage,
   canPreviewRoles,
   canViewSecurityReport,
+  previewUsers,
 }: {
   overview: OperationsOverview
   securityReport: SecurityAccountFinding[]
   canManage: boolean
   canPreviewRoles: boolean
   canViewSecurityReport: boolean
+  previewUsers: PreviewableUser[]
 }) {
   const router = useRouter()
   const params = useSearchParams()
@@ -115,8 +117,11 @@ export default function OperationsClient({
   const [busy, setBusy] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [revealedAliases, setRevealedAliases] = useState<Record<string, string>>({})
-  const [maintenanceFormOpen, setMaintenanceFormOpen] = useState(false)
+  const [maintenanceFormOpen, setMaintenanceFormOpen] = useState(
+    () => params.get('section') === 'maintenance' && params.get('create') === '1'
+  )
   const [snapshotName, setSnapshotName] = useState('')
+  const [previewUserId, setPreviewUserId] = useState('')
 
   const activeIncidents = overview.incidents.filter((incident) => incident.status !== 'resolved')
   const unreadNotifications = overview.notifications.filter((notification) => !notification.read)
@@ -222,8 +227,20 @@ export default function OperationsClient({
     window.location.assign('/dashboard')
   }
 
+  const startUserPreview = async () => {
+    if (!token || !previewUserId) return
+    setBusy('preview:user')
+    const result = await setUserPreview(previewUserId, token)
+    if ('error' in result) {
+      setMessage(result.error)
+      setBusy(null)
+      return
+    }
+    window.location.assign('/dashboard')
+  }
+
   return (
-    <div className="min-h-screen bg-[#f4f4f2] text-[#242524] dark:bg-[#080908] dark:text-[#eceeec]">
+    <div className="vezcore-readable min-h-screen bg-[#f4f4f2] text-[#242524] dark:bg-[#080908] dark:text-[#eceeec]">
       <header className="sticky top-0 z-40 border-b border-black/[0.08] bg-[#f8f8f6]/95 backdrop-blur dark:border-white/[0.09] dark:bg-[#0b0c0b]/95">
         <div className="mx-auto flex h-12 max-w-[1400px] items-center px-4 sm:px-6">
           <Image src="/logo/vezcore_logo_black_full.svg" alt="VEZcore" width={104} height={42} className="h-auto w-[104px] dark:hidden" priority />
@@ -280,7 +297,28 @@ export default function OperationsClient({
           </nav>
           {canPreviewRoles && (
             <div className="mt-6 border-t border-black/[0.08] px-2 pt-4 dark:border-white/[0.08]">
-              <p className="text-[8px] uppercase text-[#949996]">Podgląd dostępu</p>
+              <p className="text-[9px] font-medium text-[#686e6a] dark:text-[#a3a9a5]">Podgląd dostępu</p>
+              <p className="mt-1 text-[8px] leading-relaxed text-[#929793]">Sprawdź dokładnie moduły i funkcje widoczne dla konkretnego konta.</p>
+              <select
+                value={previewUserId}
+                onChange={(event) => setPreviewUserId(event.target.value)}
+                className="mt-3 h-9 w-full rounded-[7px] border border-black/[0.09] bg-white px-2 text-[9px] outline-none dark:border-white/[0.1] dark:bg-[#111311]"
+                aria-label="Wybierz użytkownika do podglądu"
+              >
+                <option value="">Wybierz konto</option>
+                {previewUsers.map((user) => (
+                  <option key={user.id} value={user.id}>{user.label} · {user.role}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={startUserPreview}
+                disabled={!previewUserId || busy === 'preview:user'}
+                className="mt-1.5 h-8 w-full rounded-[7px] bg-[#292a29] text-[9px] font-medium text-white disabled:opacity-40 dark:bg-white dark:text-black"
+              >
+                Zobacz jego widok
+              </button>
+              <p className="mt-3 text-[8px] text-[#949996]">Szybkie profile testowe</p>
               <div className="mt-2 grid grid-cols-2 gap-1">
                 <button type="button" onClick={() => startPreview('client')} className="h-8 rounded-[6px] border border-black/[0.08] bg-white/50 text-[9px] hover:bg-white dark:border-white/[0.09] dark:bg-white/[0.025] dark:hover:bg-white/[0.06]">Użytkownik</button>
                 <button type="button" onClick={() => startPreview('operator')} className="h-8 rounded-[6px] border border-black/[0.08] bg-white/50 text-[9px] hover:bg-white dark:border-white/[0.09] dark:bg-white/[0.025] dark:hover:bg-white/[0.06]">Operator</button>
@@ -300,11 +338,34 @@ export default function OperationsClient({
           {section === 'overview' && (
             <div>
               <PageHeading title="Stan operacyjny" description="Dostępność z ostatnich 30 dni, bieżące zdarzenia i przewidywany wpływ zależności." />
-              <div className="grid border-b border-black/[0.09] py-6 dark:border-white/[0.09] sm:grid-cols-3">
+              <div className="grid border-b border-black/[0.09] py-6 dark:border-white/[0.09] sm:grid-cols-4">
                 <Metric label="Aktywne incydenty" value={String(activeIncidents.length)} tone={activeIncidents.length > 0 ? 'warning' : 'normal'} />
                 <Metric label="Nieprzeczytane" value={String(unreadNotifications.length)} />
                 <Metric label="Moduły z wpływem" value={String(impactedModules.length)} />
+                <Metric label="Planowane prace" value={String(overview.maintenance.filter((item) => item.status === 'scheduled').length)} />
               </div>
+
+              <section className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.09] py-4 dark:border-white/[0.09]">
+                <div>
+                  <h2 className="text-[11px] font-medium">Planowanie prac konserwacyjnych</h2>
+                  <p className="mt-1 text-[9px] text-[#7d837f] dark:text-[#9da39f]">
+                    {canManage
+                      ? 'Ustal moduł, zakres i czas prac. W tym oknie automatyczne alerty są prawidłowo wyciszane.'
+                      : 'Masz dostęp tylko do podglądu zaplanowanych okien. Edycja wymaga uprawnienia operations.manage.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    changeSection('maintenance')
+                    if (canManage) setMaintenanceFormOpen(true)
+                  }}
+                  className="flex h-9 items-center gap-1.5 rounded-[7px] border border-black/[0.09] px-3 text-[9px] font-medium hover:bg-white dark:border-white/[0.1] dark:hover:bg-white/[0.06]"
+                >
+                  <Wrench className="h-3.5 w-3.5" />
+                  {canManage ? 'Zaplanuj prace' : 'Pokaż harmonogram'}
+                </button>
+              </section>
 
               <section className="py-6">
                 <div className="mb-3 flex items-center justify-between">

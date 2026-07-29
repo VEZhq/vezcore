@@ -103,6 +103,14 @@ type ResizeState = {
   originHeight: number
 }
 
+type PanelDragState = {
+  pointerId: number
+  startX: number
+  startY: number
+  originLeft: number
+  originTop: number
+}
+
 type ModuleDragState = {
   pointerId: number
   name: DashboardModuleName
@@ -115,6 +123,21 @@ type ModuleDragState = {
 type ModulePosition = {
   left: number
   top: number
+}
+
+type DashboardSize = {
+  width: number
+  height: number
+}
+
+type TileResizeState = {
+  pointerId: number
+  kind: 'module' | 'service'
+  id: DashboardModuleName | ServiceNodeDefinition['id']
+  startX: number
+  startY: number
+  originWidth: number
+  originHeight: number
 }
 
 type ServiceNodeDragState = {
@@ -136,6 +159,7 @@ type ServiceNodeDefinition = {
   left: number
   top: number
   width: number
+  height: number
   href?: string
 }
 
@@ -198,12 +222,12 @@ const DRAWING_WIDTH = SCENE_WIDTH + (LAYOUT_MARGIN * 2)
 const DRAWING_HEIGHT = SCENE_HEIGHT + (LAYOUT_MARGIN * 2)
 
 const serviceNodes: ServiceNodeDefinition[] = [
-  { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 104, top: 210, width: 140, href: 'https://api.vezvision.com/healthz' },
-  { id: 'database', label: 'Core DB', checkKey: 'database', owner: 'vez', icon: Database, left: 342, top: 280, width: 132 },
-  { id: 'deploy', label: 'Deploy', deploy: true, owner: 'vez', icon: Rocket, left: 746, top: 280, width: 126 },
-  { id: 'labApi', label: 'Lab API', checkKey: 'labApi', owner: 'vezLabs', icon: Server, left: 806, top: 28, width: 132, href: 'https://api.vezlabs.dev/healthz' },
-  { id: 'minio', label: 'MinIO', checkKey: 'minio', owner: 'vezLabs', icon: HardDrive, left: 900, top: 280, width: 126, href: 'https://s3-dev.vezlabs.dev' },
-  { id: 'monitor', label: 'Monitor', checkKey: 'monitor', owner: 'vezLabs', icon: Activity, left: 1202, top: 102, width: 132, href: 'https://monitor.vezlabs.dev' },
+  { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 104, top: 210, width: 140, height: 48, href: 'https://api.vezvision.com/healthz' },
+  { id: 'database', label: 'Core DB', checkKey: 'database', owner: 'vez', icon: Database, left: 342, top: 280, width: 132, height: 48 },
+  { id: 'deploy', label: 'Deploy', deploy: true, owner: 'vez', icon: Rocket, left: 746, top: 280, width: 126, height: 48 },
+  { id: 'labApi', label: 'Lab API', checkKey: 'labApi', owner: 'vezLabs', icon: Server, left: 806, top: 28, width: 132, height: 48, href: 'https://api.vezlabs.dev/healthz' },
+  { id: 'minio', label: 'MinIO', checkKey: 'minio', owner: 'vezLabs', icon: HardDrive, left: 900, top: 280, width: 126, height: 48, href: 'https://s3-dev.vezlabs.dev' },
+  { id: 'monitor', label: 'Monitor', checkKey: 'monitor', owner: 'vezLabs', icon: Activity, left: 1202, top: 102, width: 132, height: 48, href: 'https://monitor.vezlabs.dev' },
 ]
 
 function getWorstStatus(statuses: HealthStatus[]): HealthStatus {
@@ -328,7 +352,7 @@ function moduleAnchor(
 }
 
 function nodeAnchor(node: ServiceNodeDefinition) {
-  return { x: node.left + (node.width / 2), y: node.top + 24 }
+  return { x: node.left + (node.width / 2), y: node.top + (node.height / 2) }
 }
 
 function serviceConnector(
@@ -403,21 +427,34 @@ export function DashboardModules({
   const [openModule, setOpenModule] = useState<DashboardModuleName | null>(null)
   const [infraData, setInfraData] = useState<InfraData | null>(null)
   const [panelSize, setPanelSize] = useState(preferences.operationsPanelSize)
+  const [panelPosition, setPanelPosition] = useState(preferences.operationsPanelPosition)
   const [modulePositions, setModulePositions] = useState<Record<string, ModulePosition>>(
     preferences.dashboardModulePositions
+  )
+  const [moduleSizes, setModuleSizes] = useState<Record<string, DashboardSize>>(
+    preferences.dashboardModuleSizes
   )
   const [serviceNodePositions, setServiceNodePositions] = useState<Record<string, ModulePosition>>(
     preferences.dashboardServiceNodePositions
   )
+  const [serviceNodeSizes, setServiceNodeSizes] = useState<Record<string, DashboardSize>>(
+    preferences.dashboardServiceNodeSizes
+  )
   const sceneRef = useRef<HTMLDivElement>(null)
+  const boardRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLElement>(null)
   const dragRef = useRef<DragState | null>(null)
+  const panelDragRef = useRef<PanelDragState | null>(null)
   const moduleDragRef = useRef<ModuleDragState | null>(null)
   const serviceNodeDragRef = useRef<ServiceNodeDragState | null>(null)
   const resizeRef = useRef<ResizeState | null>(null)
+  const tileResizeRef = useRef<TileResizeState | null>(null)
   const panelSizeRef = useRef(panelSize)
+  const panelPositionRef = useRef(panelPosition)
   const modulePositionsRef = useRef(modulePositions)
+  const moduleSizesRef = useRef(moduleSizes)
   const serviceNodePositionsRef = useRef(serviceNodePositions)
+  const serviceNodeSizesRef = useRef(serviceNodeSizes)
   const panRef = useRef(preferences.dashboardCenter)
   const frameRef = useRef<number | null>(null)
 
@@ -452,17 +489,26 @@ export function DashboardModules({
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       modulePositionsRef.current = preferences.dashboardModulePositions
+      moduleSizesRef.current = preferences.dashboardModuleSizes
       serviceNodePositionsRef.current = preferences.dashboardServiceNodePositions
+      serviceNodeSizesRef.current = preferences.dashboardServiceNodeSizes
       panelSizeRef.current = preferences.operationsPanelSize
+      panelPositionRef.current = preferences.operationsPanelPosition
       setModulePositions(preferences.dashboardModulePositions)
+      setModuleSizes(preferences.dashboardModuleSizes)
       setServiceNodePositions(preferences.dashboardServiceNodePositions)
+      setServiceNodeSizes(preferences.dashboardServiceNodeSizes)
       setPanelSize(preferences.operationsPanelSize)
+      setPanelPosition(preferences.operationsPanelPosition)
     })
     return () => cancelAnimationFrame(frame)
   }, [
     preferences.dashboardModulePositions,
+    preferences.dashboardModuleSizes,
     preferences.dashboardServiceNodePositions,
+    preferences.dashboardServiceNodeSizes,
     preferences.operationsPanelSize,
+    preferences.operationsPanelPosition,
   ])
 
   useEffect(() => {
@@ -529,12 +575,13 @@ export function DashboardModules({
   const effectiveLayout = Object.fromEntries(
     (Object.keys(moduleLayout) as DashboardModuleName[]).map((name) => [
       name,
-      { ...moduleLayout[name], ...modulePositions[name] },
+      { ...moduleLayout[name], ...modulePositions[name], ...moduleSizes[name] },
     ])
   ) as typeof moduleLayout
   const effectiveServiceNodes = serviceNodes.map((node) => ({
     ...node,
     ...serviceNodePositions[node.id],
+    ...serviceNodeSizes[node.id],
   }))
   const sceneServiceNodes = effectiveServiceNodes.filter(
     (node) => editMode || !preferences.hiddenServiceNodes.includes(node.id)
@@ -617,13 +664,26 @@ export function DashboardModules({
     panRef.current = { x: 0, y: 0 }
     scheduleSceneTransform()
     modulePositionsRef.current = {}
+    moduleSizesRef.current = {}
     serviceNodePositionsRef.current = {}
+    serviceNodeSizesRef.current = {}
+    panelPositionRef.current = { left: 12, top: 12 }
+    panelSizeRef.current = { width: 300, height: 360 }
     setModulePositions({})
+    setModuleSizes({})
     setServiceNodePositions({})
+    setServiceNodeSizes({})
+    setPanelPosition(panelPositionRef.current)
+    setPanelSize(panelSizeRef.current)
     updatePreferences({
       dashboardModulePositions: {},
+      dashboardModuleSizes: {},
       dashboardServiceNodePositions: {},
+      dashboardServiceNodeSizes: {},
       dashboardCenter: { x: 0, y: 0 },
+      operationsPanelPosition: panelPositionRef.current,
+      operationsPanelSize: panelSizeRef.current,
+      operationsPanelHidden: false,
     })
   }
 
@@ -682,17 +742,17 @@ export function DashboardModules({
     if (!drag || drag.pointerId !== event.pointerId) return
     event.preventDefault()
     event.stopPropagation()
-    const base = moduleLayout[drag.name]
+    const current = effectiveLayout[drag.name]
     const nextPosition = {
       left: clamp(
         drag.originLeft + event.clientX - drag.startX,
         -LAYOUT_MARGIN,
-        SCENE_WIDTH + LAYOUT_MARGIN - base.width
+        SCENE_WIDTH + LAYOUT_MARGIN - current.width
       ),
       top: clamp(
         drag.originTop + event.clientY - drag.startY,
         -LAYOUT_MARGIN,
-        SCENE_HEIGHT + LAYOUT_MARGIN - base.height
+        SCENE_HEIGHT + LAYOUT_MARGIN - current.height
       ),
     }
     const next = { ...modulePositionsRef.current, [drag.name]: nextPosition }
@@ -732,7 +792,7 @@ export function DashboardModules({
     if (!drag || drag.pointerId !== event.pointerId) return
     event.preventDefault()
     event.stopPropagation()
-    const node = serviceNodes.find((item) => item.id === drag.id)
+    const node = effectiveServiceNodes.find((item) => item.id === drag.id)
     if (!node) return
     const nextPosition = {
       left: clamp(
@@ -743,7 +803,7 @@ export function DashboardModules({
       top: clamp(
         drag.originTop + event.clientY - drag.startY,
         -LAYOUT_MARGIN,
-        SCENE_HEIGHT + LAYOUT_MARGIN - 48
+        SCENE_HEIGHT + LAYOUT_MARGIN - node.height
       ),
     }
     const next = { ...serviceNodePositionsRef.current, [drag.id]: nextPosition }
@@ -779,8 +839,9 @@ export function DashboardModules({
     const resize = resizeRef.current
     if (!resize || resize.pointerId !== event.pointerId) return
 
-    const maxWidth = Math.min(540, window.innerWidth - 32)
-    const maxHeight = Math.min(700, window.innerHeight - 190)
+    const board = boardRef.current
+    const maxWidth = Math.min(540, (board?.clientWidth ?? window.innerWidth) - panelPositionRef.current.left - 12)
+    const maxHeight = Math.min(700, (board?.clientHeight ?? window.innerHeight) - panelPositionRef.current.top - 12)
     const next = {
       width: clamp(resize.originWidth + event.clientX - resize.startX, 280, maxWidth),
       height: clamp(resize.originHeight + event.clientY - resize.startY, 280, maxHeight),
@@ -795,9 +856,128 @@ export function DashboardModules({
     updatePreferences({ operationsPanelSize: panelSizeRef.current })
   }
 
+  const startPanelDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest('button, a')) return
+    event.preventDefault()
+    event.stopPropagation()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    panelDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originLeft: panelPositionRef.current.left,
+      originTop: panelPositionRef.current.top,
+    }
+  }
+
+  const movePanelDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = panelDragRef.current
+    if (!drag || drag.pointerId !== event.pointerId) return
+    const board = boardRef.current
+    const next = {
+      left: clamp(
+        drag.originLeft + event.clientX - drag.startX,
+        0,
+        Math.max(0, (board?.clientWidth ?? window.innerWidth) - panelSizeRef.current.width)
+      ),
+      top: clamp(
+        drag.originTop + event.clientY - drag.startY,
+        0,
+        Math.max(0, (board?.clientHeight ?? window.innerHeight) - panelSizeRef.current.height)
+      ),
+    }
+    panelPositionRef.current = next
+    setPanelPosition(next)
+  }
+
+  const endPanelDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (panelDragRef.current?.pointerId !== event.pointerId) return
+    panelDragRef.current = null
+    updatePreferences({ operationsPanelPosition: panelPositionRef.current })
+  }
+
+  const hideOperationsPanel = () => {
+    updatePreferences({ operationsPanelHidden: true })
+  }
+
+  const showOperationsPanel = () => {
+    updatePreferences({ operationsPanelHidden: false })
+  }
+
+  const startTileResize = (
+    event: ReactPointerEvent<HTMLButtonElement>,
+    kind: TileResizeState['kind'],
+    id: TileResizeState['id'],
+    size: DashboardSize
+  ) => {
+    event.preventDefault()
+    event.stopPropagation()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    tileResizeRef.current = {
+      pointerId: event.pointerId,
+      kind,
+      id,
+      startX: event.clientX,
+      startY: event.clientY,
+      originWidth: size.width,
+      originHeight: size.height,
+    }
+  }
+
+  const moveTileResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const resize = tileResizeRef.current
+    if (!resize || resize.pointerId !== event.pointerId) return
+    event.preventDefault()
+    event.stopPropagation()
+
+    const isModule = resize.kind === 'module'
+    const nextSize = {
+      width: clamp(
+        resize.originWidth + event.clientX - resize.startX,
+        isModule ? 170 : 108,
+        isModule ? 380 : 280
+      ),
+      height: clamp(
+        resize.originHeight + event.clientY - resize.startY,
+        isModule ? 92 : 44,
+        isModule ? 220 : 96
+      ),
+    }
+
+    if (isModule) {
+      const next = { ...moduleSizesRef.current, [resize.id]: nextSize }
+      moduleSizesRef.current = next
+      setModuleSizes(next)
+    } else {
+      const next = { ...serviceNodeSizesRef.current, [resize.id]: nextSize }
+      serviceNodeSizesRef.current = next
+      setServiceNodeSizes(next)
+    }
+  }
+
+  const endTileResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const resize = tileResizeRef.current
+    if (!resize || resize.pointerId !== event.pointerId) return
+    event.preventDefault()
+    event.stopPropagation()
+    tileResizeRef.current = null
+    updatePreferences(resize.kind === 'module'
+      ? { dashboardModuleSizes: moduleSizesRef.current }
+      : { dashboardServiceNodeSizes: serviceNodeSizesRef.current })
+  }
+
   return (
     <section className="relative mt-2 min-h-0 w-full flex-1">
       <div className="absolute right-1 top-1 z-50 flex items-center gap-2">
+        {canAccessInfrastructure && preferences.operationsPanelHidden && (
+          <button
+            onClick={showOperationsPanel}
+            className="flex h-9 items-center gap-2 rounded-[9px] border border-black/[0.06] bg-white/80 px-3 text-xs font-medium text-[#626866] shadow-sm transition-colors hover:bg-white dark:border-white/[0.09] dark:bg-[#121413]/90 dark:text-[#aeb3b1] dark:hover:bg-[#181b1a]"
+          >
+            <Eye className="h-3.5 w-3.5" />
+            Pokaż raport
+          </button>
+        )}
         <button
           onClick={resetModuleLayout}
           className="flex h-9 items-center gap-2 rounded-[9px] border border-black/[0.06] bg-white/80 px-3 text-xs font-medium text-[#626866] shadow-sm transition-colors hover:bg-white dark:border-white/[0.09] dark:bg-[#121413]/90 dark:text-[#aeb3b1] dark:hover:bg-[#181b1a]"
@@ -836,7 +1016,7 @@ export function DashboardModules({
         </button>
       </div>
 
-      <div className="ecosystem-board-warehouse relative h-full min-h-[540px] overflow-hidden rounded-[14px]">
+      <div ref={boardRef} className="ecosystem-board-warehouse relative h-full min-h-[540px] overflow-hidden rounded-[14px]">
         <div className="warehouse-floor-lines absolute inset-0" />
 
         <div
@@ -1014,7 +1194,7 @@ export function DashboardModules({
                     <div className="mt-auto">
                       <div className="flex items-center gap-2">
                         <span className={`h-2 w-2 rounded-full ${status.dot}`} />
-                        <h3 className="text-[15px] font-semibold text-[#242826] dark:text-[#f0f1f0]">{mod.label}</h3>
+                        <h3 className="text-[15px] font-medium text-[#242826] dark:text-[#f0f1f0]">{mod.label}</h3>
                       </div>
                       <p className="mt-1 truncate text-[10px] text-[#69716e] dark:text-[#a0a5a2]">{statusSummary}</p>
                       {mod.name === 'vezVision' && (
@@ -1030,6 +1210,22 @@ export function DashboardModules({
                         <span key={detail.text} className="block leading-relaxed text-white/75">{detail.text}</span>
                       ))}
                     </span>
+                  )}
+                  {editMode && (
+                    <button
+                      type="button"
+                      data-no-pan
+                      onPointerDown={(event) => startTileResize(event, 'module', mod.name, layout)}
+                      onPointerMove={moveTileResize}
+                      onPointerUp={endTileResize}
+                      onPointerCancel={endTileResize}
+                      onLostPointerCapture={endTileResize}
+                      className="absolute bottom-1 right-1 z-50 flex h-6 w-6 cursor-nwse-resize touch-none items-center justify-center rounded-[6px] bg-white/80 text-[#747b78] shadow-sm hover:bg-white dark:bg-[#242725] dark:text-[#afb4b1]"
+                      aria-label={`Zmień rozmiar ${mod.label}`}
+                      title="Przeciągnij, aby zmienić rozmiar"
+                    >
+                      <MoveDiagonal2 className="h-3.5 w-3.5" />
+                    </button>
                   )}
                 </article>
               )
@@ -1056,7 +1252,7 @@ export function DashboardModules({
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-1.5">
                         <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${status.dot}`} />
-                        <span className="truncate text-[10px] font-semibold text-[#303432] dark:text-[#e5e7e6]">{node.label}</span>
+                        <span className="truncate text-[10px] font-medium text-[#303432] dark:text-[#e5e7e6]">{node.label}</span>
                       </span>
                       <span className="mt-0.5 block truncate text-[8px] text-[#858c89] dark:text-[#858b88]">{detail}</span>
                     </span>
@@ -1104,7 +1300,7 @@ export function DashboardModules({
                     target="_blank"
                     rel="noreferrer"
                     className="ecosystem-service-node group/service absolute z-30 flex items-center gap-2.5"
-                    style={{ left: node.left, top: node.top, width: node.width }}
+                    style={{ left: node.left, top: node.top, width: node.width, height: node.height }}
                     title={`${node.label}: ${detail}. Otwórz`}
                   >
                     {nodeContent}
@@ -1122,36 +1318,73 @@ export function DashboardModules({
                     className={`ecosystem-service-node absolute z-30 flex items-center gap-2.5 ${
                       editMode ? 'is-editing cursor-grab touch-none active:cursor-grabbing' : ''
                     } ${isHidden ? 'opacity-40' : ''}`}
-                    style={{ left: node.left, top: node.top, width: node.width }}
+                    style={{ left: node.left, top: node.top, width: node.width, height: node.height }}
                     title={editMode ? `Przeciągnij ${node.label}` : `${node.label}: ${detail}`}
                   >
                     {nodeContent}
+                    {editMode && (
+                      <button
+                        type="button"
+                        data-no-pan
+                        onPointerDown={(event) => startTileResize(event, 'service', node.id, node)}
+                        onPointerMove={moveTileResize}
+                        onPointerUp={endTileResize}
+                        onPointerCancel={endTileResize}
+                        onLostPointerCapture={endTileResize}
+                        className="absolute bottom-0.5 right-0.5 z-50 flex h-4 w-4 cursor-nwse-resize touch-none items-center justify-center rounded-[4px] bg-white/85 text-[#7d8581] dark:bg-[#242725] dark:text-[#aab0ad]"
+                        aria-label={`Zmień rozmiar ${node.label}`}
+                        title="Zmień rozmiar"
+                      >
+                        <MoveDiagonal2 className="h-2.5 w-2.5" />
+                      </button>
+                    )}
                   </div>
                 )
               })}
           </div>
         </div>
 
-        {canAccessInfrastructure && (
+        {canAccessInfrastructure && !preferences.operationsPanelHidden && (
           <aside
             ref={panelRef}
             data-no-pan
-            className="operations-panel absolute left-3 top-3 z-40 flex min-h-[280px] min-w-[280px] flex-col overflow-hidden rounded-[14px]"
+            className="operations-panel absolute z-40 flex min-h-[280px] min-w-[280px] flex-col overflow-hidden rounded-[14px]"
             style={{
+              left: panelPosition.left,
+              top: panelPosition.top,
               width: panelSize.width,
               height: panelSize.height,
               maxWidth: 'calc(100% - 24px)',
               maxHeight: 'calc(100% - 24px)',
             }}
           >
-          <div className="flex shrink-0 items-center justify-between px-3.5 pb-2 pt-3">
+          <div
+            onPointerDown={startPanelDrag}
+            onPointerMove={movePanelDrag}
+            onPointerUp={endPanelDrag}
+            onPointerCancel={endPanelDrag}
+            onLostPointerCapture={endPanelDrag}
+            className="flex shrink-0 cursor-move touch-none items-center justify-between px-3.5 pb-2 pt-3"
+            title="Przeciągnij panel"
+          >
             <div>
-              <p className="text-[13px] font-semibold text-[#242725] dark:text-[#eef0ef]">Report operations</p>
+              <p className="text-[13px] font-medium text-[#242725] dark:text-[#eef0ef]">Report operations</p>
               <p className="mt-0.5 text-[10px] text-[#8a918f] dark:text-[#858c88]">
                 {healthyModuleCount} działa · {alertModuleCount} alertów
               </p>
             </div>
-            <GripVertical className="h-4 w-4 text-[#a2a8a6]" />
+            <span className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={hideOperationsPanel}
+                className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-[6px] text-[#929996] hover:bg-black/[0.05] hover:text-[#343836] dark:hover:bg-white/[0.07] dark:hover:text-white"
+                aria-label="Ukryj Report operations"
+                title="Ukryj panel"
+              >
+                <EyeOff className="h-3.5 w-3.5" />
+              </button>
+              <GripVertical className="h-4 w-4 text-[#a2a8a6]" />
+            </span>
           </div>
 
           <div className="flex shrink-0 gap-1 border-y border-black/[0.05] px-3 py-1.5 dark:border-white/[0.07]">
@@ -1210,7 +1443,7 @@ export function DashboardModules({
                     >
                       <Icon className="h-3.5 w-3.5" />
                     </span>
-                    <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-[#272a29] dark:text-[#e5e7e6]">
+                    <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-[#272a29] dark:text-[#e5e7e6]">
                       {mod.label}
                     </span>
                     <span className="flex shrink-0 items-center gap-1.5">

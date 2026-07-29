@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { clearRolePreview } from '@/lib/actions/role-preview'
 import { useCSRFToken } from '@/hooks/useCSRFToken'
 
-export function RolePreviewBanner({ role }: { role: string }) {
+export function RolePreviewBanner({ role, userLabel }: { role?: string | null; userLabel?: string | null }) {
   const { token } = useCSRFToken()
   const [busy, setBusy] = useState(false)
 
@@ -20,7 +20,9 @@ export function RolePreviewBanner({ role }: { role: string }) {
   return (
     <div className="relative z-[100] flex h-8 items-center justify-center gap-2 border-b border-[#b8a14e]/35 bg-[#fff8d8] px-3 text-[10px] font-medium text-[#5d522a] dark:border-[#d7bc56]/25 dark:bg-[#2a2515] dark:text-[#e4d38d]">
       <Eye className="h-3.5 w-3.5" />
-      Podgląd roli: {role === 'operator' ? 'operator' : 'użytkownik'}
+      {userLabel
+        ? `Widzisz VEZcore dokładnie jako: ${userLabel}`
+        : `Podgląd roli: ${role === 'operator' ? 'operator' : 'użytkownik'}`}
       <button
         type="button"
         onClick={closePreview}

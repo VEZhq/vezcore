@@ -5,7 +5,13 @@ import { createActionClient } from '@/lib/supabase/server'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { isAdminRole } from '@/lib/roles'
 import { cookies } from 'next/headers'
-import { applyRolePreview, isRolePreview, ROLE_PREVIEW_COOKIE, type RolePreview } from '@/lib/role-preview'
+import {
+  applyRolePreview,
+  isRolePreview,
+  ROLE_PREVIEW_COOKIE,
+  USER_PREVIEW_COOKIE,
+  type RolePreview,
+} from '@/lib/role-preview'
 
 export interface UserPermissions {
   canAccessKonta: boolean
@@ -82,11 +88,14 @@ interface PermissionKeyRow {
   permission_key: string | null
 }
 
-interface AuthenticatedPermissionState {
+export interface AuthenticatedPermissionState {
   userId: string
   permissions: UserPermissions
   previewRole: RolePreview | null
+  previewUserId: string | null
+  previewLabel: string | null
   actualRole: string | null
+  tenantId: string | null
 }
 
 const EMPTY_PERMISSIONS: UserPermissions = {
@@ -226,7 +235,7 @@ async function buildUserPermissions(userId: string, role: string | null): Promis
   }
 }
 
-export const getAuthenticatedUserPermissionState = cache(async (): Promise<AuthenticatedPermissionState | null> => {
+export const getActualAuthenticatedPermissionState = cache(async (): Promise<AuthenticatedPermissionState | null> => {
   const supabase = await createActionClient()
 
   const {
@@ -237,21 +246,65 @@ export const getAuthenticatedUserPermissionState = cache(async (): Promise<Authe
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, tenant_id')
     .eq('id', user.id)
     .single()
 
   const permissions = await buildUserPermissions(user.id, profile?.role || null)
+
+  return {
+    userId: user.id,
+    permissions,
+    previewRole: null,
+    previewUserId: null,
+    previewLabel: null,
+    actualRole: profile?.role || null,
+    tenantId: profile?.tenant_id || null,
+  }
+})
+
+export const getAuthenticatedUserPermissionState = cache(async (): Promise<AuthenticatedPermissionState | null> => {
+  const actualState = await getActualAuthenticatedPermissionState()
+  if (!actualState) return null
+
+  const cookieStore = await cookies()
+  const previewUserId = actualState.permissions.canPreviewRoles
+    ? cookieStore.get(USER_PREVIEW_COOKIE)?.value ?? null
+    : null
+
+  if (previewUserId) {
+    const admin = getAdminClient()
+    const { data: targetProfile } = await admin
+      .from('profiles')
+      .select('id, full_name, role, tenant_id, deleted_at')
+      .eq('id', previewUserId)
+      .is('deleted_at', null)
+      .maybeSingle()
+
+    const sameTenant = actualState.actualRole === 'super_admin'
+      || Boolean(actualState.tenantId && targetProfile?.tenant_id === actualState.tenantId)
+
+    if (targetProfile && sameTenant) {
+      const { data: targetAuth } = await admin.auth.admin.getUserById(targetProfile.id)
+      return {
+        ...actualState,
+        permissions: await buildUserPermissions(targetProfile.id, targetProfile.role),
+        previewUserId: targetProfile.id,
+        previewLabel: targetProfile.full_name || targetAuth?.user?.email || targetProfile.id.slice(0, 8),
+      }
+    }
+  }
+
+  const permissions = actualState.permissions
   const previewValue = (await cookies()).get(ROLE_PREVIEW_COOKIE)?.value
   const previewRole = permissions.canPreviewRoles && isRolePreview(previewValue)
     ? previewValue
     : null
 
   return {
-    userId: user.id,
+    ...actualState,
     permissions: previewRole ? applyRolePreview(permissions, previewRole) : permissions,
     previewRole,
-    actualRole: profile?.role || null,
   }
 })
 
