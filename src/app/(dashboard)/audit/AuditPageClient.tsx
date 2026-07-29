@@ -432,12 +432,12 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#242725] dark:bg-[#070807] dark:text-[#eceeed]">
+    <div className="min-h-screen bg-white text-[#242725] dark:bg-[#070807] dark:text-[#eceeed] xl:h-screen xl:overflow-hidden">
       <MobileNav currentPath="/audit" showKonta={canAccessKonta} showAudit showSettings={canAccessSettings} />
 
-      <div className="mx-auto grid min-h-screen w-full max-w-[1540px] xl:grid-cols-[minmax(0,1fr)_340px]">
-        <main className="min-w-0 px-5 py-8 sm:px-10 lg:px-14">
-          <header className="flex items-end justify-between border-b border-black/[0.12] pb-7 dark:border-white/[0.1]">
+      <div className="mx-auto grid min-h-screen w-full max-w-[1540px] xl:h-screen xl:min-h-0 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <main className="min-w-0 px-5 py-8 sm:px-10 lg:px-14 xl:flex xl:min-h-0 xl:flex-col xl:overflow-hidden">
+          <header className="flex shrink-0 items-end justify-between border-b border-black/[0.12] pb-7 dark:border-white/[0.1]">
             <div>
               <Link
                 href="/dashboard"
@@ -451,7 +451,7 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
             <ThemeToggle />
           </header>
 
-          <section className="pt-8">
+          <section className="audit-log-scroll pt-8 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-4">
             {loading ? (
               <div className="space-y-8">
                 {Array.from({ length: 7 }, (_, index) => (
@@ -575,8 +575,8 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
           </section>
         </main>
 
-        <aside className="border-l border-black/[0.12] bg-[#f5f7f6] px-7 py-8 dark:border-white/[0.09] dark:bg-[#0b0c0b]">
-          <div className="sticky top-8">
+        <aside className="border-l border-black/[0.12] bg-[#f5f7f6] px-7 py-8 dark:border-white/[0.09] dark:bg-[#0b0c0b] xl:h-screen">
+          <div>
             <div className="flex items-start justify-between">
               <h2 className="text-[28px] font-semibold leading-none">Filters</h2>
               {hasFilters && (

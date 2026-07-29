@@ -417,37 +417,32 @@
   --module-accent: #668875;
   --module-soft: #edf4ef;
   border-radius: 13px;
-  transform: perspective(900px) rotateX(2.5deg) rotateY(-1deg) translateZ(0);
+  transform: perspective(1000px) rotateX(1.6deg) rotateY(-1.2deg) translateZ(0);
   transform-origin: center bottom;
-  transition: transform 180ms ease, filter 180ms ease;
-  filter: drop-shadow(0 13px 15px rgba(25, 31, 29, 0.10));
+  transition: transform 200ms ease;
   isolation: isolate;
 }
 
 .warehouse-module-tile::before {
   content: '';
   position: absolute;
-  left: 5px;
-  right: 5px;
-  bottom: -7px;
-  height: 9px;
-  border: 1px solid rgba(25, 31, 29, 0.08);
-  border-top: 0;
-  border-radius: 0 0 11px 11px;
-  background: linear-gradient(180deg, #e3e5e4, #d9dcda);
+  inset: 5px -5px -6px 5px;
+  border: 1px solid rgba(25, 31, 29, 0.055);
+  border-radius: 12px;
+  background: linear-gradient(145deg, #edf0ee, #dde1df);
   z-index: -1;
 }
 
 .warehouse-module-tile::after {
   content: '';
   position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: -14px;
-  height: 10px;
+  left: 9%;
+  right: 4%;
+  bottom: -18px;
+  height: 24px;
   border-radius: 50%;
-  background: rgba(23, 29, 27, 0.11);
-  filter: blur(7px);
+  background: rgba(23, 29, 27, 0.13);
+  filter: blur(14px);
   z-index: -2;
 }
 
@@ -462,7 +457,8 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 249, 0.98));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
-    0 1px 1px rgba(25, 31, 29, 0.03);
+    0 1px 2px rgba(25, 31, 29, 0.035),
+    0 10px 28px rgba(25, 31, 29, 0.075);
 }
 
 .warehouse-module-tile.is-root .warehouse-module-surface {
@@ -470,7 +466,8 @@
   background: linear-gradient(180deg, #ffffff, #f6f7f6);
   box-shadow:
     inset 0 1px 0 #ffffff,
-    0 0 0 3px rgba(25, 31, 29, 0.025);
+    0 1px 2px rgba(25, 31, 29, 0.04),
+    0 12px 30px rgba(25, 31, 29, 0.085);
 }
 
 .warehouse-module-icon {
@@ -487,8 +484,7 @@
 
 .warehouse-module-tile:hover {
   z-index: 35;
-  transform: perspective(900px) rotateX(1deg) rotateY(0deg) translateY(-5px) translateZ(12px);
-  filter: drop-shadow(0 18px 19px rgba(25, 31, 29, 0.13));
+  transform: perspective(1000px) rotateX(0.6deg) rotateY(-0.3deg) translateY(-4px) translateZ(10px);
 }
 
 .ecosystem-service-node {
@@ -503,6 +499,16 @@
     inset 0 1px 0 #ffffff;
   transform: perspective(700px) rotateX(1.5deg);
   transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+a.ecosystem-service-node {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+a.ecosystem-service-node:focus-visible {
+  outline: 2px solid rgba(84, 168, 111, 0.55);
+  outline-offset: 3px;
 }
 
 .ecosystem-service-node:hover {
@@ -561,12 +567,12 @@
 }
 
 .dark .warehouse-module-tile {
-  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.42));
+  filter: none;
 }
 
 .dark .warehouse-module-tile::before {
   border-color: rgba(255, 255, 255, 0.07);
-  background: linear-gradient(180deg, #1b1c1b, #111211);
+  background: linear-gradient(145deg, #202220, #101110);
 }
 
 .dark .warehouse-module-tile::after {
@@ -579,7 +585,8 @@
   background: linear-gradient(180deg, #151615, #0f100f);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.065),
-    0 1px 1px rgba(0, 0, 0, 0.4);
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 13px 32px rgba(0, 0, 0, 0.38);
 }
 
 .dark .warehouse-module-icon {
@@ -589,7 +596,7 @@
 }
 
 .dark .warehouse-module-tile:hover {
-  filter: drop-shadow(0 20px 22px rgba(0, 0, 0, 0.52));
+  filter: none;
 }
 
 .dark .ecosystem-service-node {
@@ -626,6 +633,36 @@
   border: 1px solid color-mix(in srgb, var(--module-accent) 25%, transparent);
   background: color-mix(in srgb, var(--module-accent) 17%, #111111);
   color: color-mix(in srgb, var(--module-accent) 66%, white);
+}
+
+.audit-log-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(103, 112, 108, 0.28) transparent;
+  scrollbar-gutter: stable;
+}
+
+.audit-log-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+
+.audit-log-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.audit-log-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(103, 112, 108, 0.3);
+  background-clip: padding-box;
+}
+
+.dark .audit-log-scroll {
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.dark .audit-log-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  background-clip: padding-box;
 }
 
 @media (max-width: 1023px) {

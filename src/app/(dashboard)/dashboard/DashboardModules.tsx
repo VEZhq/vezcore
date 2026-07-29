@@ -58,9 +58,11 @@ type InfraData = {
   }>
   deploy: {
     status: DeployStatus
+    sha: string | null
     shortSha: string | null
     message: string
     completedAt: string | null
+    url: string | null
   }
   resources?: InfrastructureResource[]
 }
@@ -106,6 +108,7 @@ type ServiceNodeDefinition = {
   left: number
   top: number
   width: number
+  href?: string
 }
 
 const moduleStatusSources: Record<DashboardModuleName, { checks: string[]; deploy?: boolean }> = {
@@ -147,12 +150,12 @@ const moduleLayout: Record<DashboardModuleName, { left: number; top: number; wid
 }
 
 const serviceNodes: ServiceNodeDefinition[] = [
-  { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 104, top: 210, width: 140 },
+  { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 104, top: 210, width: 140, href: 'https://api.vezvision.com/healthz' },
   { id: 'database', label: 'Core DB', checkKey: 'database', owner: 'vez', icon: Database, left: 342, top: 280, width: 132 },
   { id: 'deploy', label: 'Deploy', deploy: true, owner: 'vez', icon: Rocket, left: 746, top: 280, width: 126 },
-  { id: 'labApi', label: 'Lab API', checkKey: 'labApi', owner: 'vezLabs', icon: Server, left: 806, top: 28, width: 132 },
-  { id: 'minio', label: 'MinIO', checkKey: 'minio', owner: 'vezLabs', icon: HardDrive, left: 900, top: 280, width: 126 },
-  { id: 'monitor', label: 'Monitor', checkKey: 'monitor', owner: 'vezLabs', icon: Activity, left: 1202, top: 102, width: 132 },
+  { id: 'labApi', label: 'Lab API', checkKey: 'labApi', owner: 'vezLabs', icon: Server, left: 806, top: 28, width: 132, href: 'https://api.vezlabs.dev/healthz' },
+  { id: 'minio', label: 'MinIO', checkKey: 'minio', owner: 'vezLabs', icon: HardDrive, left: 900, top: 280, width: 126, href: 'https://s3-dev.vezlabs.dev' },
+  { id: 'monitor', label: 'Monitor', checkKey: 'monitor', owner: 'vezLabs', icon: Activity, left: 1202, top: 102, width: 132, href: 'https://monitor.vezlabs.dev' },
 ]
 
 function getWorstStatus(statuses: HealthStatus[]): HealthStatus {
@@ -253,6 +256,16 @@ function getServiceNodeDetail(node: ServiceNodeDefinition, infraData: InfraData 
   const check = infraData.checks[node.checkKey ?? '']
   if (!check) return 'Brak danych'
   return check.latencyMs ? `${check.detail} · ${check.latencyMs}ms` : check.detail
+}
+
+function getServiceNodeHref(node: ServiceNodeDefinition, infraData: InfraData | null) {
+  if (node.id === 'deploy') {
+    if (infraData?.deploy.sha) {
+      return `https://github.com/VEZhq/vezcore/commit/${infraData.deploy.sha}`
+    }
+    return infraData?.deploy.url ?? undefined
+  }
+  return node.href
 }
 
 export function DashboardModules({
@@ -634,14 +647,10 @@ export function DashboardModules({
                 const nodeStatus = serviceStatusById[node.id]
                 const status = statusMeta[nodeStatus]
                 const detail = getServiceNodeDetail(node, infraData)
+                const href = getServiceNodeHref(node, infraData)
 
-                return (
-                  <div
-                    key={node.id}
-                    className="ecosystem-service-node absolute z-30 flex items-center gap-2.5"
-                    style={{ left: node.left, top: node.top, width: node.width }}
-                    title={`${node.label}: ${detail}`}
-                  >
+                const nodeContent = (
+                  <>
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-[#f1f2f1] text-[#717876] dark:bg-white/[0.07] dark:text-[#a8aeab]">
                       <Icon className="h-3.5 w-3.5" />
                     </span>
@@ -652,6 +661,30 @@ export function DashboardModules({
                       </span>
                       <span className="mt-0.5 block truncate text-[8px] text-[#858c89] dark:text-[#858b88]">{detail}</span>
                     </span>
+                    {href && <ArrowUpRight className="h-3 w-3 shrink-0 text-[#9aa19e] transition-transform group-hover/service:-translate-y-0.5 group-hover/service:translate-x-0.5" />}
+                  </>
+                )
+
+                return href ? (
+                  <a
+                    key={node.id}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ecosystem-service-node group/service absolute z-30 flex items-center gap-2.5"
+                    style={{ left: node.left, top: node.top, width: node.width }}
+                    title={`${node.label}: ${detail}. Otwórz`}
+                  >
+                    {nodeContent}
+                  </a>
+                ) : (
+                  <div
+                    key={node.id}
+                    className="ecosystem-service-node absolute z-30 flex items-center gap-2.5"
+                    style={{ left: node.left, top: node.top, width: node.width }}
+                    title={`${node.label}: ${detail}`}
+                  >
+                    {nodeContent}
                   </div>
                 )
               })}
