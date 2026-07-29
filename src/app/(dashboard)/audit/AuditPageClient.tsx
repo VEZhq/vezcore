@@ -1,12 +1,15 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { LucideIcon } from 'lucide-react'
 import {
   AlertTriangle,
+  CalendarDays,
+  Check,
   CheckCircle2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -77,6 +80,248 @@ function formatDetailValue(value: unknown) {
   if (typeof value === 'string') return value
   if (typeof value === 'number' || typeof value === 'boolean') return String(value)
   return JSON.stringify(value)
+}
+
+function toIsoDate(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function parseIsoDate(value: string) {
+  if (!value) return null
+  const date = new Date(`${value}T12:00:00`)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+function formatFilterDate(value: string) {
+  const date = parseIsoDate(value)
+  return date
+    ? new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date)
+    : 'Wybierz datę'
+}
+
+function DateRangeFilter({
+  startDate,
+  endDate,
+  onStartChange,
+  onEndChange,
+}: {
+  startDate: string
+  endDate: string
+  onStartChange: (value: string) => void
+  onEndChange: (value: string) => void
+}) {
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [activeField, setActiveField] = useState<'start' | 'end' | null>(null)
+  const [visibleMonth, setVisibleMonth] = useState(() => new Date())
+
+  useEffect(() => {
+    const close = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setActiveField(null)
+    }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [])
+
+  const openCalendar = (field: 'start' | 'end') => {
+    const selected = parseIsoDate(field === 'start' ? startDate : endDate)
+    setVisibleMonth(selected ?? new Date())
+    setActiveField((current) => current === field ? null : field)
+  }
+
+  const firstDay = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1)
+  const gridStart = new Date(firstDay)
+  gridStart.setDate(firstDay.getDate() - ((firstDay.getDay() + 6) % 7))
+  const days = Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(gridStart)
+    date.setDate(gridStart.getDate() + index)
+    return date
+  })
+  const selectedValue = activeField === 'start' ? startDate : endDate
+  const today = toIsoDate(new Date())
+
+  const selectDate = (date: Date) => {
+    const value = toIsoDate(date)
+    if (activeField === 'start') {
+      onStartChange(value)
+      if (endDate && value > endDate) onEndChange(value)
+    } else if (activeField === 'end') {
+      onEndChange(value)
+      if (startDate && value < startDate) onStartChange(value)
+    }
+    setActiveField(null)
+  }
+
+  const applyPreset = (daysBack: number) => {
+    const end = new Date()
+    const start = new Date()
+    start.setDate(start.getDate() - daysBack)
+    onStartChange(toIsoDate(start))
+    onEndChange(toIsoDate(end))
+    setActiveField(null)
+  }
+
+  return (
+    <div ref={rootRef} className="relative">
+      <div className="grid grid-cols-3 gap-1.5">
+        {[
+          ['Dzisiaj', 0],
+          ['7 dni', 6],
+          ['30 dni', 29],
+        ].map(([label, days]) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => applyPreset(Number(days))}
+            className="h-8 border border-black/[0.08] bg-white text-[10px] text-[#68706d] transition-colors hover:border-[#789483]/45 hover:text-[#35423b]"
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        {([
+          ['start', 'Od', startDate],
+          ['end', 'Do', endDate],
+        ] as const).map(([field, label, value]) => (
+          <button
+            key={field}
+            type="button"
+            onClick={() => openCalendar(field)}
+            className={`flex min-w-0 items-center gap-2 border bg-white px-2.5 py-2 text-left transition-colors ${
+              activeField === field ? 'border-[#789483]' : 'border-black/[0.12] hover:border-black/[0.22]'
+            }`}
+          >
+            <CalendarDays className="h-3.5 w-3.5 shrink-0 text-[#789483]" />
+            <span className="min-w-0">
+              <span className="block text-[8px] uppercase text-[#979d9a]">{label}</span>
+              <span className="block truncate text-[10px] font-medium text-[#3d4340]">{formatFilterDate(value)}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {activeField && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 border border-black/[0.12] bg-white p-3 shadow-[0_18px_45px_rgba(29,36,32,0.16)]">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1))}
+              className="flex h-8 w-8 items-center justify-center text-[#717976] hover:bg-[#f2f4f3]"
+              aria-label="Poprzedni miesiąc"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div className="text-center">
+              <p className="text-[11px] font-semibold capitalize">
+                {new Intl.DateTimeFormat('pl-PL', { month: 'long', year: 'numeric' }).format(visibleMonth)}
+              </p>
+              <p className="text-[8px] text-[#979d9a]">{activeField === 'start' ? 'Data początkowa' : 'Data końcowa'}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1))}
+              className="flex h-8 w-8 items-center justify-center text-[#717976] hover:bg-[#f2f4f3]"
+              aria-label="Następny miesiąc"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="mt-2 grid grid-cols-7 text-center text-[8px] font-medium uppercase text-[#9ba19f]">
+            {['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'].map((day) => (
+              <span key={day} className="py-1">{day}</span>
+            ))}
+          </div>
+          <div className="grid grid-cols-7">
+            {days.map((date) => {
+              const value = toIsoDate(date)
+              const inMonth = date.getMonth() === visibleMonth.getMonth()
+              const selected = value === selectedValue
+              const inRange = startDate && endDate && value >= startDate && value <= endDate
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => selectDate(date)}
+                  className={`relative h-8 text-[10px] transition-colors ${
+                    selected
+                      ? 'bg-[#627f6e] font-semibold text-white'
+                      : inRange
+                        ? 'bg-[#edf3ef] text-[#405449] hover:bg-[#e1ebe4]'
+                        : inMonth
+                          ? 'text-[#333936] hover:bg-[#f0f3f1]'
+                          : 'text-[#c0c5c2] hover:bg-[#f6f7f6]'
+                  } ${value === today && !selected ? 'font-semibold ring-1 ring-inset ring-[#8ca494]' : ''}`}
+                >
+                  {date.getDate()}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function EventTypeFilter({
+  actions,
+  value,
+  onChange,
+}: {
+  actions: string[]
+  value: string
+  onChange: (value: string) => void
+}) {
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    const close = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [])
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className="flex h-10 w-full items-center justify-between border border-black/[0.12] bg-white px-3 text-left text-[11px] text-[#414744] hover:border-black/[0.22]"
+      >
+        <span className="flex min-w-0 items-center gap-2">
+          <span className={`h-2 w-2 shrink-0 rounded-full ${value ? getMeta(value).dot : 'bg-[#a9afad]'}`} />
+          <span className="truncate">{value ? getMeta(value).label : 'Wszystkie zdarzenia'}</span>
+        </span>
+        <ChevronDown className={`h-3.5 w-3.5 text-[#8d9491] transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-72 overflow-y-auto border border-black/[0.12] bg-white py-1 shadow-[0_16px_38px_rgba(29,36,32,0.14)]">
+          {[['', 'Wszystkie zdarzenia'], ...actions.map((action) => [action, getMeta(action).label])].map(([action, label]) => (
+            <button
+              key={action || 'all'}
+              type="button"
+              onClick={() => {
+                onChange(action)
+                setOpen(false)
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[10px] text-[#626966] hover:bg-[#f2f4f3]"
+            >
+              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${action ? getMeta(action).dot : 'bg-[#a9afad]'}`} />
+              <span className="min-w-0 flex-1 truncate">{label}</span>
+              {value === action && <Check className="h-3.5 w-3.5 shrink-0 text-[#668976]" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function AuditPageClient({ canAccessKonta, canAccessSettings }: AuditPageClientProps) {
@@ -343,104 +588,103 @@ export default function AuditPageClient({ canAccessKonta, canAccessSettings }: A
               )}
             </div>
 
-            <section className="mt-7">
-              <h3 className="text-[18px] font-semibold">Filter by time</h3>
-              <label className="mt-3 block">
-                <span className="mb-2 block text-[13px] font-medium">From</span>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(event) => {
-                    setStartDate(event.target.value)
-                    setPage(1)
-                  }}
-                  className="h-10 w-full border border-black/[0.16] bg-white px-3 text-[12px] outline-none focus:border-[#708f79]"
-                />
-              </label>
-              <label className="mt-4 block">
-                <span className="mb-2 block text-[13px] font-medium">To</span>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(event) => {
-                    setEndDate(event.target.value)
-                    setPage(1)
-                  }}
-                  className="h-10 w-full border border-black/[0.16] bg-white px-3 text-[12px] outline-none focus:border-[#708f79]"
-                />
-              </label>
-              <button
-                type="button"
-                onClick={() => void fetchLogs()}
-                className="mt-4 h-10 bg-[#313634] px-4 text-[12px] font-medium text-white hover:bg-[#202422]"
-              >
-                Filter
-              </button>
-            </section>
-
-            <section className="mt-7">
-              <h3 className="border-b border-black/[0.12] pb-3 text-[18px] font-semibold">Filter by users</h3>
-              <button
-                type="button"
-                onClick={() => {
-                  setUserFilter('')
-                  setPage(1)
-                }}
-                className={`block w-full border-b border-black/[0.10] px-3 py-3 text-left text-[12px] ${
-                  userFilter === '' ? 'font-semibold text-[#26302b]' : 'text-[#668976] hover:bg-white/70'
-                }`}
-              >
-                Wszyscy użytkownicy
-              </button>
-              {users.map((user) => (
-                <button
-                  key={user.id}
-                  type="button"
-                  onClick={() => {
-                    setUserFilter(user.id)
-                    setPage(1)
-                  }}
-                  className={`block w-full border-b border-black/[0.10] px-3 py-3 text-left text-[12px] ${
-                    userFilter === user.id ? 'font-semibold text-[#26302b]' : 'text-[#668976] hover:bg-white/70'
-                  }`}
-                >
-                  {user.label}
-                </button>
-              ))}
-            </section>
-
-            <section className="mt-7">
-              <h3 className="border-b border-black/[0.12] pb-3 text-[18px] font-semibold">Filter by event type</h3>
-              <button
-                type="button"
-                onClick={() => {
-                  setActionFilter('')
-                  setPage(1)
-                }}
-                className={`block w-full border-b border-black/[0.10] px-3 py-3 text-left text-[12px] ${
-                  actionFilter === '' ? 'font-semibold text-[#26302b]' : 'text-[#668976] hover:bg-white/70'
-                }`}
-              >
-                Wszystkie zdarzenia
-              </button>
-              <div className="max-h-[420px] overflow-y-auto">
-                {actions.map((action) => (
+            <section className="mt-7 border-t border-black/[0.10] pt-5">
+              <div className="mb-3 flex items-end justify-between gap-3">
+                <div>
+                  <h3 className="text-[15px] font-semibold">Filter by time</h3>
+                  <p className="mt-0.5 text-[9px] text-[#929896]">Zakres aktualizuje oś automatycznie</p>
+                </div>
+                {(startDate || endDate) && (
                   <button
-                    key={action}
                     type="button"
                     onClick={() => {
-                      setActionFilter(action)
+                      setStartDate('')
+                      setEndDate('')
                       setPage(1)
                     }}
-                    className={`block w-full border-b border-black/[0.10] px-3 py-3 text-left text-[12px] ${
-                      actionFilter === action ? 'font-semibold text-[#26302b]' : 'text-[#668976] hover:bg-white/70'
+                    className="text-[9px] text-[#789483] hover:text-[#43564a]"
+                  >
+                    Wyczyść
+                  </button>
+                )}
+              </div>
+              <DateRangeFilter
+                startDate={startDate}
+                endDate={endDate}
+                onStartChange={(value) => {
+                  setStartDate(value)
+                  setPage(1)
+                }}
+                onEndChange={(value) => {
+                  setEndDate(value)
+                  setPage(1)
+                }}
+              />
+            </section>
+
+            <section className="mt-7 border-t border-black/[0.10] pt-5">
+              <h3 className="text-[15px] font-semibold">Filter by users</h3>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUserFilter('')
+                    setPage(1)
+                  }}
+                  className={`inline-flex h-8 items-center gap-1.5 border px-2.5 text-[10px] ${
+                    userFilter === ''
+                      ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a]'
+                      : 'border-black/[0.08] bg-white text-[#747b78] hover:border-black/[0.18]'
+                  }`}
+                >
+                  <Users className="h-3 w-3" />
+                  Wszyscy
+                </button>
+                {users.map((user) => (
+                  <button
+                    key={user.id}
+                    type="button"
+                    onClick={() => {
+                      setUserFilter(user.id)
+                      setPage(1)
+                    }}
+                    className={`inline-flex h-8 max-w-full items-center gap-1.5 border px-2.5 text-[10px] ${
+                      userFilter === user.id
+                        ? 'border-[#789483]/45 bg-[#eaf0ec] font-medium text-[#43564a]'
+                        : 'border-black/[0.08] bg-white text-[#747b78] hover:border-black/[0.18]'
                     }`}
                   >
-                    {getMeta(action).label}
+                    <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#edf1ef] text-[8px] font-semibold text-[#668976]">
+                      {user.label.slice(0, 1).toUpperCase()}
+                    </span>
+                    <span className="truncate">{user.label}</span>
                   </button>
                 ))}
               </div>
             </section>
+
+            <section className="mt-7 border-t border-black/[0.10] pt-5">
+              <h3 className="mb-3 text-[15px] font-semibold">Filter by event type</h3>
+              <EventTypeFilter
+                actions={actions}
+                value={actionFilter}
+                onChange={(value) => {
+                  setActionFilter(value)
+                  setPage(1)
+                }}
+              />
+            </section>
+
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="mt-7 flex h-9 w-full items-center justify-center gap-2 border border-black/[0.10] bg-white text-[10px] text-[#626966] hover:border-[#b56b6b]/35 hover:text-[#a44f4f]"
+              >
+                <X className="h-3.5 w-3.5" />
+                Wyczyść wszystkie filtry
+              </button>
+            )}
           </div>
         </aside>
       </div>
