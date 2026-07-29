@@ -86,32 +86,32 @@ export default async function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#f1f3f2] text-[#242725] dark:bg-[#070807] dark:text-[#eceeed]">
-      <header className="border-b border-black/[0.08] bg-white/60 dark:border-white/[0.08] dark:bg-[#0b0c0b]/95">
-        <div className="mx-auto flex h-14 w-full max-w-[1320px] items-center px-5 sm:px-8">
+      <header className="border-b border-black/[0.07] bg-white/45 dark:border-white/[0.08] dark:bg-[#090a09]">
+        <div className="mx-auto flex h-12 w-full max-w-[1180px] items-center px-4 sm:px-6">
           <Image
             src="/logo/vezcore_logo_black_full.svg"
             alt="VEZcore"
-            width={112}
+            width={104}
             height={42}
-            className="h-auto w-[112px] dark:hidden"
+            className="h-auto w-[104px] dark:hidden"
             priority
           />
           <Image
             src="/logo/vezcore_logo_white_full.svg"
             alt="VEZcore"
-            width={112}
+            width={104}
             height={42}
-            className="hidden h-auto w-[112px] dark:block"
+            className="hidden h-auto w-[104px] dark:block"
             priority
           />
-          <span className="mx-4 hidden h-5 w-px bg-black/[0.09] sm:block dark:bg-white/[0.1]" />
-          <span className="hidden text-[10px] font-medium text-[#747b78] sm:block dark:text-[#8f9692]">Profil konta</span>
+          <span className="mx-3 h-4 w-px bg-black/[0.08] dark:bg-white/[0.1]" />
+          <span className="text-[10px] font-medium text-[#747b78] dark:text-[#8f9692]">Konto</span>
 
           <div className="ml-auto flex items-center gap-2">
             <ThemeToggle />
             <Link
               href="/dashboard"
-              className="flex h-8 items-center gap-2 rounded-[8px] border border-black/[0.07] bg-white/75 px-3 text-[11px] font-medium text-[#626966] transition-colors hover:bg-white hover:text-black dark:border-white/[0.09] dark:bg-white/[0.05] dark:text-[#aab0ad] dark:hover:bg-white/[0.09] dark:hover:text-white"
+              className="flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-[10px] font-medium text-[#626966] transition-colors hover:bg-black/[0.04] hover:text-black dark:text-[#aab0ad] dark:hover:bg-white/[0.07] dark:hover:text-white"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Dashboard
@@ -120,51 +120,66 @@ export default async function ProfilePage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-[1320px] px-5 py-8 sm:px-8 sm:py-10">
-        <div className="flex flex-col gap-2 border-b border-black/[0.1] pb-6 dark:border-white/[0.09]">
-          <p className="text-[9px] font-semibold uppercase text-[#7b827f] dark:text-[#8f9692]">Konto i bezpieczeństwo</p>
-          <h1 className="text-[30px] font-semibold leading-tight tracking-normal text-[#242725] dark:text-[#f2f3f2]">
-            Twój profil
-          </h1>
-        </div>
-
-        <section className="grid gap-7 border-b border-black/[0.1] py-7 dark:border-white/[0.09] lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-            <AvatarUpload currentAvatarUrl={profile?.avatar_url ?? null} userId={user.id} />
-            <div className="min-w-0">
-              <h2 className="truncate text-[24px] font-semibold text-[#252927] dark:text-[#f0f2f1]">{displayName}</h2>
-              <p className="mt-1 truncate font-mono text-[11px] text-[#747b78] dark:text-[#8d9490]">{user.email}</p>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="rounded-[6px] border border-black/[0.09] bg-white/60 px-2 py-1 text-[9px] font-medium uppercase text-[#626966] dark:border-white/[0.09] dark:bg-white/[0.045] dark:text-[#a2a8a5]">
-                  {role}
-                </span>
-                {tenant && (
-                  <span className="rounded-[6px] border border-black/[0.09] px-2 py-1 text-[9px] text-[#747b78] dark:border-white/[0.09] dark:text-[#909693]">
-                    {tenant.name}
-                  </span>
-                )}
-              </div>
+      <main className="mx-auto w-full max-w-[1180px] px-4 py-6 sm:px-6 sm:py-8">
+        <section className="border-b border-black/[0.1] pb-8 dark:border-white/[0.09]">
+          <div className="mb-7 flex items-center justify-between">
+            <div>
+              <p className="text-[9px] font-semibold uppercase text-[#808783] dark:text-[#8f9692]">Profil</p>
+              <p className="mt-1 text-[11px] text-[#777e7a] dark:text-[#8e9591]">
+                Tożsamość, dostęp i bezpieczeństwo konta
+              </p>
             </div>
+            <span className="hidden font-mono text-[9px] text-[#9aa09d] sm:block">
+              Utworzono {formatDate(user.created_at)}
+            </span>
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-black/[0.08] border-y border-black/[0.08] py-4 dark:divide-white/[0.08] dark:border-white/[0.08]">
-            {[
-              ['Email', user.email_confirmed_at ? 'Potwierdzony' : 'Niepotwierdzony', Boolean(user.email_confirmed_at)],
-              ['2FA', has2FA ? 'Włączone' : 'Wyłączone', has2FA],
-              ['Konto', 'Aktywne', true],
-            ].map(([label, value, positive]) => (
-              <div key={String(label)} className="px-4 first:pl-0 last:pr-0">
-                <p className="text-[9px] uppercase text-[#969c99]">{label}</p>
-                <p className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-[#454b48] dark:text-[#c6cac8]">
-                  <span className={`h-1.5 w-1.5 rounded-full ${positive ? 'bg-emerald-500' : 'bg-amber-400'}`} />
-                  {String(value)}
-                </p>
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+              <AvatarUpload
+                currentAvatarUrl={profile?.avatar_url ?? null}
+                userId={user.id}
+                fallbackLabel={displayName}
+              />
+              <div className="min-w-0">
+                <h1 className="truncate text-[28px] font-semibold leading-tight text-[#252927] dark:text-[#f0f2f1]">
+                  {displayName}
+                </h1>
+                <p className="mt-1.5 truncate font-mono text-[11px] text-[#747b78] dark:text-[#8d9490]">{user.email}</p>
+                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[9px]">
+                  <span className="font-semibold uppercase text-[#626966] dark:text-[#a2a8a5]">{role}</span>
+                  {tenant && (
+                    <span className="flex items-center gap-1.5 text-[#747b78] dark:text-[#909693]">
+                      <Building2 className="h-3 w-3" />
+                      {tenant.name}
+                    </span>
+                  )}
+                </div>
               </div>
-            ))}
+            </div>
+
+            <div className="border-l border-black/[0.08] pl-0 dark:border-white/[0.08] lg:pl-7">
+              {[
+                ['Adres e-mail', user.email_confirmed_at ? 'Potwierdzony' : 'Wymaga potwierdzenia', Boolean(user.email_confirmed_at)],
+                ['Weryfikacja 2FA', has2FA ? 'Aktywna' : 'Wyłączona', has2FA],
+                ['Dostęp do konta', 'Aktywny', true],
+              ].map(([label, value, positive]) => (
+                <div
+                  key={String(label)}
+                  className="flex items-center justify-between border-b border-black/[0.07] py-3 first:pt-0 last:border-b-0 last:pb-0 dark:border-white/[0.07]"
+                >
+                  <span className="text-[10px] text-[#7b827e] dark:text-[#909692]">{label}</span>
+                  <span className="flex items-center gap-2 text-[10px] font-medium text-[#3f4542] dark:text-[#c7cbc9]">
+                    <span className={`h-1.5 w-1.5 rounded-full ${positive ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                    {String(value)}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        <div className="grid gap-10 py-8 lg:grid-cols-[330px_minmax(0,1fr)]">
+        <div className="grid gap-10 py-8 lg:grid-cols-[300px_minmax(0,1fr)]">
           <aside>
             <div className="flex items-center justify-between border-b border-black/[0.1] pb-3 dark:border-white/[0.09]">
               <h2 className="text-[14px] font-semibold">Dane konta</h2>

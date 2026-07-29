@@ -603,8 +603,7 @@ a.ecosystem-service-node:focus-visible {
 }
 
 .dark .warehouse-module-tile::before {
-  border-color: rgba(255, 255, 255, 0.07);
-  background: linear-gradient(180deg, #202220, #0d0f0e);
+  content: none;
 }
 
 .dark .warehouse-module-surface,
@@ -615,9 +614,8 @@ a.ecosystem-service-node:focus-visible {
     linear-gradient(165deg, #171918 0%, #121413 58%, #0e100f 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.075),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
-    0 1px 2px rgba(0, 0, 0, 0.5),
-    0 8px 18px rgba(0, 0, 0, 0.34);
+    inset 0 -1px 0 rgba(0, 0, 0, 0.42),
+    0 1px 0 rgba(0, 0, 0, 0.5);
 }
 
 .dark .warehouse-module-icon {
@@ -630,15 +628,13 @@ a.ecosystem-service-node:focus-visible {
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(17, 18, 17, 0.985);
   box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.34),
-    0 2px 0 #060706,
+    0 1px 0 rgba(0, 0, 0, 0.58),
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
 .dark .ecosystem-service-node:hover {
   box-shadow:
-    0 9px 18px rgba(0, 0, 0, 0.44),
-    0 2px 0 #060706,
+    0 1px 0 rgba(0, 0, 0, 0.58),
     inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 

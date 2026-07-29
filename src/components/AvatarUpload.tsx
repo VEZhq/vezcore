@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import Image from 'next/image'
+import { useRef, useState } from 'react'
 import { Camera, Upload, X, RefreshCw } from 'lucide-react'
 import { uploadAvatar, removeAvatar } from '@/lib/actions/avatar'
 import { useConfirm } from '@/components/ConfirmDialog'
@@ -10,15 +9,24 @@ import { useCSRFToken } from '@/hooks/useCSRFToken'
 interface AvatarUploadProps {
   currentAvatarUrl: string | null
   userId: string
+  fallbackLabel?: string
 }
 
-export function AvatarUpload({ currentAvatarUrl, userId }: AvatarUploadProps) {
+export function AvatarUpload({ currentAvatarUrl, userId, fallbackLabel = 'VEZ' }: AvatarUploadProps) {
   void userId
   const { confirm } = useConfirm()
   const { token: csrfToken } = useCSRFToken()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null)
+  const initials = fallbackLabel
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -79,24 +87,37 @@ export function AvatarUpload({ currentAvatarUrl, userId }: AvatarUploadProps) {
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <div className="relative">
-        {currentAvatarUrl ? (
-          <Image
+    <div className="flex flex-col gap-3 sm:items-start">
+      <div className="group relative h-24 w-24 shrink-0">
+        {currentAvatarUrl && failedImageUrl !== currentAvatarUrl ? (
+          // Avatar hosts are dynamic and should not depend on Next Image's hostname allowlist.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={currentAvatarUrl}
-            alt="Awatar"
-            width={64}
-            height={64}
-            className="h-20 w-20 rounded-[12px] object-cover ring-1 ring-black/[0.08] dark:ring-white/[0.1]"
+            alt={`Awatar ${fallbackLabel}`}
+            onError={() => setFailedImageUrl(currentAvatarUrl)}
+            referrerPolicy="no-referrer"
+            className="h-24 w-24 rounded-[16px] object-cover ring-1 ring-black/[0.09] dark:ring-white/[0.12]"
           />
         ) : (
-          <div className="flex h-20 w-20 items-center justify-center rounded-[12px] bg-black/[0.04] ring-1 ring-black/[0.06] dark:bg-white/[0.055] dark:ring-white/[0.08]">
-            <Camera className="h-6 w-6 text-[#888f8c]" />
+          <div className="flex h-24 w-24 items-center justify-center rounded-[16px] bg-[#e3e9e5] text-[24px] font-semibold text-[#587063] ring-1 ring-black/[0.06] dark:bg-[#18201c] dark:text-[#9db0a5] dark:ring-white/[0.09]">
+            {initials || <Camera className="h-6 w-6" />}
           </div>
         )}
-        
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="absolute bottom-1.5 right-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-black/[0.08] bg-white text-[#59615d] shadow-sm transition-transform hover:scale-105 disabled:opacity-50 dark:border-white/[0.1] dark:bg-[#202320] dark:text-[#d4d8d6]"
+          aria-label="Zmień awatar"
+          title="Zmień awatar"
+        >
+          <Camera className="h-3.5 w-3.5" />
+        </button>
+
         {uploading && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-[12px] bg-black/50">
+          <div className="absolute inset-0 flex items-center justify-center rounded-[16px] bg-black/50">
             <RefreshCw className="h-5 w-5 text-white animate-spin" />
           </div>
         )}
@@ -111,24 +132,27 @@ export function AvatarUpload({ currentAvatarUrl, userId }: AvatarUploadProps) {
           className="hidden"
         />
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="flex h-8 items-center gap-2 rounded-[7px] border border-black/[0.09] bg-white/60 px-3 text-[9px] font-medium text-[#606764] transition-colors hover:bg-white disabled:opacity-50 dark:border-white/[0.09] dark:bg-white/[0.045] dark:text-[#a5aaa7] dark:hover:bg-white/[0.08]"
+            className="flex h-7 items-center gap-1.5 px-1 text-[10px] font-medium text-[#68706c] transition-colors hover:text-[#202422] disabled:opacity-50 dark:text-[#9ca39f] dark:hover:text-white"
           >
             <Upload className="h-3 w-3" />
-            {uploading ? 'Przesyłanie...' : 'Zmień awatar'}
+            {uploading ? 'Przesyłanie...' : 'Wgraj zdjęcie'}
           </button>
 
           {currentAvatarUrl && (
             <button
+              type="button"
               onClick={handleRemove}
               disabled={uploading}
-              className="p-2 text-[#8a918e] transition-colors hover:text-red-500 disabled:opacity-50"
+              className="flex h-7 w-7 items-center justify-center text-[#8a918e] transition-colors hover:text-red-500 disabled:opacity-50"
               aria-label="Usuń awatar"
+              title="Usuń awatar"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -138,7 +162,7 @@ export function AvatarUpload({ currentAvatarUrl, userId }: AvatarUploadProps) {
         )}
         
         <p className="text-[9px] text-[#969c99]">
-          JPG, PNG lub GIF. Max 5MB.
+          JPG, PNG, GIF lub WebP · maks. 5 MB
         </p>
       </div>
     </div>

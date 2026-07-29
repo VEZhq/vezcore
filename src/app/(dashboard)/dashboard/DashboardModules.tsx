@@ -765,11 +765,11 @@ export function DashboardModules({
         </button>
       </div>
 
-      <div className="ecosystem-board-warehouse relative h-full min-h-[500px] overflow-hidden rounded-[18px]">
+      <div className="ecosystem-board-warehouse relative h-full min-h-[540px] overflow-hidden rounded-[14px]">
         <div className="warehouse-floor-lines absolute inset-0" />
 
         <div
-          className="warehouse-map-viewport absolute inset-0 overflow-hidden rounded-[18px]"
+          className="warehouse-map-viewport absolute inset-0 overflow-hidden rounded-[14px]"
           onPointerDown={startMapDrag}
           onPointerMove={moveMapDrag}
           onPointerUp={endMapDrag}

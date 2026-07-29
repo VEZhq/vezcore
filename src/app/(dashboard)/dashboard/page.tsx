@@ -66,11 +66,11 @@ export default async function DashboardPage() {
   return (
     <div className="h-screen overflow-hidden bg-[#c8d0cf] text-[#202020] dark:bg-black dark:text-[#ededed]">
       <main className="relative h-full w-full overflow-hidden bg-[#f1f3f2] dark:bg-[#070807]">
-        <div className="relative flex h-full flex-col px-5 py-3 sm:px-7 lg:px-8">
+        <div className="relative flex h-full flex-col px-2.5 py-2 sm:px-3.5">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_8%,rgba(255,255,255,0.82),transparent_30%)] dark:bg-none" />
 
           <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-            <header className="flex h-12 shrink-0 items-center gap-4 border-b border-black/[0.06] pb-2 dark:border-white/[0.08]">
+            <header className="flex h-11 shrink-0 items-center gap-4 border-b border-black/[0.06] pb-1.5 dark:border-white/[0.08]">
               <div className="flex shrink-0 items-center gap-3">
                 <Image
                   src="/logo/vezcore_logo_black_full.svg"
