@@ -37,8 +37,8 @@ const defaultPreferences: UserPreferences = {
   autoLogoutOnIpChange: false,
   hiddenModules: [],
   operationsPanelSize: {
-    width: 320,
-    height: 410,
+    width: 300,
+    height: 360,
   },
 }
 

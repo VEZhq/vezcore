@@ -36,7 +36,7 @@ import {
 
 type HealthStatus = 'checking' | 'healthy' | 'warning' | 'error' | 'unknown'
 type DeployStatus = 'success' | 'failure' | 'pending' | 'unknown'
-type PanelFilter = 'all' | 'available' | 'alert'
+type PanelFilter = 'all' | 'alert'
 
 type NavigationAccess = {
   canAccessKonta: boolean
@@ -156,22 +156,22 @@ const modulePalette: Record<DashboardModuleDefinition['color'], { accent: string
 }
 
 const moduleLayout: Record<DashboardModuleName, { left: number; top: number; width: number; height: number }> = {
-  vez: { left: 510, top: 188, width: 220, height: 122 },
-  vezVision: { left: 78, top: 48, width: 208, height: 112 },
-  vezLabs: { left: 932, top: 48, width: 208, height: 112 },
-  nably: { left: 54, top: 410, width: 196, height: 108 },
-  vezWork: { left: 350, top: 410, width: 196, height: 108 },
-  vezRent: { left: 694, top: 410, width: 196, height: 108 },
-  vezStudio: { left: 990, top: 410, width: 196, height: 108 },
+  vez: { left: 510, top: 210, width: 220, height: 122 },
+  vezVision: { left: 60, top: 70, width: 208, height: 112 },
+  vezLabs: { left: 970, top: 70, width: 208, height: 112 },
+  nably: { left: 52, top: 430, width: 196, height: 108 },
+  vezWork: { left: 360, top: 430, width: 196, height: 108 },
+  vezRent: { left: 690, top: 430, width: 196, height: 108 },
+  vezStudio: { left: 1000, top: 430, width: 196, height: 108 },
 }
 
 const serviceNodes: ServiceNodeDefinition[] = [
-  { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 320, top: 52, width: 126 },
-  { id: 'database', label: 'Core DB', checkKey: 'database', owner: 'vez', icon: Database, left: 386, top: 332, width: 126 },
-  { id: 'deploy', label: 'Deploy', deploy: true, owner: 'vez', icon: Rocket, left: 754, top: 190, width: 120 },
-  { id: 'labApi', label: 'Lab API', checkKey: 'labApi', owner: 'vezLabs', icon: Server, left: 770, top: 42, width: 126 },
-  { id: 'minio', label: 'MinIO', checkKey: 'minio', owner: 'vezLabs', icon: HardDrive, left: 788, top: 262, width: 126 },
-  { id: 'monitor', label: 'Monitor', checkKey: 'monitor', owner: 'vezLabs', icon: Activity, left: 1106, top: 214, width: 126 },
+  { id: 'prodApi', label: 'Prod API', checkKey: 'prodApi', owner: 'vezVision', icon: Server, left: 104, top: 210, width: 140 },
+  { id: 'database', label: 'Core DB', checkKey: 'database', owner: 'vez', icon: Database, left: 342, top: 280, width: 132 },
+  { id: 'deploy', label: 'Deploy', deploy: true, owner: 'vez', icon: Rocket, left: 766, top: 280, width: 126 },
+  { id: 'labApi', label: 'Lab API', checkKey: 'labApi', owner: 'vezLabs', icon: Server, left: 806, top: 28, width: 132 },
+  { id: 'minio', label: 'MinIO', checkKey: 'minio', owner: 'vezLabs', icon: HardDrive, left: 812, top: 280, width: 126 },
+  { id: 'monitor', label: 'Monitor', checkKey: 'monitor', owner: 'vezLabs', icon: Activity, left: 1202, top: 102, width: 132 },
 ]
 
 function getWorstStatus(statuses: HealthStatus[]): HealthStatus {
@@ -276,19 +276,7 @@ function getServiceNodeDetail(node: ServiceNodeDefinition, infraData: InfraData 
 
 function buildInternalLinks(access: NavigationAccess): Record<DashboardModuleName, InternalLink[]> {
   return {
-    vez: [
-      { label: 'Dashboard', href: '/dashboard', description: 'Mapa ekosystemu' },
-      { label: 'Profil', href: '/profile', description: 'Twoje konto i bezpieczeństwo' },
-      ...(access.canAccessKonta
-        ? [{ label: 'Konta', href: '/konta', description: 'Użytkownicy i pozwolenia' }]
-        : []),
-      ...(access.canAccessAudit
-        ? [{ label: 'Aktywność', href: '/audit', description: 'Zdarzenia i logowania' }]
-        : []),
-      ...(access.canAccessSettings
-        ? [{ label: 'Ustawienia', href: '/settings', description: 'Konfiguracja VEZcore' }]
-        : []),
-    ],
+    vez: [],
     vezVision: [
       { label: 'Centrum VEZvision', href: '/vezvision', description: 'Przegląd modułu' },
       ...(access.canViewVezVisionBlog
@@ -336,7 +324,7 @@ export function DashboardModules({
   const { preferences, updatePreferences } = useUserPreferences()
   const [editMode, setEditMode] = useState(false)
   const [panelFilter, setPanelFilter] = useState<PanelFilter>('all')
-  const [openModule, setOpenModule] = useState<DashboardModuleName | null>('vez')
+  const [openModule, setOpenModule] = useState<DashboardModuleName | null>(null)
   const [revealedAliases, setRevealedAliases] = useState<string[]>([])
   const [copiedAlias, setCopiedAlias] = useState<string | null>(null)
   const [infraData, setInfraData] = useState<InfraData | null>(null)
@@ -402,10 +390,13 @@ export function DashboardModules({
     : allModuleViewModels.filter((item) => !item.isHidden)
 
   const panelModules = allModuleViewModels.filter((item) => {
-    if (panelFilter === 'available') return item.moduleStatus === 'healthy'
     if (panelFilter === 'alert') return item.moduleStatus === 'warning' || item.moduleStatus === 'error'
     return true
   })
+  const healthyModuleCount = allModuleViewModels.filter((item) => item.moduleStatus === 'healthy').length
+  const alertModuleCount = allModuleViewModels.filter(
+    (item) => item.moduleStatus === 'warning' || item.moduleStatus === 'error'
+  ).length
 
   const statusByModule = Object.fromEntries(
     allModuleViewModels.map((item) => [item.mod.name, item.moduleStatus])
@@ -493,8 +484,8 @@ export function DashboardModules({
 
     const maxWidth = Math.min(540, window.innerWidth - 32)
     const maxHeight = Math.min(700, window.innerHeight - 190)
-    panel.style.width = `${clamp(resize.originWidth + event.clientX - resize.startX, 300, maxWidth)}px`
-    panel.style.height = `${clamp(resize.originHeight + event.clientY - resize.startY, 320, maxHeight)}px`
+    panel.style.width = `${clamp(resize.originWidth + event.clientX - resize.startX, 280, maxWidth)}px`
+    panel.style.height = `${clamp(resize.originHeight + event.clientY - resize.startY, 280, maxHeight)}px`
   }
 
   const endPanelResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
@@ -559,27 +550,27 @@ export function DashboardModules({
           onPointerUp={endMapDrag}
           onPointerCancel={endMapDrag}
         >
-          <div ref={sceneRef} className="warehouse-map-scene absolute left-[300px] top-[18px] h-[550px] w-[1240px]">
-            <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1240 550" preserveAspectRatio="none" aria-hidden="true">
+          <div ref={sceneRef} className="warehouse-map-scene absolute left-[300px] top-[8px] h-[570px] w-[1360px]">
+            <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1360 570" preserveAspectRatio="none" aria-hidden="true">
               {sceneModuleNames.has('vez') && sceneModuleNames.has('vezVision') && (
                 <path
-                  d="M510 232 H468 L448 212 V132 L420 104 H286"
+                  d="M268 126 H360 L384 150 V220 L408 244 H510"
                   className={`ecosystem-edge ${edgeStatusClass(statusByModule.vezVision ?? 'unknown')}`}
                 />
               )}
               {sceneModuleNames.has('vez') && sceneModuleNames.has('vezLabs') && (
                 <path
-                  d="M730 232 H798 L824 206 V136 L856 104 H932"
+                  d="M730 244 H810 L834 220 V150 L858 126 H970"
                   className={`ecosystem-edge ${edgeStatusClass(labsStatus)}`}
                 />
               )}
               {sceneModuleNames.has('vezLabs') && (
                 <>
                   {([
-                    ['nably', 'M956 160 V198 H842 L816 224 V316 H674 L648 342 H152 V410'],
-                    ['vezWork', 'M996 160 V220 H864 L842 242 V322 H474 L448 348 V410'],
-                    ['vezRent', 'M1068 160 V238 H934 L910 262 V338 H818 L792 364 V410'],
-                    ['vezStudio', 'M1120 160 H1168 V292 H1134 L1088 338 V410'],
+                    ['nably', 'M1012 182 V328 L990 350 H150 V430'],
+                    ['vezWork', 'M1052 182 V350 L1032 370 H458 V430'],
+                    ['vezRent', 'M1092 182 V370 L1072 390 H788 V430'],
+                    ['vezStudio', 'M1132 182 V390 L1112 410 H1098 V430'],
                   ] as const).map(([name, path]) => {
                     if (!sceneModuleNames.has(name)) return null
                     const branchStatus = dependencyStatus(labsStatus, statusByModule[name] ?? 'unknown')
@@ -594,19 +585,19 @@ export function DashboardModules({
                 </>
               )}
               {canAccessInfrastructure && sceneModuleNames.has('vezVision') && (
-                <path d="M286 84 H304 V81 H320" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.prodApi)}`} />
+                <path d="M164 182 V196 H174 V210" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.prodApi)}`} />
               )}
               {canAccessInfrastructure && sceneModuleNames.has('vez') && (
                 <>
-                  <path d="M570 310 V360 H512" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.database)}`} />
-                  <path d="M730 262 H742 V219 H754" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.deploy)}`} />
+                  <path d="M510 304 H492 L474 304" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.database)}`} />
+                  <path d="M730 304 H748 L766 304" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.deploy)}`} />
                 </>
               )}
               {canAccessInfrastructure && sceneModuleNames.has('vezLabs') && (
                 <>
-                  <path d="M932 88 H914 V71 H896" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.labApi)}`} />
-                  <path d="M932 136 H914 V291" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.minio)}`} />
-                  <path d="M1140 110 H1200 V214" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.monitor)}`} />
+                  <path d="M994 70 V52 H938" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.labApi)}`} />
+                  <path d="M994 182 V252 L966 280 H938" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.minio)}`} />
+                  <path d="M1178 126 H1202" className={`ecosystem-edge service-edge ${edgeStatusClass(serviceStatusById.monitor)}`} />
                 </>
               )}
             </svg>
@@ -713,7 +704,7 @@ export function DashboardModules({
         <aside
           ref={panelRef}
           data-no-pan
-          className="operations-panel absolute left-3 top-3 z-40 flex min-h-[320px] min-w-[300px] flex-col overflow-hidden rounded-[16px]"
+          className="operations-panel absolute left-3 top-3 z-40 flex min-h-[280px] min-w-[280px] flex-col overflow-hidden rounded-[14px]"
           style={{
             width: preferences.operationsPanelSize.width,
             height: preferences.operationsPanelSize.height,
@@ -721,24 +712,25 @@ export function DashboardModules({
             maxHeight: 'calc(100% - 24px)',
           }}
         >
-          <div className="flex shrink-0 items-center justify-between px-4 pb-3 pt-4">
+          <div className="flex shrink-0 items-center justify-between px-3.5 pb-2 pt-3">
             <div>
-              <p className="text-sm font-semibold text-[#242725]">Report operations</p>
-              <p className="mt-0.5 text-[10px] text-[#828987]">{allModuleViewModels.length} modułów ekosystemu</p>
+              <p className="text-[12px] font-semibold text-[#242725]">Report operations</p>
+              <p className="mt-0.5 text-[9px] text-[#8a918f]">
+                {healthyModuleCount} działa · {alertModuleCount} alertów
+              </p>
             </div>
             <GripVertical className="h-4 w-4 text-[#a2a8a6]" />
           </div>
 
-          <div className="flex shrink-0 gap-1 border-y border-black/[0.05] px-3 py-2">
+          <div className="flex shrink-0 gap-1 border-y border-black/[0.05] px-3 py-1.5">
             {([
               ['all', 'Wszystkie'],
-              ['available', 'Działa'],
-              ['alert', 'Alerty'],
+              ['alert', `Alerty ${alertModuleCount}`],
             ] as const).map(([value, label]) => (
               <button
                 key={value}
                 onClick={() => setPanelFilter(value)}
-                className={`h-7 rounded-[7px] px-2.5 text-[10px] font-medium transition-colors ${
+                className={`h-6 rounded-[6px] px-2 text-[9px] font-medium transition-colors ${
                   panelFilter === value
                     ? 'bg-[#f0f1f0] text-[#242725]'
                     : 'text-[#747b79] hover:bg-[#f5f6f5]'
@@ -749,9 +741,9 @@ export function DashboardModules({
             ))}
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto p-2">
+          <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
             {panelModules.map((item) => {
-              const { mod, moduleStatus, statusSummary, deployText, isHidden } = item
+              const { mod, moduleStatus, deployText, isHidden } = item
               const Icon = mod.icon
               const status = statusMeta[moduleStatus]
               const palette = modulePalette[mod.color]
@@ -771,52 +763,49 @@ export function DashboardModules({
                   <button
                     type="button"
                     onClick={() => setOpenModule(isOpen ? null : mod.name)}
-                    className="flex w-full items-center gap-2.5 p-2.5 text-left"
+                    className="flex w-full items-center gap-2 p-2 text-left"
                     aria-expanded={isOpen}
                   >
                     <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px]"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px]"
                       style={{ backgroundColor: palette.soft, color: palette.accent }}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-3.5 w-3.5" />
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="truncate text-[11px] font-semibold text-[#272a29]">{mod.label}</span>
-                        <span className="flex items-center gap-2">
-                          <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} title={status.label} />
-                          <ChevronDown className={`h-3.5 w-3.5 text-[#939a98] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                        </span>
-                      </span>
-                      <span className="mt-0.5 block truncate text-[9px] text-[#747c79]">{statusSummary}</span>
+                    <span className="min-w-0 flex-1 truncate text-[10px] font-semibold text-[#272a29]">
+                      {mod.label}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+                      <span className="text-[8px] text-[#7e8583]">{status.label}</span>
+                      <ChevronDown className={`h-3 w-3 text-[#9ca2a0] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                     </span>
                   </button>
 
                   {isOpen && (
-                    <div className="border-t border-black/[0.05] px-3 pb-3 pt-2.5">
-                      <div className="flex items-center justify-between gap-3 text-[9px]">
+                    <div className="border-t border-black/[0.05] px-2.5 pb-2.5 pt-2">
+                      <div className="flex items-center justify-between gap-3 text-[8px]">
                         <span className={`inline-flex items-center gap-1.5 font-medium ${status.text}`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
                           {status.label}
                         </span>
-                        <span className="truncate text-[#929896]">Deploy: {deployText}</span>
+                        {moduleStatusSources[mod.name].deploy && (
+                          <span className="truncate text-[#929896]">Deploy {deployText}</span>
+                        )}
                       </div>
 
                       {links.length > 0 && (
-                        <div className="mt-3">
-                          <p className="mb-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-[#a0a6a4]">VEZcore</p>
-                          <div className="space-y-1">
+                        <div className="mt-2">
+                          <p className="mb-1 text-[8px] font-medium text-[#9aa09e]">Strony</p>
+                          <div className="grid grid-cols-2 gap-1">
                             {links.map((link) => (
                               <Link
                                 key={link.href}
                                 href={link.href}
-                                className="group/link flex items-center gap-2 rounded-[7px] px-2 py-1.5 transition-colors hover:bg-[#f5f6f5]"
+                                className="group/link flex min-w-0 items-center gap-1 rounded-[6px] bg-[#f7f8f7] px-2 py-1.5 transition-colors hover:bg-[#f1f2f1]"
                               >
-                                <span className="min-w-0 flex-1">
-                                  <span className="block truncate text-[10px] font-medium text-[#343836]">{link.label}</span>
-                                  <span className="block truncate text-[8px] text-[#929896]">{link.description}</span>
-                                </span>
-                                <ArrowUpRight className="h-3 w-3 shrink-0 text-[#a1a7a5] group-hover/link:text-[#4f5654]" />
+                                <span className="min-w-0 flex-1 truncate text-[9px] font-medium text-[#454a48]">{link.label}</span>
+                                <ArrowUpRight className="h-2.5 w-2.5 shrink-0 text-[#a1a7a5] group-hover/link:text-[#4f5654]" />
                               </Link>
                             ))}
                           </div>
@@ -824,46 +813,43 @@ export function DashboardModules({
                       )}
 
                       {resources.length > 0 && (
-                        <div className="mt-3">
-                          <p className="mb-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-[#a0a6a4]">Zasoby techniczne</p>
-                          <div className="space-y-2">
+                        <div className="mt-2">
+                          <p className="mb-1 text-[8px] font-medium text-[#9aa09e]">Zasoby</p>
+                          <div className="space-y-1">
                             {resources.map((resource) => {
                               const resourceKey = `${mod.name}-${resource.label}`
                               const isRevealed = revealedAliases.includes(resourceKey)
                               const isCopied = copiedAlias === resourceKey
 
                               return (
-                                <div key={resourceKey} className="rounded-[8px] border border-black/[0.05] bg-[#fafafa] p-2">
+                                <div key={resourceKey} className="rounded-[7px] bg-[#f7f8f7] px-2 py-1.5">
                                   <a
                                     href={resource.href}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="group/resource flex items-center gap-2"
                                   >
-                                    <span className="min-w-0 flex-1">
-                                      <span className="block truncate text-[10px] font-medium text-[#343836]">{resource.label}</span>
-                                      <span className="block truncate text-[8px] text-[#929896]">{resource.description}</span>
-                                    </span>
-                                    <ExternalLink className="h-3 w-3 shrink-0 text-[#a1a7a5] group-hover/resource:text-[#4f5654]" />
+                                    <span className="min-w-0 flex-1 truncate text-[9px] font-medium text-[#454a48]">{resource.label}</span>
+                                    <ExternalLink className="h-2.5 w-2.5 shrink-0 text-[#a1a7a5] group-hover/resource:text-[#4f5654]" />
                                   </a>
                                   <button
                                     type="button"
                                     onClick={() => handleAliasClick(resourceKey, resource.alias)}
-                                    className="group/alias mt-2 flex h-7 w-full items-center justify-between gap-2 rounded-[6px] border border-black/[0.05] bg-white px-2 font-mono text-[9px] text-[#6f7774] transition-colors hover:border-black/[0.10]"
+                                    className="group/alias mt-1 flex h-6 w-full items-center justify-between gap-2 rounded-[5px] bg-white px-1.5 font-mono text-[8px] text-[#6f7774] transition-colors hover:bg-[#fdfdfd]"
                                     title="Najedź, aby odsłonić. Kliknij, aby skopiować."
                                   >
                                     <span className="flex min-w-0 items-center gap-1.5">
                                       {isCopied ? (
-                                        <Check className="h-3 w-3 shrink-0 text-emerald-600" />
+                                        <Check className="h-2.5 w-2.5 shrink-0 text-emerald-600" />
                                       ) : isRevealed ? (
-                                        <Copy className="h-3 w-3 shrink-0" />
+                                        <Copy className="h-2.5 w-2.5 shrink-0" />
                                       ) : (
-                                        <Eye className="h-3 w-3 shrink-0" />
+                                        <Eye className="h-2.5 w-2.5 shrink-0" />
                                       )}
                                       <span className={isRevealed ? 'hidden' : 'truncate group-hover/alias:hidden'}>••••••••••••</span>
                                       <span className={isRevealed ? 'truncate' : 'hidden truncate group-hover/alias:inline'}>{resource.alias}</span>
                                     </span>
-                                    <span className="shrink-0 font-sans text-[8px] text-[#a0a6a4]">
+                                    <span className="shrink-0 font-sans text-[7px] text-[#a0a6a4]">
                                       {isCopied ? 'Skopiowano' : 'Kopiuj'}
                                     </span>
                                   </button>
@@ -874,11 +860,6 @@ export function DashboardModules({
                         </div>
                       )}
 
-                      {links.length === 0 && resources.length === 0 && (
-                        <p className="mt-3 rounded-[7px] bg-[#f6f7f6] px-2.5 py-2 text-[9px] text-[#8a918f]">
-                          Brak skonfigurowanych stron i zasobów.
-                        </p>
-                      )}
                     </div>
                   )}
                 </div>
